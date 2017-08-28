@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class ProductDetailPageApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(ProductDetailPageApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(ProductDetailPageApplication.class, args);
+    }
 }
