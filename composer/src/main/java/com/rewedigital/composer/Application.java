@@ -36,11 +36,13 @@ public class Application {
         private void init(final Environment environment) {
             environment.routingEngine()
                 .registerAutoRoute(Route.async("GET", "/<path:path>", rc -> handler.execute(rc)))
+                .registerAutoRoute(Route.async("HEAD", "/<path:path>", rc -> handler.execute(rc)))
                 .registerAutoRoute(Route.async("POST", "/<path:path>", rc -> handler.execute(rc)))
-                .registerAutoRoute(Route.async("PATCH", "/<path:path>", rc -> handler.execute(rc)))
+                .registerAutoRoute(Route.async("PUT", "/<path:path>", rc -> handler.execute(rc)))
                 .registerAutoRoute(Route.async("DELETE", "/<path:path>", rc -> handler.execute(rc)))
                 .registerAutoRoute(Route.async("TRACE", "/<path:path>", rc -> handler.execute(rc)))
-                .registerAutoRoute(Route.async("HEADE", "/<path:path>", rc -> handler.execute(rc)));
+                .registerAutoRoute(Route.async("OPTIONS", "/<path:path>", rc -> handler.execute(rc)))
+                .registerAutoRoute(Route.async("PATCH", "/<path:path>", rc -> handler.execute(rc)));
         }
 
     }
