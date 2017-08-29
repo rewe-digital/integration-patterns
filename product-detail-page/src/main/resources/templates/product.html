@@ -1,79 +1,78 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
- xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
- layout:decorate="~{layouts/layout}">
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/layout}">
 
 <head>
 <title>Product Detail Page</title>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <meta name="viewport"
- content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-
+	content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 <link rel="stylesheet"
- href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" />
-<link href="../static/products/css/core.css" th:href="@{/products/css/core.css}"
- rel="stylesheet" media="screen" />
+	href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css"/>
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" />
+<link href="../static/products/css/core.css"
+	th:href="@{/products/css/core.css}" rel="stylesheet" media="screen" />
 </head>
 
 <body>
- <div class="container">
-  <div class="row">
-   <div class="col-xs-4 item-photo">
-    <img style="max-width: 100%;"
-     th:src="${'https://img.rewe-static.de/' + product.productNumber + '/' + product.image + '?resize=400px:400px&amp;output-quality=90&amp;output-format=image/webp'}" />
-   </div>
-   <div class="col-xs-5" style="border: 0px solid gray">
-    <h3 th:text="${product.name}"></h3>
-    <h5 style="color: #337ab7" th:text="${'von ' + product.vendor}">
-    </h5>
+	<div class="container">
+		<div class="row">
+			<div class="col-xs-4 item-photo">
+				<img style="max-width: 100%;"
+					th:src="${'https://img.rewe-static.de/' + product.productNumber + '/' + product.image + '?resize=400px:400px&amp;output-quality=90&amp;output-format=image/webp'}" />
+			</div>
+			<div class="col-xs-5" style="border: 0px solid gray">
+				<h3 th:text="${product.name}"></h3>
+				<h5 style="color: #337ab7" th:text="${'von ' + product.vendor}">
+				</h5>
 
-    <h6 class="title-price">
-     <small th:text="${'Art.-Nr. ' + product.productNumber}"> </small>
-    </h6>
-    <h3 style="margin-top: 0px;" th:text="${product.price}"></h3>
+				<h6 class="title-price">
+					<small th:text="${'Art.-Nr. ' + product.productNumber}"> </small>
+				</h6>
+				<h3 style="margin-top: 0px;" th:text="${product.price}"></h3>
 
-    <div class="section" style="padding-bottom: 20px;">
-     <h6 class="title-attr">
-      <small>Menge</small>
-     </h6>
-     <div>
-      <div class="btn-minus">
-       <span class="glyphicon glyphicon-minus"></span>
-      </div>
-      <input value="1" />
-      <div class="btn-plus">
-       <span class="glyphicon glyphicon-plus"></span>
-      </div>
-     </div>
-    </div>
+				<div class="section" style="padding-bottom: 20px;">
+					<h6 class="title-attr">
+						<small>Menge</small>
+					</h6>
+					<div>
+						<div class="btn-minus">
+							<span class="fa fa-minus"></span>
+						</div>
+						<input value="1" />
+						<div class="btn-plus">
+							<span class="fa fa-plus"></span>
+						</div>
+					</div>
+				</div>
 
-    <div class="section" style="padding-bottom: 20px;">
-     <button class="btn btn-success">
-      <span style="margin-right: 20px"
-       class="glyphicon glyphicon-shopping-cart" aria-hidden="true"></span>
-      Jetzt kaufen
-     </button>
-    </div>
-   </div>
+				<div class="section" style="padding-bottom: 20px;">
+					<button class="btn btn-success">
+						<span style="margin-right: 20px"
+							class="fa fa-shopping-cart" aria-hidden="true"></span>
+						Jetzt kaufen
+					</button>
+				</div>
+			</div>
 
-   <div class="col-xs-9">
-    <ul class="menu-items">
-     <li class="active">Beschreibung</li>
-     <li>Zutaten und Allergene</li>
-     <li>Nährwerte</li>
-    </ul>
-    <div style="width: 100%; border-top: 1px solid silver">
-     <p style="padding: 15px;" th:text="${product.description}"></p>
+			<div class="col-xs-9">
+				<ul class="menu-items">
+					<li class="active">Beschreibung</li>
+				</ul>
+				<div style="width: 100%; border-top: 1px solid silver">
+					<p style="padding: 15px;" th:text="${product.description}"></p>
 
-    </div>
-   </div>
-  </div>
- </div>
+				</div>
+			</div>
+		</div>
+	</div>
 
- <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
- <script
-  src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
- <script
-  src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js"></script>
+	<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+	<script
+		src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
+	<script
+		src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js"></script>
 </body>
 </html>
