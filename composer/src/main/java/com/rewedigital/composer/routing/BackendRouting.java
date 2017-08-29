@@ -1,6 +1,7 @@
 package com.rewedigital.composer.routing;
 
 import java.net.URI;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -26,22 +27,31 @@ public class BackendRouting {
      * @param incommingRequest
      * @return the location of the back-end service or {@link Optional#empty()} when the request could not be parsed.
      */
-    public Optional<URI> lookup(final Request incommingRequest) {
+    public Optional<RouteMatch> lookup(final Request incommingRequest) {
         try {
-            return ruleRouter.match(incommingRequest).map(m -> m.getRule().getTarget());
+            return ruleRouter.match(incommingRequest)
+                .map(m -> new RouteMatch(m.getRule().getTarget(), m.parsedPathArguments()));
         } catch (final InvalidUriException e) {
             LOGGER.warn("Could not match the incomming route as the route was not parsable.", e);
             return Optional.empty();
         }
     }
 
-    public enum RoutingType {
-        PASS, TEMPLATE
-    }
+    public static class RouteMatch {
+        private final URI backend;
+        private final Map<String, String> parsedPathArguments;
 
-    public static class RouteConfig {
-        public RouteConfig(final RoutingType type, final URI backend) {
+        public RouteMatch(final URI backend, final Map<String, String> parsedPathArguments) {
+            this.backend = backend;
+            this.parsedPathArguments = parsedPathArguments;
+        }
 
+        public URI backend() {
+            return backend;
+        }
+
+        public Map<String, String> parsedPathArguments() {
+            return parsedPathArguments;
         }
     }
 

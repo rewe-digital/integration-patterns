@@ -1,6 +1,5 @@
 package com.rewedigital.composer.proxy;
 
-import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -12,8 +11,8 @@ import java.util.concurrent.CompletionStage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.rewedigital.composer.Application;
 import com.rewedigital.composer.routing.BackendRouting;
+import com.rewedigital.composer.routing.BackendRouting.RouteMatch;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.RequestContext;
 import com.spotify.apollo.Response;
@@ -22,7 +21,7 @@ import okio.ByteString;
 
 public class HostRoutingHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Application.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HostRoutingHandler.class);
     private final BackendRouting routing;
 
     public HostRoutingHandler(final BackendRouting routing) {
@@ -35,11 +34,11 @@ public class HostRoutingHandler {
         logRequestSpecification(context);
 
         // Find the route to the service that provides the master template.
-        final Optional<URI> lookup = routing.lookup(request);
+        final Optional<RouteMatch> lookup = routing.lookup(request);
 
         // Fetch the template
         final Optional<CompletionStage<Response<ByteString>>> templateRequest =
-            lookup.map(uri -> request(context, request, uri));
+            lookup.map(l -> request(context, request, l));
 
         // Parse
 
@@ -60,8 +59,12 @@ public class HostRoutingHandler {
     }
 
     private CompletionStage<Response<ByteString>> request(
-        final RequestContext context, final Request request, final URI uri) {
-        return context.requestScopedClient().send(Request.forUri(uri.toString(), request.method()));
+        final RequestContext context, final Request request, final RouteMatch lookup) {
+
+        // TODO: Sophisticated URI composing.
+        final String base = lookup.backend().toString() + "/" + lookup.parsedPathArguments().get("id");
+        LOGGER.info(base);
+        return context.requestScopedClient().send(Request.forUri(base, request.method()));
     }
 
     private Response<String> composedResponse(final Response<ByteString> response) {
