@@ -1,10 +1,11 @@
-package com.rewedigital.composer;
+package com.rewedigital.examples.msintegration.composer;
 
 import java.util.Objects;
 
-import com.rewedigital.composer.proxy.HostRoutingHandler;
-import com.rewedigital.composer.routing.BackendRouting;
-import com.rewedigital.composer.routing.StaticRoutes;
+import com.rewedigital.examples.msintegration.composer.proxy.ComposingHandler;
+import com.rewedigital.examples.msintegration.composer.proxy.RequestBuilder;
+import com.rewedigital.examples.msintegration.composer.routing.BackendRouting;
+import com.rewedigital.examples.msintegration.composer.routing.StaticRoutes;
 import com.spotify.apollo.Environment;
 import com.spotify.apollo.core.Service;
 import com.spotify.apollo.http.client.HttpClientModule;
@@ -16,7 +17,8 @@ public class Application {
 
     public static void main(final String[] args) throws LoadingException {
         final ComposerInitializer initializer =
-            new ComposerInitializer(new HostRoutingHandler(new BackendRouting(StaticRoutes.routes())));
+            new ComposerInitializer(
+                new ComposingHandler(new BackendRouting(StaticRoutes.routes()), new RequestBuilder()));
         final Service service =
             HttpService
                 .usingAppInit(initializer::init, "composer")
@@ -27,9 +29,9 @@ public class Application {
 
     private static class ComposerInitializer {
 
-        private final HostRoutingHandler handler;
+        private final ComposingHandler handler;
 
-        private ComposerInitializer(final HostRoutingHandler handler) {
+        private ComposerInitializer(final ComposingHandler handler) {
             this.handler = Objects.requireNonNull(handler);
         }
 

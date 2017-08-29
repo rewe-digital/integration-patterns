@@ -1,6 +1,4 @@
-package com.rewedigital.composer.routing;
-
-import java.net.URI;
+package com.rewedigital.examples.msintegration.composer.routing;
 
 import com.google.common.collect.ImmutableList;
 import com.spotify.apollo.route.Rule;
@@ -8,8 +6,8 @@ import com.spotify.apollo.route.RuleRouter;
 
 public class StaticRoutes {
 
-    public static RuleRouter<URI> routes() {
-        final Rule<URI> pdp = Rule.fromUri("/p/<id>", "GET", URI.create("http://localhost:8080/products/"));
+    public static RuleRouter<String> routes() {
+        final Rule<String> pdp = Rule.fromUri("/p/<id>", "GET", "http://localhost:8080/products/{id}");
         return RuleRouter.of(ImmutableList.of(pdp));
     }
 

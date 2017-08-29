@@ -1,6 +1,5 @@
-package com.rewedigital.composer.routing;
+package com.rewedigital.examples.msintegration.composer.routing;
 
-import java.net.URI;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -15,19 +14,13 @@ import com.spotify.apollo.route.RuleRouter;
 public class BackendRouting {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BackendRouting.class);
-    private final RuleRouter<URI> ruleRouter;
+    private final RuleRouter<String> ruleRouter;
 
-    public BackendRouting(final RuleRouter<URI> ruleRouter) {
+    public BackendRouting(final RuleRouter<String> ruleRouter) {
         this.ruleRouter = Objects.requireNonNull(ruleRouter);
     }
 
-    /**
-     * The location of a back-end service that provides the content for a matched route.
-     *
-     * @param incommingRequest
-     * @return the location of the back-end service or {@link Optional#empty()} when the request could not be parsed.
-     */
-    public Optional<RouteMatch> lookup(final Request incommingRequest) {
+    public Optional<RouteMatch> matches(final Request incommingRequest) {
         try {
             return ruleRouter.match(incommingRequest)
                 .map(m -> new RouteMatch(m.getRule().getTarget(), m.parsedPathArguments()));
@@ -38,20 +31,25 @@ public class BackendRouting {
     }
 
     public static class RouteMatch {
-        private final URI backend;
+        private final String backend;
         private final Map<String, String> parsedPathArguments;
 
-        public RouteMatch(final URI backend, final Map<String, String> parsedPathArguments) {
+        public RouteMatch(final String backend, final Map<String, String> parsedPathArguments) {
             this.backend = backend;
             this.parsedPathArguments = parsedPathArguments;
         }
 
-        public URI backend() {
+        public String backend() {
             return backend;
         }
 
         public Map<String, String> parsedPathArguments() {
             return parsedPathArguments;
+        }
+
+        @Override
+        public String toString() {
+            return "RouteMatch [backend=" + backend + ", parsedPathArguments=" + parsedPathArguments + "]";
         }
     }
 
