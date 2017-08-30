@@ -27,11 +27,12 @@ public class ComposingHandler {
 
     private final BackendRouting routing;
     private final RequestBuilder requestBuilder;
-    private final Composer composer = new Composer();
+    private final Composer composer;
 
-    public ComposingHandler(final BackendRouting routing, final RequestBuilder requestBuilder) {
+    public ComposingHandler(final BackendRouting routing, final RequestBuilder requestBuilder, final Composer composer) {
         this.routing = Objects.requireNonNull(routing);
         this.requestBuilder = Objects.requireNonNull(requestBuilder);
+        this.composer = Objects.requireNonNull(composer);
     }
 
     public CompletionStage<Response<String>> execute(final RequestContext context) {

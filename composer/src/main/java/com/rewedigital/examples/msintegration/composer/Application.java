@@ -1,11 +1,10 @@
 package com.rewedigital.examples.msintegration.composer;
 
-import java.util.Objects;
-
+import com.rewedigital.examples.msintegration.composer.composing.Composer;
 import com.rewedigital.examples.msintegration.composer.proxy.ComposingHandler;
 import com.rewedigital.examples.msintegration.composer.proxy.RequestBuilder;
 import com.rewedigital.examples.msintegration.composer.routing.BackendRouting;
-import com.rewedigital.examples.msintegration.composer.routing.StaticRoutes;
+import com.rewedigital.examples.msintegration.composer.routing.StaticBackendRoutes;
 import com.spotify.apollo.Environment;
 import com.spotify.apollo.core.Service;
 import com.spotify.apollo.http.client.HttpClientModule;
@@ -16,26 +15,25 @@ import com.spotify.apollo.route.Route;
 public class Application {
 
     public static void main(final String[] args) throws LoadingException {
-        final ComposerInitializer initializer =
-            new ComposerInitializer(
-                new ComposingHandler(new BackendRouting(StaticRoutes.routes()), new RequestBuilder()));
+
         final Service service =
             HttpService
-                .usingAppInit(initializer::init, "composer")
+                .usingAppInit(Initializer::init, "composer")
                 .withModule(HttpClientModule.create())
                 .build();
+
         HttpService.boot(service, args);
     }
 
-    private static class ComposerInitializer {
+    private static class Initializer {
 
-        private final ComposingHandler handler;
+        private static void init(final Environment environment) {
+            final ComposingHandler handler =
+                new ComposingHandler(
+                    new BackendRouting(StaticBackendRoutes.routes()),
+                    new RequestBuilder(),
+                    new Composer(environment));
 
-        private ComposerInitializer(final ComposingHandler handler) {
-            this.handler = Objects.requireNonNull(handler);
-        }
-
-        private void init(final Environment environment) {
             environment.routingEngine()
                 .registerAutoRoute(Route.async("GET", "/<path:path>", rc -> handler.execute(rc)))
                 .registerAutoRoute(Route.async("HEAD", "/<path:path>", rc -> handler.execute(rc)))
