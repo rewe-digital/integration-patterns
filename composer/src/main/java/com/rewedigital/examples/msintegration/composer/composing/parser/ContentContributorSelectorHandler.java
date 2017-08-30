@@ -8,8 +8,6 @@ import org.attoparser.AbstractMarkupHandler;
 import org.attoparser.ParseException;
 import org.attoparser.util.TextUtil;
 
-import com.rewedigital.examples.msintegration.composer.composing.IncludedService;
-
 public class ContentContributorSelectorHandler extends AbstractMarkupHandler {
 
     private Optional<IncludedService> include = Optional.empty();

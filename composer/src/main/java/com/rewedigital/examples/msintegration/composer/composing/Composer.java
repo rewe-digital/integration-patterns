@@ -14,8 +14,9 @@ import org.attoparser.ParseException;
 import org.attoparser.config.ParseConfiguration;
 
 import com.google.common.base.Throwables;
-import com.rewedigital.examples.msintegration.composer.composing.IncludedService.WithContent;
 import com.rewedigital.examples.msintegration.composer.composing.parser.ContentContributorSelectorHandler;
+import com.rewedigital.examples.msintegration.composer.composing.parser.IncludedService;
+import com.rewedigital.examples.msintegration.composer.composing.parser.IncludedService.WithContent;
 import com.spotify.apollo.Environment;
 
 public class Composer {
