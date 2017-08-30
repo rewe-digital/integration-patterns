@@ -18,18 +18,18 @@ import com.spotify.apollo.Status;
 
 import okio.ByteString;
 
-public class ComposingHandler {
+public class ComposingRequestHandler {
 
 	private static final CompletableFuture<Response<String>> OHH_NOOSE = CompletableFuture
 			.completedFuture(Response.forPayload("Ohh.. noose!"));
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(ComposingHandler.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ComposingRequestHandler.class);
 
 	private final BackendRouting routing;
 	private final TemplateClient templateClient;
 	private final Composer composer;
 
-	public ComposingHandler(final BackendRouting routing, final TemplateClient templateClient,
+	public ComposingRequestHandler(final BackendRouting routing, final TemplateClient templateClient,
 			final Composer composer) {
 		this.routing = Objects.requireNonNull(routing);
 		this.templateClient = Objects.requireNonNull(templateClient);

@@ -31,7 +31,7 @@ public class ComposingHandlerTest {
 
     @Test
     public void happyPathSuccess() throws InterruptedException, ExecutionException {
-        final ComposingHandler handler = new ComposingHandler(new BackendRouting(aRouter()), new StubTemplateClient(),
+        final ComposingRequestHandler handler = new ComposingRequestHandler(new BackendRouting(aRouter()), new StubTemplateClient(),
             new Composer(mock(Environment.class)));
 
         final Response<String> response = handler.execute(aContext()).toCompletableFuture().get();
