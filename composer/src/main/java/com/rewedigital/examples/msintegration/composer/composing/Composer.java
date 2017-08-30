@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Throwables;
 import com.rewedigital.examples.msintegration.composer.composing.parser.ContentContributorSelectorHandler;
+import com.rewedigital.examples.msintegration.composer.composing.parser.ContentExtractor;
 import com.rewedigital.examples.msintegration.composer.composing.parser.IncludedService;
 import com.rewedigital.examples.msintegration.composer.composing.parser.IncludedService.WithContent;
 import com.spotify.apollo.Environment;
@@ -26,6 +27,7 @@ public class Composer {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Composer.class);
 
 	private final IMarkupParser parser = new MarkupParser(ParseConfiguration.htmlConfiguration());
+	private final ContentExtractor contentExtractor = new ContentExtractor();
 	private final Environment environment;
 
 	public Composer(final Environment environment) {
@@ -57,7 +59,7 @@ public class Composer {
 
 	private Stream<CompletableFuture<WithContent>> fetchContent(final List<IncludedService> includedServices) {
 		return includedServices.stream().map(service -> service.fetchContent(environment.client()))
-				.map(futureResponse -> futureResponse.thenApply(response -> response.extractContent()));
+				.map(futureResponse -> futureResponse.thenApply(response -> response.extractContent(contentExtractor)));
 	}
 
 	private String replaceInTemplate(String template, Stream<IncludedService.WithContent> contentStream) {

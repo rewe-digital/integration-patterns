@@ -36,18 +36,20 @@ public class IncludedService {
 	public class WithResponse {
 		private final Response<ByteString> response;
 
-		private WithResponse(Response<ByteString> futureServiceResponse) {
+		private WithResponse(final Response<ByteString> futureServiceResponse) {
 			this.response = futureServiceResponse;
 		}
 
 		/**
 		 * Extracts the content of this response.
 		 * 
+		 * @param contentExtractor
+		 *            extracts relevant content from the response
 		 * @return the content
 		 */
-		public WithContent extractContent() {
-			// FIXME add parser etc as parameter
-			return new WithContent(response.payload().get().utf8());
+		public WithContent extractContent(final ContentExtractor contentExtractor) {
+			String content = contentExtractor.contentFrom(response, path());
+			return new WithContent(content);
 		}
 	}
 
@@ -59,7 +61,7 @@ public class IncludedService {
 
 		private final String content;
 
-		public WithContent(String content) {
+		public WithContent(final String content) {
 			this.content = content;
 		}
 
