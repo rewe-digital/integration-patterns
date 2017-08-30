@@ -1,10 +1,8 @@
 package com.rewedigital.examples.msintegration.composer.composing;
 
-import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CompletionStage;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.CompletableFuture;
 
 import com.spotify.apollo.Client;
 import com.spotify.apollo.Request;
@@ -14,59 +12,79 @@ import okio.ByteString;
 
 public class IncludedService {
 
-    private CompletionStage<Response<ByteString>> futureServiceResponse = null;
-    private final Map<String, String> attributes = new HashMap<>();
-    private int startOffset;
-    private int endOffset;
+	public class WithResponse {
+		private final Response<ByteString> response;
 
-    public void put(final String attribute, final String value) {
-        attributes.put(attribute, value);
-    }
+		private WithResponse(Response<ByteString> futureServiceResponse) {
+			this.response = futureServiceResponse;
+		}
 
-    public void startOffset(final int startOffset) {
-        this.startOffset = startOffset;
-    }
+		public Response<ByteString> content() {
+			return response;
+		}
 
-    public void endOffset(final int endOffset) {
-        this.endOffset = endOffset;
-    }
+		// FIXME add parser etc as parameter
+		public WithContent extractContent() {
+			return new WithContent(response.payload().get().utf8());
+		}
+	}
 
-    public Map<String, String> getAttributes() {
-        return attributes;
-    }
+	public class WithContent {
 
-    public String path() {
-        return attributes.get("path");
-    }
+		private final String content;
 
-    public int startOffset() {
-        return startOffset;
-    }
+		public WithContent(String content) {
+			this.content = content;
+		}
 
-    public int endOffset() {
-        return endOffset;
-    }
+		public int startOffset() {
+			return startOffset;
+		}
 
-    public void fetchContent(final Client client) {
-        futureServiceResponse = client.send(Request.forUri(this.path(), "GET"));
-    }
+		public int endOffset() {
+			return endOffset;
+		}
 
-    private String content() {
-        if (futureServiceResponse == null) {
-            throw new IllegalStateException("Call fetchContent first.");
-        }
-        // FIXME: Status code, is there a response and parsing...
-        try {
-            return futureServiceResponse.toCompletableFuture().get().payload().get().utf8();
-        } catch (InterruptedException | ExecutionException e) {
-            return "fallback";
-        }
-    }
+		public String content() {
+			return content;
+		}
+	}
 
-    public int inject(final StringWriter writer, final String baseTemplate, final int start) {
-        writer.write(baseTemplate, start, startOffset() - start);
-        writer.write(content());
-        return endOffset();
-    }
+	private final Map<String, String> attributes = new HashMap<>();
+	private int startOffset;
+	private int endOffset;
+
+	public void put(final String attribute, final String value) {
+		attributes.put(attribute, value);
+	}
+
+	public void startOffset(final int startOffset) {
+		this.startOffset = startOffset;
+	}
+
+	public void endOffset(final int endOffset) {
+		this.endOffset = endOffset;
+	}
+
+	public Map<String, String> getAttributes() {
+		return attributes;
+	}
+
+	public String path() {
+		return attributes.get("path");
+	}
+
+	public int startOffset() {
+		return startOffset;
+	}
+
+	public int endOffset() {
+		return endOffset;
+	}
+
+	public CompletableFuture<WithResponse> fetchContent(final Client client) {
+		return client.send(Request.forUri(this.path(), "GET"))
+				.thenApply(response -> new IncludedService.WithResponse(response)).toCompletableFuture();
+	}
 
 }
