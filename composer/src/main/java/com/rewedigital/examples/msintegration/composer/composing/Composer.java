@@ -1,10 +1,11 @@
 package com.rewedigital.examples.msintegration.composer.composing;
 
+import static com.rewedigital.examples.msintegration.composer.util.StreamUtil.flatten;
+
 import java.io.StringWriter;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang.NotImplementedException;
@@ -66,12 +67,6 @@ public class Composer {
 		return contentStream
 				.collect(() -> new OngoingReplacement(template), (r, c) -> r.replace(c), (a, b) -> a.combine(b))
 				.result();
-	}
-
-	private static <T> CompletableFuture<Stream<T>> flatten(Stream<CompletableFuture<T>> com) {
-		List<CompletableFuture<T>> list = com.collect(Collectors.toList());
-		return CompletableFuture.allOf(list.toArray(new CompletableFuture[list.size()]))
-				.thenApply(v -> list.stream().map(CompletableFuture::join));
 	}
 
 	private static class OngoingReplacement {
