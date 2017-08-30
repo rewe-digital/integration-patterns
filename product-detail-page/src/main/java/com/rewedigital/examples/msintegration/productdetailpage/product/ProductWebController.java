@@ -2,7 +2,7 @@ package com.rewedigital.examples.msintegration.productdetailpage.product;
 
 import static java.lang.String.format;
 
-import java.util.Optional;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -21,20 +21,21 @@ public class ProductWebController {
 	}
 
 	@GetMapping("/products/{productId}")
-	public ModelAndView productDetails(@PathVariable("productId") final String productId) {
-		return getProductById(productId).map(p -> {
+	public ModelAndView productDetails(@PathVariable("productId") final String productId, HttpServletResponse response) {
+		ModelAndView result = buildModelAndView(productId);
+		response.addHeader("x-uic-stylesheet", "/products/css/core.css");
+		return result;
+	}
+
+	private ModelAndView buildModelAndView(final String productId) {
+		return products.get(productId).map(p -> {
 			final ModelAndView result = new ModelAndView("product");
 			result.addObject("product", p);
 			return result;
 		}).orElseThrow(() -> productNotFound(productId));
 	}
 
-	private Optional<Product> getProductById(String productId) {
-		return products.get(productId);
-	}
-
 	private RuntimeException productNotFound(final String id) {
 		throw new RuntimeException(format("product [%s] not found", id));
 	}
-
 }
