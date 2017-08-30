@@ -11,9 +11,9 @@ import com.spotify.apollo.Response;
 
 import okio.ByteString;
 
-public class RequestBuilder {
+public class TemplateClient {
 
-    public CompletionStage<Response<ByteString>> requestFor(final RouteMatch match, final Request request,
+    public CompletionStage<Response<ByteString>> getTemplate(final RouteMatch match, final Request request,
         final RequestContext context) {
         final String expandedBackedUri = UriTemplate.fromTemplate(match.backend())
             .expand(Collections.<String, Object>unmodifiableMap(match.parsedPathArguments()));

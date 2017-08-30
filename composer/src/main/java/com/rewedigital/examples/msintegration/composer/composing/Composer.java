@@ -12,6 +12,8 @@ import org.attoparser.IMarkupParser;
 import org.attoparser.MarkupParser;
 import org.attoparser.ParseException;
 import org.attoparser.config.ParseConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Throwables;
 import com.rewedigital.examples.msintegration.composer.composing.parser.ContentContributorSelectorHandler;
@@ -20,6 +22,8 @@ import com.rewedigital.examples.msintegration.composer.composing.parser.Included
 import com.spotify.apollo.Environment;
 
 public class Composer {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(Composer.class);
 
 	private final IMarkupParser parser = new MarkupParser(ParseConfiguration.htmlConfiguration());
 	private final Environment environment;
@@ -41,11 +45,11 @@ public class Composer {
 		final List<IncludedService> includedServices = handler.includedServices();
 		final CompletableFuture<Stream<IncludedService.WithContent>> futureContentStream = flatten(
 				fetchContent(includedServices));
+
 		try {
 			return futureContentStream.thenApply(contentStream -> replaceInTemplate(baseTemplate, contentStream)).get();
 		} catch (InterruptedException | ExecutionException e) {
-			// TODO Log error
-			e.printStackTrace();
+			LOGGER.error("execution error while composing template with content", e);
 			return baseTemplate;
 		}
 
