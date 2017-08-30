@@ -2,6 +2,8 @@ package com.rewedigital.examples.msintegration.productdetailpage.product;
 
 import static java.lang.String.format;
 
+import java.util.ArrayList;
+
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,13 +23,27 @@ public class ProductWebController {
 	}
 
 	@GetMapping("/products/{productId}")
-	public ModelAndView productDetails(@PathVariable("productId") final String productId, HttpServletResponse response) {
-		ModelAndView result = buildModelAndView(productId);
+	public ModelAndView productDetails(@PathVariable("productId") final String productId,
+			HttpServletResponse response) {
+		ModelAndView result = getProductDetails(productId);
 		response.addHeader("x-uic-stylesheet", "/products/css/core.css");
 		return result;
 	}
 
-	private ModelAndView buildModelAndView(final String productId) {
+	@GetMapping("/products")
+	public ModelAndView productList(HttpServletResponse response) {
+		ModelAndView result = getProductList();
+		response.addHeader("x-uic-stylesheet", "/products/css/core.css");
+		return result;
+	}
+
+	private ModelAndView getProductList() {
+		ModelAndView result = new ModelAndView("productList");
+		result.addObject("products", new ArrayList<>(products.list()));
+		return result;
+	}
+
+	private ModelAndView getProductDetails(final String productId) {
 		return products.get(productId).map(p -> {
 			final ModelAndView result = new ModelAndView("product");
 			result.addObject("product", p);
