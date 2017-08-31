@@ -1,5 +1,6 @@
 package com.rewedigital.examples.msintegration.composer.composing;
 
+import static com.rewedigital.examples.msintegration.composer.composing.parser.Parser.PARSER;
 import static com.rewedigital.examples.msintegration.composer.util.StreamUtil.flatten;
 
 import java.io.StringWriter;
@@ -7,8 +8,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
@@ -18,10 +20,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang.NotImplementedException;
-import org.attoparser.IMarkupParser;
-import org.attoparser.MarkupParser;
 import org.attoparser.ParseException;
-import org.attoparser.config.ParseConfiguration;
 
 import com.google.common.base.Throwables;
 import com.rewedigital.examples.msintegration.composer.composing.parser.ContentContributorSelectorHandler;
@@ -32,43 +31,47 @@ import com.spotify.apollo.Environment;
 
 public class Composer {
 
-    private final IMarkupParser parser = new MarkupParser(ParseConfiguration.htmlConfiguration());
     private final ContentExtractor contentExtractor = new ContentExtractor();
     private final Environment environment;
 
     public Composer(final Environment environment) {
-        this.environment = environment;
+        this.environment = Objects.requireNonNull(environment);
     }
 
-    public CompletableFuture<String> compose(final String template) {
+    public CompletionStage<String> compose(final String template) {
         final List<IncludedService> includes = parse(template);
-        final CompletableFuture<Stream<IncludedService.WithContent>> content = fetchContent(
-                includes);
+
+        final CompletionStage<Stream<IncludedService.WithContent>> content =
+            fetchContent(includes);
+
         return replaceInTemplate(template, content);
     }
 
     private List<IncludedService> parse(final String template) {
         final ContentContributorSelectorHandler handler = new ContentContributorSelectorHandler();
         try {
-            parser.parse(template, handler);
+            PARSER.parse(template, handler);
         } catch (final ParseException e) {
             Throwables.propagate(e);
         }
-
         return handler.includedServices();
     }
 
-    private CompletableFuture<Stream<IncludedService.WithContent>> fetchContent(final List<IncludedService> includes) {
-        return flatten(includes.stream()
-                .map(include -> include
-                        .fetchContent(environment.client()))
-                .map(futureResponse -> futureResponse
-                        .thenApply(response -> response
-                                .extractContent(contentExtractor))));
+    private CompletionStage<Stream<IncludedService.WithContent>> fetchContent(final List<IncludedService> includes) {
+        return flatten(streamOfFutureContent(includes));
     }
 
-    private CompletableFuture<String> replaceInTemplate(final String template,
-            final CompletableFuture<Stream<IncludedService.WithContent>> futureContentStream) {
+    private Stream<CompletionStage<WithContent>> streamOfFutureContent(final List<IncludedService> includes) {
+        return includes.stream()
+            .map(include -> include
+                .fetchContent(environment.client()))
+            .map(futureResponse -> futureResponse
+                .thenApply(response -> response
+                    .extractContent(contentExtractor)));
+    }
+
+    private CompletionStage<String> replaceInTemplate(final String template,
+            final CompletionStage<Stream<IncludedService.WithContent>> futureContentStream) {
         return futureContentStream
                 .thenApply(contentStream -> contentStream
                         .collect(new OngoingReplacement(template))
@@ -84,7 +87,7 @@ public class Composer {
         private int currentIndex;
         private String result;
 
-        public OngoingReplacement(String baseTemplate) {
+        public OngoingReplacement(final String baseTemplate) {
             this.template = baseTemplate;
             this.writer = new StringWriter(baseTemplate.length());
             this.assetLinks = new LinkedList<>();
@@ -103,7 +106,7 @@ public class Composer {
             return (r, c) -> r.write(c);
         }
 
-        private void write(WithContent c) {
+        private void write(final WithContent c) {
             writer.write(template, currentIndex, c.startOffset() - currentIndex);
             writer.write(c.content());
             currentIndex = c.endOffset();

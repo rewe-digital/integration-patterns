@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 import com.spotify.apollo.Client;
 import com.spotify.apollo.Request;
@@ -35,23 +35,31 @@ public class IncludedService {
      * Enhances the included service with the response from the get call to fetch
      * the content.
      */
-    public class WithResponse {
-        private final Response<ByteString> response;
+    public static class WithResponse {
 
-        private WithResponse(final Response<ByteString> futureServiceResponse) {
-            this.response = futureServiceResponse;
+        private final Response<ByteString> response;
+        private final String path;
+        private final int startOffset;
+        private final int endOffset;
+
+        private WithResponse(final Response<ByteString> serviceResponse, final String path, final int startOffset,
+            final int endOffset) {
+            this.response = serviceResponse;
+            this.path = path;
+            this.startOffset = startOffset;
+            this.endOffset = endOffset;
         }
 
         /**
          * Extracts the content of this response.
-         * 
+         *
          * @param contentExtractor
          *            extracts relevant content from the response
          * @return the content
          */
         public WithContent extractContent(final ContentExtractor contentExtractor) {
-            final Content content = contentExtractor.contentFrom(response, path());
-            return new WithContent(content);
+            final Content content = contentExtractor.contentFrom(response, path);
+            return new WithContent(content, startOffset, endOffset);
         }
     }
 
@@ -59,14 +67,18 @@ public class IncludedService {
      * Enhances the included service with the content from the response of the fetch
      * call.
      */
-    public class WithContent {
+    public static class WithContent {
 
         private final String content;
         private final List<String> assetLinks;
+        private final int startOffset;
+        private final int endOffset;
 
-        public WithContent(final Content content) {
+        public WithContent(final Content content, final int startOffset, final int endOffset) {
             this.content = content.body();
             this.assetLinks = content.assetLinks();
+            this.startOffset = startOffset;
+            this.endOffset = endOffset;
         }
 
         public int startOffset() {
@@ -104,14 +116,14 @@ public class IncludedService {
 
     /**
      * Starts fetching the content for this include using the provided client.
-     * 
+     *
      * @param client
      *            the client to fetch the content
      * @return a future containing the response
      */
-    public CompletableFuture<WithResponse> fetchContent(final Client client) {
-        return client.send(Request.forUri(this.path(), "GET"))
-                .thenApply(response -> new IncludedService.WithResponse(response)).toCompletableFuture();
+    public CompletionStage<WithResponse> fetchContent(final Client client) {
+        return client.send(Request.forUri(path(), "GET"))
+                .thenApply(response -> new IncludedService.WithResponse(response, path(), startOffset, endOffset));
     }
 
 }

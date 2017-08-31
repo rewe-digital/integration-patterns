@@ -44,14 +44,13 @@ public class ComposingRequestHandler {
             LOGGER.info("The request {} matched the backend route {}.", request, match);
             return templateClient.getTemplate(rm, request, context).thenCompose(this::compose);
         }).orElse(defaultResponse());
-
     }
 
-    private CompletableFuture<Response<String>> compose(final Response<ByteString> response) {
+    private CompletionStage<Response<String>> compose(final Response<ByteString> response) {
         if (response.status().code() != Status.OK.code() || !response.payload().isPresent()) {
             // Do whatever suits your environment, retrieve the data from a cache,
             // re-execute the request or just fail.
-            return CompletableFuture.completedFuture(Response.of(Status.BAD_REQUEST, "Ohh.. noose!"));
+            return OHH_NOOSE;
         }
 
         final String responseAsUtf8 = response.payload().get().utf8();
