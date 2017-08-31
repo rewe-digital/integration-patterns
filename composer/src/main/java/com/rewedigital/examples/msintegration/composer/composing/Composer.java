@@ -5,6 +5,7 @@ import static com.rewedigital.examples.msintegration.composer.util.StreamUtil.fl
 import java.io.StringWriter;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -13,6 +14,7 @@ import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang.NotImplementedException;
@@ -25,6 +27,7 @@ import com.google.common.base.Throwables;
 import com.rewedigital.examples.msintegration.composer.composing.parser.ContentContributorSelectorHandler;
 import com.rewedigital.examples.msintegration.composer.composing.parser.ContentExtractor;
 import com.rewedigital.examples.msintegration.composer.composing.parser.IncludedService;
+import com.rewedigital.examples.msintegration.composer.composing.parser.IncludedService.WithContent;
 import com.spotify.apollo.Environment;
 
 public class Composer {
@@ -76,35 +79,56 @@ public class Composer {
             implements Collector<IncludedService.WithContent, OngoingReplacement, OngoingReplacement> {
 
         private final StringWriter writer;
-        private final String baseTemplate;
-
+        private final String template;
+        private final List<String> assetLinks;
         private int currentIndex;
+        private String result;
 
         public OngoingReplacement(String baseTemplate) {
-            this.baseTemplate = baseTemplate;
+            this.template = baseTemplate;
             this.writer = new StringWriter(baseTemplate.length());
+            this.assetLinks = new LinkedList<>();
             this.currentIndex = 0;
         }
 
         public String result() {
-            return writer.toString();
+            if (result == null) {
+                finish();
+            }
+            return result;
         }
 
         @Override
         public BiConsumer<OngoingReplacement, IncludedService.WithContent> accumulator() {
-            return (r, c) -> {
-                r.writer.write(r.baseTemplate, r.currentIndex, c.startOffset() - r.currentIndex);
-                r.writer.write(c.content());
-                r.currentIndex = c.endOffset();
-            };
+            return (r, c) -> r.write(c);
+        }
+
+        private void write(WithContent c) {
+            writer.write(template, currentIndex, c.startOffset() - currentIndex);
+            writer.write(c.content());
+            currentIndex = c.endOffset();
+            assetLinks.addAll(c.assets());
         }
 
         @Override
         public Function<OngoingReplacement, OngoingReplacement> finisher() {
-            return r -> {
-                r.writer.write(r.baseTemplate, r.currentIndex, r.baseTemplate.length() - r.currentIndex);
-                return r;
-            };
+            return r -> r.finish();
+        }
+
+        private OngoingReplacement finish() {
+            writeFinalChunk();
+            writeAssets();
+            return this;
+        }
+
+        private void writeFinalChunk() {
+            writer.write(template, currentIndex, template.length() - currentIndex);
+            this.result = writer.toString();
+        }
+
+        private void writeAssets() {
+            final String assets = assetLinks.stream().collect(Collectors.joining("\n"));
+            result = result.replaceFirst("</head>", assets + "\n</head>");
         }
 
         @Override
