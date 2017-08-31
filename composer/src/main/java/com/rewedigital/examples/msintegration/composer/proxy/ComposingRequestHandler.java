@@ -25,7 +25,7 @@ import okio.ByteString;
 public class ComposingRequestHandler {
 
     private static final CompletableFuture<Response<String>> ERROR_PAGE = CompletableFuture
-            .completedFuture(Response.of(Status.NOT_FOUND, "Ohh.. noose!"));
+        .completedFuture(Response.of(Status.NOT_FOUND, "Ohh.. noose!"));
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ComposingRequestHandler.class);
 
@@ -34,7 +34,7 @@ public class ComposingRequestHandler {
     private final Composer composer;
 
     public ComposingRequestHandler(final BackendRouting routing, final TemplateClient templateClient,
-            final Composer composer) {
+        final Composer composer) {
         this.routing = Objects.requireNonNull(routing);
         this.templateClient = Objects.requireNonNull(templateClient);
         this.composer = Objects.requireNonNull(composer);
@@ -51,6 +51,10 @@ public class ComposingRequestHandler {
     }
 
     private CompletionStage<Response<String>> compose(final RouteMatch match, final Response<ByteString> response) {
+        if (match.shouldProxy()) {
+            return CompletableFuture.completedFuture(response.withPayload(response.payload().map(p -> p.utf8())));
+        }
+
         if (response.status().code() != Status.OK.code() || !response.payload().isPresent()) {
             // Do whatever suits your environment, retrieve the data from a cache,
             // re-execute the request or just fail.
@@ -58,16 +62,13 @@ public class ComposingRequestHandler {
         }
 
         final String responseAsUtf8 = response.payload().get().utf8();
-        if (match.shouldProxy()) {
-            return CompletableFuture.completedFuture(Response.of(Status.OK, responseAsUtf8));
-        }
         return composer.compose(responseAsUtf8)
             .thenApply(r -> Response.forPayload(r).withHeaders(transformHeaders(response.headerEntries())));
     }
 
     private Map<String, String> transformHeaders(final List<Entry<String, String>> headerEntries) {
         return headerEntries.stream().filter(h -> "content-type".equalsIgnoreCase(h.getKey()))
-            .collect(toMap(k -> k.getKey(), v -> v.getValue(), (a, b) -> a));
+            .collect(toMap(Entry::getKey, Entry::getValue, (a, b) -> a));
     }
 
     private static CompletableFuture<Response<String>> defaultResponse() {
