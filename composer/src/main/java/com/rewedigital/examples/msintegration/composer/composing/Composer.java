@@ -137,7 +137,7 @@ public class Composer {
         @Override
         public BinaryOperator<OngoingReplacement> combiner() {
             return (r, s) -> {
-                throw new NotImplementedException("must not be used with parallel streams");
+                throw new NotImplementedException("Must not be used with parallel streams");
             };
         }
 

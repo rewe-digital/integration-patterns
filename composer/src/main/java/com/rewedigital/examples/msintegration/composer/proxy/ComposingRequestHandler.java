@@ -25,7 +25,7 @@ import okio.ByteString;
 public class ComposingRequestHandler {
 
     private static final CompletableFuture<Response<String>> OHH_NOOSE = CompletableFuture
-            .completedFuture(Response.forPayload("Ohh.. noose!"));
+            .completedFuture(Response.of(Status.NOT_FOUND, "Ohh.. noose!"));
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ComposingRequestHandler.class);
 
@@ -57,8 +57,10 @@ public class ComposingRequestHandler {
             return defaultResponse();
         }
 
-
         final String responseAsUtf8 = response.payload().get().utf8();
+        if (match.shouldProxy()) {
+            return CompletableFuture.completedFuture(Response.of(Status.OK, responseAsUtf8));
+        }
         return composer.compose(responseAsUtf8)
             .thenApply(r -> Response.forPayload(r).withHeaders(transformHeaders(response.headerEntries())));
     }

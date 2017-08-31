@@ -32,6 +32,7 @@ public class BackendRouting {
     }
 
     public static class RouteMatch {
+
         private final Match backend;
         private final Map<String, String> parsedPathArguments;
 
@@ -42,6 +43,10 @@ public class BackendRouting {
 
         public String backend() {
             return backend.backend();
+        }
+
+        public boolean shouldProxy() {
+            return backend.shouldProxy();
         }
 
         public Map<String, String> parsedPathArguments() {

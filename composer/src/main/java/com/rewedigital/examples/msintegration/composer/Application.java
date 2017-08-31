@@ -35,6 +35,7 @@ public class Application {
                     new Composer(environment));
 
             environment.routingEngine()
+                .registerAutoRoute(Route.async("GET", "/", rc -> handler.execute(rc)))
                 .registerAutoRoute(Route.async("GET", "/<path:path>", rc -> handler.execute(rc)))
                 .registerAutoRoute(Route.async("HEAD", "/<path:path>", rc -> handler.execute(rc)))
                 .registerAutoRoute(Route.async("POST", "/<path:path>", rc -> handler.execute(rc)))
