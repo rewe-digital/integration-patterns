@@ -44,10 +44,6 @@ public class BackendRouting {
             return backend.backend();
         }
 
-        public String contentType() {
-            return backend.contentType();
-        }
-
         public Map<String, String> parsedPathArguments() {
             return parsedPathArguments;
         }

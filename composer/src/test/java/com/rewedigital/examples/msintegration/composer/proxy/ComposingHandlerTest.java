@@ -41,7 +41,7 @@ public class ComposingHandlerTest {
     }
 
     private RuleRouter<Match> aRouter() {
-        final Rule<Match> sampleRule = Rule.fromUri("/<path:path>", "GET", Match.of("http://target", "text/html"));
+        final Rule<Match> sampleRule = Rule.fromUri("/<path:path>", "GET", Match.of("http://target"));
         return RuleRouter.of(singletonList(sampleRule));
     }
 

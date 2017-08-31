@@ -1,10 +1,14 @@
 package com.rewedigital.examples.msintegration.composer.proxy;
 
+import static java.util.stream.Collectors.toMap;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,12 +54,18 @@ public class ComposingRequestHandler {
         if (response.status().code() != Status.OK.code() || !response.payload().isPresent()) {
             // Do whatever suits your environment, retrieve the data from a cache,
             // re-execute the request or just fail.
-            return OHH_NOOSE;
+            return defaultResponse();
         }
+
 
         final String responseAsUtf8 = response.payload().get().utf8();
         return composer.compose(responseAsUtf8)
-            .thenApply(r -> Response.forPayload(r).withHeader("content-type", match.contentType()));
+            .thenApply(r -> Response.forPayload(r).withHeaders(transformHeaders(response.headerEntries())));
+    }
+
+    private Map<String, String> transformHeaders(final List<Entry<String, String>> headerEntries) {
+        // FIXME: Add only response headers in a whitelist.
+        return headerEntries.stream().collect(toMap(k -> k.getKey(), v -> v.getValue(), (a, b) -> a));
     }
 
     private static CompletableFuture<Response<String>> defaultResponse() {
