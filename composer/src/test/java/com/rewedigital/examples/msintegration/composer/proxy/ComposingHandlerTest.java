@@ -1,5 +1,6 @@
 package com.rewedigital.examples.msintegration.composer.proxy;
 
+import static com.rewedigital.examples.msintegration.composer.routing.StaticBackendRoutes.RouteType.TEMPLATE;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -16,7 +17,6 @@ import com.rewedigital.examples.msintegration.composer.composing.Composer;
 import com.rewedigital.examples.msintegration.composer.routing.BackendRouting;
 import com.rewedigital.examples.msintegration.composer.routing.BackendRouting.RouteMatch;
 import com.rewedigital.examples.msintegration.composer.routing.StaticBackendRoutes.Match;
-import com.rewedigital.examples.msintegration.composer.routing.StaticBackendRoutes.RouteType;
 import com.spotify.apollo.Environment;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.RequestContext;
@@ -42,7 +42,7 @@ public class ComposingHandlerTest {
     }
 
     private RuleRouter<Match> aRouter() {
-        final Rule<Match> sampleRule = Rule.fromUri("/<path:path>", "GET", Match.of("http://target", RouteType.TEMPLATE));
+        final Rule<Match> sampleRule = Rule.fromUri("/<path:path>", "GET", Match.of("http://target", TEMPLATE));
         return RuleRouter.of(singletonList(sampleRule));
     }
 
