@@ -1,6 +1,8 @@
 package com.rewedigital.examples.msintegration.composer.composing.parser;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -48,7 +50,7 @@ public class IncludedService {
          * @return the content
          */
         public WithContent extractContent(final ContentExtractor contentExtractor) {
-            String content = contentExtractor.contentFrom(response, path());
+            final Content content = contentExtractor.contentFrom(response, path());
             return new WithContent(content);
         }
     }
@@ -60,9 +62,11 @@ public class IncludedService {
     public class WithContent {
 
         private final String content;
+        private final List<String> assetLinks;
 
-        public WithContent(final String content) {
-            this.content = content;
+        public WithContent(final Content content) {
+            this.content = content.body();
+            this.assetLinks = content.assetLinks();
         }
 
         public int startOffset() {
@@ -75,6 +79,10 @@ public class IncludedService {
 
         public String content() {
             return content;
+        }
+
+        public Collection<String> assets() {
+            return assetLinks;
         }
     }
 

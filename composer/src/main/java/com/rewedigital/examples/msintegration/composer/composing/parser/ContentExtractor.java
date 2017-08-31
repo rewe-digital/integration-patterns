@@ -15,23 +15,34 @@ import okio.ByteString;
 
 public class ContentExtractor {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(ContentExtractor.class);
+    private static final String STYLESHEET_HEADER = "x-uic-stylesheet";
 
-	private final IMarkupParser parser = new MarkupParser(ParseConfiguration.htmlConfiguration());
+    private static final Logger LOGGER = LoggerFactory.getLogger(ContentExtractor.class);
 
-	public String contentFrom(final Response<ByteString> response, final String path) {
-		if (response.status().code() != Status.OK.code() || !response.payload().isPresent()) {
-			LOGGER.warn("Missing content from {} with status {}- returning empty default", path,
-					response.status().code());
-			return "";
-		}
-		final ContentExtractionHandler handler = new ContentExtractionHandler();
-		try {
-			parser.parse(response.payload().get().utf8(), handler);
-		} catch (final ParseException e) {
-			Throwables.propagate(e);
-		}
-		return handler.content();
-	}
+    private final IMarkupParser parser = new MarkupParser(ParseConfiguration.htmlConfiguration());
+
+    public Content contentFrom(final Response<ByteString> response, final String path) {
+        if (response.status().code() != Status.OK.code() || !response.payload().isPresent()) {
+            LOGGER.warn("Missing content from {} with status {}- returning empty default", path,
+                    response.status().code());
+            return new Content();
+        }
+        final ContentExtractionHandler handler = new ContentExtractionHandler();
+        try {
+            parser.parse(response.payload().get().utf8(), handler);
+        } catch (final ParseException e) {
+            Throwables.propagate(e);
+        }
+        final Content result = new Content();
+        result.body(handler.content());
+        response.header(STYLESHEET_HEADER)
+                .map(href -> buildCssLink(href))
+                .ifPresent(link -> result.addAssetLink(link));
+        return result;
+    }
+
+    private String buildCssLink(String href) {
+        return String.format("<link rel=\"stylesheet\" href=\"%s\" />", href);
+    }
 
 }
