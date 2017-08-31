@@ -10,4 +10,9 @@ public class WebController {
 	public String header() {
 		return "header";
 	}
+
+	@GetMapping("/footer")
+	public String footer() {
+		return "footer";
+	}
 }

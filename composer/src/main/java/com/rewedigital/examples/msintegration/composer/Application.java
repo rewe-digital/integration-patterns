@@ -1,8 +1,8 @@
 package com.rewedigital.examples.msintegration.composer;
 
 import com.rewedigital.examples.msintegration.composer.composing.Composer;
-import com.rewedigital.examples.msintegration.composer.proxy.ComposingHandler;
-import com.rewedigital.examples.msintegration.composer.proxy.RequestBuilder;
+import com.rewedigital.examples.msintegration.composer.proxy.ComposingRequestHandler;
+import com.rewedigital.examples.msintegration.composer.proxy.TemplateClient;
 import com.rewedigital.examples.msintegration.composer.routing.BackendRouting;
 import com.rewedigital.examples.msintegration.composer.routing.StaticBackendRoutes;
 import com.spotify.apollo.Environment;
@@ -28,10 +28,10 @@ public class Application {
     private static class Initializer {
 
         private static void init(final Environment environment) {
-            final ComposingHandler handler =
-                new ComposingHandler(
+            final ComposingRequestHandler handler =
+                new ComposingRequestHandler(
                     new BackendRouting(StaticBackendRoutes.routes()),
-                    new RequestBuilder(),
+                    new TemplateClient(),
                     new Composer(environment));
 
             environment.routingEngine()
