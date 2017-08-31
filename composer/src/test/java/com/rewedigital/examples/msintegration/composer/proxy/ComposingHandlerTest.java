@@ -16,6 +16,7 @@ import com.rewedigital.examples.msintegration.composer.composing.Composer;
 import com.rewedigital.examples.msintegration.composer.routing.BackendRouting;
 import com.rewedigital.examples.msintegration.composer.routing.BackendRouting.RouteMatch;
 import com.rewedigital.examples.msintegration.composer.routing.StaticBackendRoutes.Match;
+import com.rewedigital.examples.msintegration.composer.routing.StaticBackendRoutes.RouteType;
 import com.spotify.apollo.Environment;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.RequestContext;
@@ -41,7 +42,7 @@ public class ComposingHandlerTest {
     }
 
     private RuleRouter<Match> aRouter() {
-        final Rule<Match> sampleRule = Rule.fromUri("/<path:path>", "GET", Match.of("http://target"));
+        final Rule<Match> sampleRule = Rule.fromUri("/<path:path>", "GET", Match.of("http://target", RouteType.TEMPLATE));
         return RuleRouter.of(singletonList(sampleRule));
     }
 
