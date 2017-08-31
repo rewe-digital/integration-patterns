@@ -1,9 +1,8 @@
 package com.rewedigital.examples.msintegration.composer.composing.parser;
 
-import org.attoparser.IMarkupParser;
-import org.attoparser.MarkupParser;
+import static com.rewedigital.examples.msintegration.composer.composing.parser.Parser.PARSER;
+
 import org.attoparser.ParseException;
-import org.attoparser.config.ParseConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,17 +18,15 @@ public class ContentExtractor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ContentExtractor.class);
 
-    private final IMarkupParser parser = new MarkupParser(ParseConfiguration.htmlConfiguration());
-
     public Content contentFrom(final Response<ByteString> response, final String path) {
         if (response.status().code() != Status.OK.code() || !response.payload().isPresent()) {
-            LOGGER.warn("Missing content from {} with status {}- returning empty default", path,
+            LOGGER.warn("Missing content from {} with status {} returning empty default", path,
                     response.status().code());
             return new Content();
         }
         final ContentExtractionHandler handler = new ContentExtractionHandler();
         try {
-            parser.parse(response.payload().get().utf8(), handler);
+            PARSER.parse(response.payload().get().utf8(), handler);
         } catch (final ParseException e) {
             Throwables.propagate(e);
         }
@@ -41,7 +38,7 @@ public class ContentExtractor {
         return result;
     }
 
-    private String buildCssLink(String href) {
+    private String buildCssLink(final String href) {
         return String.format("<link rel=\"stylesheet\" href=\"%s\" />", href);
     }
 

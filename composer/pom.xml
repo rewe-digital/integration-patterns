@@ -119,7 +119,7 @@
                             <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>com.rewedigital.composer.Application</mainClass>
+                            <mainClass>com.rewedigital.examples.msintegration.composer.Application</mainClass>
                         </manifest>
                         <manifestEntries>
                             <X-Spotify-Apollo-Version>${apollo.version}</X-Spotify-Apollo-Version>
