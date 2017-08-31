@@ -24,7 +24,7 @@ import okio.ByteString;
 
 public class ComposingRequestHandler {
 
-    private static final CompletableFuture<Response<String>> OHH_NOOSE = CompletableFuture
+    private static final CompletableFuture<Response<String>> ERROR_PAGE = CompletableFuture
             .completedFuture(Response.of(Status.NOT_FOUND, "Ohh.. noose!"));
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ComposingRequestHandler.class);
@@ -66,11 +66,11 @@ public class ComposingRequestHandler {
     }
 
     private Map<String, String> transformHeaders(final List<Entry<String, String>> headerEntries) {
-        // FIXME: Add only response headers in a whitelist.
-        return headerEntries.stream().collect(toMap(k -> k.getKey(), v -> v.getValue(), (a, b) -> a));
+        return headerEntries.stream().filter(h -> Objects.equals(h.getKey(), "content-type"))
+            .collect(toMap(k -> k.getKey(), v -> v.getValue(), (a, b) -> a));
     }
 
     private static CompletableFuture<Response<String>> defaultResponse() {
-        return OHH_NOOSE;
+        return ERROR_PAGE;
     }
 }

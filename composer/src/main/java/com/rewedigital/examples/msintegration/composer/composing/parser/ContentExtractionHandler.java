@@ -31,7 +31,7 @@ public class ContentExtractionHandler extends AbstractMarkupHandler {
 		}
 	}
 
-	private boolean isContentElement(char[] buffer, int nameOffset, int nameLen) {
+	private boolean isContentElement(final char[] buffer, final int nameOffset, final int nameLen) {
 		return TextUtil.contains(true, buffer, nameOffset, nameLen, CONTENT_ELEMENT, 0, CONTENT_ELEMENT.length);
 	}
 }
