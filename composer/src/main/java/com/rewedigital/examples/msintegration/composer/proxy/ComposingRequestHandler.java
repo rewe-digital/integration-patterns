@@ -52,7 +52,8 @@ public class ComposingRequestHandler {
 
     private CompletionStage<Response<String>> compose(final RouteMatch match, final Response<ByteString> response) {
         if (match.shouldProxy()) {
-            return CompletableFuture.completedFuture(response.withPayload(response.payload().map(p -> p.utf8())));
+            return CompletableFuture
+                .completedFuture(response.withPayload(response.payload().map(p -> p.utf8()).orElse("")));
         }
 
         if (response.status().code() != Status.OK.code() || !response.payload().isPresent()) {
