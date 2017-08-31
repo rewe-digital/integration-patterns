@@ -19,91 +19,91 @@ import okio.ByteString;
  * <li>{@link WithResponse#extractContent()} on the result of fetchContent to
  * extract relevant content from the response</li>
  * <li>{@link WithContent#startOffset()}, {@link WithContent#endOffset()} return
- * the position of the element to be replaced with
- * {@link WithContent#content()}</li>
+ * the position in the original template of the element that should be replaced
+ * with {@link WithContent#content()}</li>
  * </ul>
  */
 public class IncludedService {
 
-	private final Map<String, String> attributes = new HashMap<>();
-	private int startOffset;
-	private int endOffset;
+    private final Map<String, String> attributes = new HashMap<>();
+    private int startOffset;
+    private int endOffset;
 
-	/**
-	 * Enhances the included service with the response from the get call to fetch
-	 * the content.
-	 */
-	public class WithResponse {
-		private final Response<ByteString> response;
+    /**
+     * Enhances the included service with the response from the get call to fetch
+     * the content.
+     */
+    public class WithResponse {
+        private final Response<ByteString> response;
 
-		private WithResponse(final Response<ByteString> futureServiceResponse) {
-			this.response = futureServiceResponse;
-		}
+        private WithResponse(final Response<ByteString> futureServiceResponse) {
+            this.response = futureServiceResponse;
+        }
 
-		/**
-		 * Extracts the content of this response.
-		 * 
-		 * @param contentExtractor
-		 *            extracts relevant content from the response
-		 * @return the content
-		 */
-		public WithContent extractContent(final ContentExtractor contentExtractor) {
-			String content = contentExtractor.contentFrom(response, path());
-			return new WithContent(content);
-		}
-	}
+        /**
+         * Extracts the content of this response.
+         * 
+         * @param contentExtractor
+         *            extracts relevant content from the response
+         * @return the content
+         */
+        public WithContent extractContent(final ContentExtractor contentExtractor) {
+            String content = contentExtractor.contentFrom(response, path());
+            return new WithContent(content);
+        }
+    }
 
-	/**
-	 * Enhances the included service with the content from the response of the fetch
-	 * call.
-	 */
-	public class WithContent {
+    /**
+     * Enhances the included service with the content from the response of the fetch
+     * call.
+     */
+    public class WithContent {
 
-		private final String content;
+        private final String content;
 
-		public WithContent(final String content) {
-			this.content = content;
-		}
+        public WithContent(final String content) {
+            this.content = content;
+        }
 
-		public int startOffset() {
-			return startOffset;
-		}
+        public int startOffset() {
+            return startOffset;
+        }
 
-		public int endOffset() {
-			return endOffset;
-		}
+        public int endOffset() {
+            return endOffset;
+        }
 
-		public String content() {
-			return content;
-		}
-	}
+        public String content() {
+            return content;
+        }
+    }
 
-	void put(final String attribute, final String value) {
-		attributes.put(attribute, value);
-	}
+    void put(final String attribute, final String value) {
+        attributes.put(attribute, value);
+    }
 
-	void startOffset(final int startOffset) {
-		this.startOffset = startOffset;
-	}
+    void startOffset(final int startOffset) {
+        this.startOffset = startOffset;
+    }
 
-	void endOffset(final int endOffset) {
-		this.endOffset = endOffset;
-	}
+    void endOffset(final int endOffset) {
+        this.endOffset = endOffset;
+    }
 
-	private String path() {
-		return attributes.get("path");
-	}
+    private String path() {
+        return attributes.get("path");
+    }
 
-	/**
-	 * Starts fetching the content for this include using the provided client.
-	 * 
-	 * @param client
-	 *            the client to fetch the content
-	 * @return a future containing the response
-	 */
-	public CompletableFuture<WithResponse> fetchContent(final Client client) {
-		return client.send(Request.forUri(this.path(), "GET"))
-				.thenApply(response -> new IncludedService.WithResponse(response)).toCompletableFuture();
-	}
+    /**
+     * Starts fetching the content for this include using the provided client.
+     * 
+     * @param client
+     *            the client to fetch the content
+     * @return a future containing the response
+     */
+    public CompletableFuture<WithResponse> fetchContent(final Client client) {
+        return client.send(Request.forUri(this.path(), "GET"))
+                .thenApply(response -> new IncludedService.WithResponse(response)).toCompletableFuture();
+    }
 
 }

@@ -20,45 +20,45 @@ import okio.ByteString;
 
 public class ComposingRequestHandler {
 
-	private static final CompletableFuture<Response<String>> OHH_NOOSE = CompletableFuture
-			.completedFuture(Response.forPayload("Ohh.. noose!"));
+    private static final CompletableFuture<Response<String>> OHH_NOOSE = CompletableFuture
+            .completedFuture(Response.forPayload("Ohh.. noose!"));
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(ComposingRequestHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ComposingRequestHandler.class);
 
-	private final BackendRouting routing;
-	private final TemplateClient templateClient;
-	private final Composer composer;
+    private final BackendRouting routing;
+    private final TemplateClient templateClient;
+    private final Composer composer;
 
-	public ComposingRequestHandler(final BackendRouting routing, final TemplateClient templateClient,
-			final Composer composer) {
-		this.routing = Objects.requireNonNull(routing);
-		this.templateClient = Objects.requireNonNull(templateClient);
-		this.composer = Objects.requireNonNull(composer);
-	}
+    public ComposingRequestHandler(final BackendRouting routing, final TemplateClient templateClient,
+            final Composer composer) {
+        this.routing = Objects.requireNonNull(routing);
+        this.templateClient = Objects.requireNonNull(templateClient);
+        this.composer = Objects.requireNonNull(composer);
+    }
 
-	public CompletionStage<Response<String>> execute(final RequestContext context) {
-		final Request request = context.request();
-		final Optional<RouteMatch> match = routing.matches(request);
+    public CompletionStage<Response<String>> execute(final RequestContext context) {
+        final Request request = context.request();
+        final Optional<RouteMatch> match = routing.matches(request);
 
-		return match.map(rm -> {
-			LOGGER.info("The request {} matched the backend route {}.", request, match);
-			return templateClient.getTemplate(rm, request, context).thenApply(this::compose);
-		}).orElse(defaultResponse());
+        return match.map(rm -> {
+            LOGGER.info("The request {} matched the backend route {}.", request, match);
+            return templateClient.getTemplate(rm, request, context).thenCompose(this::compose);
+        }).orElse(defaultResponse());
 
-	}
+    }
 
-	private Response<String> compose(final Response<ByteString> response) {
-		if (response.status().code() != Status.OK.code() || !response.payload().isPresent()) {
-			// Do whatever suits your environment, retrieve the data from a cache,
-			// re-execute the request or just fail.
-			return Response.of(Status.BAD_REQUEST, "Ohh.. noose!");
-		}
+    private CompletableFuture<Response<String>> compose(final Response<ByteString> response) {
+        if (response.status().code() != Status.OK.code() || !response.payload().isPresent()) {
+            // Do whatever suits your environment, retrieve the data from a cache,
+            // re-execute the request or just fail.
+            return CompletableFuture.completedFuture(Response.of(Status.BAD_REQUEST, "Ohh.. noose!"));
+        }
 
-		final String responseAsUtf8 = response.payload().get().utf8();
-		return Response.forPayload(composer.compose(responseAsUtf8));
-	}
+        final String responseAsUtf8 = response.payload().get().utf8();
+        return composer.compose(responseAsUtf8).thenApply(r -> Response.forPayload(r));
+    }
 
-	private static CompletableFuture<Response<String>> defaultResponse() {
-		return OHH_NOOSE;
-	}
+    private static CompletableFuture<Response<String>> defaultResponse() {
+        return OHH_NOOSE;
+    }
 }
