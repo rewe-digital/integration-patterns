@@ -66,7 +66,7 @@ public class ComposingRequestHandler {
     }
 
     private Map<String, String> transformHeaders(final List<Entry<String, String>> headerEntries) {
-        return headerEntries.stream().filter(h -> Objects.equals(h.getKey(), "content-type"))
+        return headerEntries.stream().filter(h -> "content-type".equalsIgnoreCase(h.getKey()))
             .collect(toMap(k -> k.getKey(), v -> v.getValue(), (a, b) -> a));
     }
 
