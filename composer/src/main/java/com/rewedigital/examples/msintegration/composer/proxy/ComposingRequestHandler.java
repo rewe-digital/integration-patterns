@@ -42,11 +42,11 @@ public class ComposingRequestHandler {
 
         return match.map(rm -> {
             LOGGER.info("The request {} matched the backend route {}.", request, match);
-            return templateClient.getTemplate(rm, request, context).thenCompose(this::compose);
+            return templateClient.getTemplate(rm, request, context).thenCompose(r -> compose(rm, r));
         }).orElse(defaultResponse());
     }
 
-    private CompletionStage<Response<String>> compose(final Response<ByteString> response) {
+    private CompletionStage<Response<String>> compose(final RouteMatch match, final Response<ByteString> response) {
         if (response.status().code() != Status.OK.code() || !response.payload().isPresent()) {
             // Do whatever suits your environment, retrieve the data from a cache,
             // re-execute the request or just fail.
@@ -54,7 +54,8 @@ public class ComposingRequestHandler {
         }
 
         final String responseAsUtf8 = response.payload().get().utf8();
-        return composer.compose(responseAsUtf8).thenApply(r -> Response.forPayload(r));
+        return composer.compose(responseAsUtf8)
+            .thenApply(r -> Response.forPayload(r).withHeader("content-type", match.contentType()));
     }
 
     private static CompletableFuture<Response<String>> defaultResponse() {

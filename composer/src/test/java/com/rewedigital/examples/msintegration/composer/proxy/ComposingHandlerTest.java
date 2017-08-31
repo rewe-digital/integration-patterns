@@ -15,6 +15,7 @@ import org.junit.Test;
 import com.rewedigital.examples.msintegration.composer.composing.Composer;
 import com.rewedigital.examples.msintegration.composer.routing.BackendRouting;
 import com.rewedigital.examples.msintegration.composer.routing.BackendRouting.RouteMatch;
+import com.rewedigital.examples.msintegration.composer.routing.StaticBackendRoutes.Match;
 import com.spotify.apollo.Environment;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.RequestContext;
@@ -39,8 +40,9 @@ public class ComposingHandlerTest {
         assertThat(response.payload().get()).isEqualTo(SERVICE_RESPONSE);
     }
 
-    private RuleRouter<String> aRouter() {
-        return RuleRouter.of(singletonList(Rule.fromUri("/<path:path>", "GET", "http://target")));
+    private RuleRouter<Match> aRouter() {
+        final Rule<Match> sampleRule = Rule.fromUri("/<path:path>", "GET", Match.of("http://target", "text/html"));
+        return RuleRouter.of(singletonList(sampleRule));
     }
 
     private RequestContext aContext() {
