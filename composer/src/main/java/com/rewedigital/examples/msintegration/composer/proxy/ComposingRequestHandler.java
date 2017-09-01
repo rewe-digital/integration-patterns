@@ -15,7 +15,7 @@ import java.util.concurrent.CompletionStage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.rewedigital.examples.msintegration.composer.composing.ComposerFactory;
+import com.rewedigital.examples.msintegration.composer.composing.Composer;
 import com.rewedigital.examples.msintegration.composer.routing.BackendRouting;
 import com.rewedigital.examples.msintegration.composer.routing.BackendRouting.RouteMatch;
 import com.spotify.apollo.Request;
@@ -34,13 +34,10 @@ public class ComposingRequestHandler {
 
     private final BackendRouting routing;
     private final TemplateClient templateClient;
-    private final ComposerFactory composerFactory;
 
-    public ComposingRequestHandler(final BackendRouting routing, final TemplateClient templateClient,
-        final ComposerFactory composerFactory) {
+    public ComposingRequestHandler(final BackendRouting routing, final TemplateClient templateClient) {
         this.routing = Objects.requireNonNull(routing);
         this.templateClient = Objects.requireNonNull(templateClient);
-        this.composerFactory = Objects.requireNonNull(composerFactory);
     }
 
     public CompletionStage<Response<ByteString>> execute(final RequestContext context) {
@@ -66,7 +63,7 @@ public class ComposingRequestHandler {
         }
 
         final String responseAsUtf8 = response.payload().get().utf8();
-        return composerFactory.forRequestContext(context).compose(responseAsUtf8)
+        return new Composer(context.requestScopedClient()).compose(responseAsUtf8)
             .thenApply(c -> c.contentWithAssetLinks())
             .thenApply(r -> forPayload(encodeUtf8(r)).withHeaders(transformHeaders(response.headerEntries())));
     }
