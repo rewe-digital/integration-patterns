@@ -12,15 +12,15 @@ import com.rewedigital.examples.msintegration.composer.composing.parser.Content;
 import com.rewedigital.examples.msintegration.composer.composing.parser.ContentExtractor;
 import com.rewedigital.examples.msintegration.composer.composing.parser.IncludedService;
 import com.rewedigital.examples.msintegration.composer.composing.parser.IncludedService.WithContent;
-import com.spotify.apollo.Environment;
+import com.spotify.apollo.Client;
 
 public class Composer implements ContentExtractor.Composer {
 
     private final ContentExtractor contentExtractor;
-    private final Environment environment;
+    private final Client client;
 
-    public Composer(final Environment environment) {
-        this.environment = Objects.requireNonNull(environment);
+    public Composer(final Client client) {
+        this.client = Objects.requireNonNull(client);
         this.contentExtractor = new ContentExtractor(this);
     }
 
@@ -39,14 +39,19 @@ public class Composer implements ContentExtractor.Composer {
     }
 
     private Stream<CompletionStage<WithContent>> streamOfFutureContent(final List<IncludedService> includes) {
-        return includes.stream().map(include -> include.fetchContent(environment.client())).map(
-            futureResponse -> futureResponse.thenCompose(response -> response.extractContent(contentExtractor)));
+        return includes.stream()
+            .map(include -> include
+                .fetchContent(client))
+            .map(futureResponse -> futureResponse
+                .thenCompose(response -> response.extractContent(contentExtractor)));
     }
 
     private CompletionStage<Content> replaceInTemplate(final String template,
         final CompletionStage<Stream<IncludedService.WithContent>> futureContentStream) {
         return futureContentStream
-            .thenApply(contentStream -> contentStream.collect(new OngoingComposition(template)).result());
+            .thenApply(contentStream -> contentStream
+                .collect(new OngoingComposition(template))
+                .result());
     }
 
 }

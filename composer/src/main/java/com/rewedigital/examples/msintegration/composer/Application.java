@@ -1,6 +1,6 @@
 package com.rewedigital.examples.msintegration.composer;
 
-import com.rewedigital.examples.msintegration.composer.composing.Composer;
+import com.rewedigital.examples.msintegration.composer.composing.ComposerFactory;
 import com.rewedigital.examples.msintegration.composer.proxy.ComposingRequestHandler;
 import com.rewedigital.examples.msintegration.composer.proxy.TemplateClient;
 import com.rewedigital.examples.msintegration.composer.routing.BackendRouting;
@@ -32,7 +32,7 @@ public class Application {
                 new ComposingRequestHandler(
                     new BackendRouting(StaticBackendRoutes.routes()),
                     new TemplateClient(),
-                    new Composer(environment));
+                    new ComposerFactory());
 
             environment.routingEngine()
                 .registerAutoRoute(Route.async("GET", "/", rc -> handler.execute(rc)))
