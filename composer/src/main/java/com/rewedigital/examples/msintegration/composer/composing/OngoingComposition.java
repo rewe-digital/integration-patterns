@@ -14,6 +14,7 @@ import java.util.stream.Collector;
 
 import org.apache.commons.lang.NotImplementedException;
 
+import com.rewedigital.examples.msintegration.composer.composing.parser.Content;
 import com.rewedigital.examples.msintegration.composer.composing.parser.IncludedService;
 import com.rewedigital.examples.msintegration.composer.composing.parser.IncludedService.WithContent;
 
@@ -33,11 +34,11 @@ public class OngoingComposition
         this.currentIndex = 0;
     }
 
-    public FinishedComposition result() {
+    public Content result() {
         if (result == null) {
             finish();
         }
-        return new FinishedComposition(result, assetLinks);
+        return new Content(result, assetLinks);
     }
 
     @Override

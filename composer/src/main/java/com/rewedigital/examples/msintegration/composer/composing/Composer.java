@@ -27,8 +27,7 @@ public class Composer implements ContentExtractor.Composer {
     public CompletionStage<Content> compose(final String template) {
         final List<IncludedService> includes = parseIncludes(template);
         final CompletionStage<Stream<WithContent>> futureContentStream = fetchContent(includes);
-        final CompletionStage<FinishedComposition> composition = replaceInTemplate(template, futureContentStream);
-        return composition.thenApply(comp -> new Content(comp.composition(), comp.assetLinks()));
+        return replaceInTemplate(template, futureContentStream);
     }
 
     private List<IncludedService> parseIncludes(final String template) {
@@ -44,7 +43,7 @@ public class Composer implements ContentExtractor.Composer {
             futureResponse -> futureResponse.thenCompose(response -> response.extractContent(contentExtractor)));
     }
 
-    private CompletionStage<FinishedComposition> replaceInTemplate(final String template,
+    private CompletionStage<Content> replaceInTemplate(final String template,
         final CompletionStage<Stream<IncludedService.WithContent>> futureContentStream) {
         return futureContentStream
             .thenApply(contentStream -> contentStream.collect(new OngoingComposition(template)).result());

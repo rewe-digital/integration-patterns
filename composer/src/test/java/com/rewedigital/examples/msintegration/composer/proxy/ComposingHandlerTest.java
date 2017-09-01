@@ -36,9 +36,9 @@ public class ComposingHandlerTest {
         final ComposingRequestHandler handler = new ComposingRequestHandler(new BackendRouting(aRouter()), new StubTemplateClient(),
             new Composer(mock(Environment.class)));
 
-        final Response<String> response = handler.execute(aContext()).toCompletableFuture().get();
+        final Response<ByteString> response = handler.execute(aContext()).toCompletableFuture().get();
 
-        assertThat(response.payload().get()).isEqualTo(SERVICE_RESPONSE);
+        assertThat(response.payload().get().utf8()).isEqualTo(SERVICE_RESPONSE);
     }
 
     private RuleRouter<Match> aRouter() {
