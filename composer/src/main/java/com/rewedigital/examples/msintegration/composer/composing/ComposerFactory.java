@@ -6,6 +6,7 @@ import com.spotify.apollo.Client;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.RequestContext;
 import com.spotify.apollo.Response;
+import com.spotify.apollo.Status;
 
 import okio.ByteString;
 
@@ -18,7 +19,7 @@ public class ComposerFactory {
             public CompletionStage<Response<ByteString>> send(Request request) {
                 return client.send(request)
                     .exceptionally(ex -> {
-                        return Response.forPayload(ByteString.encodeUtf8(""));
+                        return Response.of(Status.INTERNAL_SERVER_ERROR, ByteString.encodeUtf8(""));
                     });
             }
         };
