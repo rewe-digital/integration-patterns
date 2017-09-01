@@ -14,7 +14,7 @@ import com.rewedigital.examples.msintegration.composer.composing.parser.Included
 import com.rewedigital.examples.msintegration.composer.composing.parser.IncludedService.WithContent;
 import com.spotify.apollo.Environment;
 
-public class Composer {
+public class Composer implements ContentExtractor.Composer {
 
     private final ContentExtractor contentExtractor;
     private final Environment environment;
@@ -27,7 +27,7 @@ public class Composer {
     public CompletionStage<Content> compose(final String template) {
         final List<IncludedService> includes = parseIncludes(template);
         final CompletionStage<Stream<WithContent>> futureContentStream = fetchContent(includes);
-        CompletionStage<OngoingComposition> composition = replaceInTemplate(template, futureContentStream);
+        final CompletionStage<FinishedComposition> composition = replaceInTemplate(template, futureContentStream);
         return composition.thenApply(comp -> new Content(comp.composition(), comp.assetLinks()));
     }
 
@@ -40,20 +40,14 @@ public class Composer {
     }
 
     private Stream<CompletionStage<WithContent>> streamOfFutureContent(final List<IncludedService> includes) {
-        return includes.stream()
-            .map(include -> include
-                .fetchContent(environment.client()))
-            .map(futureResponse -> futureResponse
-                .thenCompose(response -> response
-                    .extractContent(contentExtractor)));
+        return includes.stream().map(include -> include.fetchContent(environment.client())).map(
+            futureResponse -> futureResponse.thenCompose(response -> response.extractContent(contentExtractor)));
     }
 
-    private CompletionStage<OngoingComposition> replaceInTemplate(final String template,
+    private CompletionStage<FinishedComposition> replaceInTemplate(final String template,
         final CompletionStage<Stream<IncludedService.WithContent>> futureContentStream) {
         return futureContentStream
-            .thenApply(contentStream -> contentStream
-                .collect(new OngoingComposition(template))
-                .result());
+            .thenApply(contentStream -> contentStream.collect(new OngoingComposition(template)).result());
     }
 
 }

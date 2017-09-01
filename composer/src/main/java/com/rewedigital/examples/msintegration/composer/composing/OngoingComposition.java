@@ -33,26 +33,11 @@ public class OngoingComposition
         this.currentIndex = 0;
     }
 
-    // FIXME return a finished composition
-    public OngoingComposition result() {
+    public FinishedComposition result() {
         if (result == null) {
             finish();
         }
-        return this;
-    }
-
-
-    // TODO belongs to finished composition
-    public String composition() {
-        if (result == null) {
-            finish();
-        }
-        return result;
-    }
-
-    // TODO belongs to finished composition
-    public List<String> assetLinks() {
-        return assetLinks;
+        return new FinishedComposition(result, assetLinks);
     }
 
     @Override
@@ -60,26 +45,9 @@ public class OngoingComposition
         return (r, c) -> r.write(c);
     }
 
-    private void write(final WithContent c) {
-        writer.write(template, currentIndex, c.startOffset() - currentIndex);
-        writer.write(c.content());
-        currentIndex = c.endOffset();
-        assetLinks.addAll(c.assets());
-    }
-
     @Override
     public Function<OngoingComposition, OngoingComposition> finisher() {
         return r -> r.finish();
-    }
-
-    private OngoingComposition finish() {
-        writeFinalChunk();
-        return this;
-    }
-
-    private void writeFinalChunk() {
-        writer.write(template, currentIndex, template.length() - currentIndex);
-        this.result = writer.toString();
     }
 
     @Override
@@ -97,5 +65,22 @@ public class OngoingComposition
     @Override
     public Set<Characteristics> characteristics() {
         return Collections.unmodifiableSet(new HashSet<>());
+    }
+
+    private void write(final WithContent c) {
+        writer.write(template, currentIndex, c.startOffset() - currentIndex);
+        writer.write(c.content());
+        currentIndex = c.endOffset();
+        assetLinks.addAll(c.assets());
+    }
+
+    private OngoingComposition finish() {
+        writeFinalChunk();
+        return this;
+    }
+
+    private void writeFinalChunk() {
+        writer.write(template, currentIndex, template.length() - currentIndex);
+        this.result = writer.toString();
     }
 }

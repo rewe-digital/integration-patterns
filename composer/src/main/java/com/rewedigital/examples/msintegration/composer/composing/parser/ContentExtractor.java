@@ -8,13 +8,16 @@ import java.util.concurrent.CompletionStage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.rewedigital.examples.msintegration.composer.composing.Composer;
 import com.spotify.apollo.Response;
 import com.spotify.apollo.Status;
 
 import okio.ByteString;
 
 public class ContentExtractor {
+
+    public interface Composer {
+        CompletionStage<Content> compose(String template);
+    }
 
     private static final String STYLESHEET_HEADER = "x-uic-stylesheet";
     private static final Logger LOGGER = LoggerFactory.getLogger(ContentExtractor.class);
