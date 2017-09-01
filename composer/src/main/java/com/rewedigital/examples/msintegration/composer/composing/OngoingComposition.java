@@ -11,15 +11,14 @@ import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang.NotImplementedException;
 
 import com.rewedigital.examples.msintegration.composer.composing.parser.IncludedService;
 import com.rewedigital.examples.msintegration.composer.composing.parser.IncludedService.WithContent;
 
-public class OngoingReplacement
-    implements Collector<IncludedService.WithContent, OngoingReplacement, OngoingReplacement> {
+public class OngoingComposition
+    implements Collector<IncludedService.WithContent, OngoingComposition, OngoingComposition> {
 
     private final StringWriter writer;
     private final String template;
@@ -27,22 +26,37 @@ public class OngoingReplacement
     private int currentIndex;
     private String result;
 
-    public OngoingReplacement(final String template) {
+    public OngoingComposition(final String template) {
         this.template = template;
         this.writer = new StringWriter(template.length());
         this.assetLinks = new LinkedList<>();
         this.currentIndex = 0;
     }
 
-    public String result() {
+    // FIXME return a finished composition
+    public OngoingComposition result() {
+        if (result == null) {
+            finish();
+        }
+        return this;
+    }
+
+
+    // TODO belongs to finished composition
+    public String composition() {
         if (result == null) {
             finish();
         }
         return result;
     }
 
+    // TODO belongs to finished composition
+    public List<String> assetLinks() {
+        return assetLinks;
+    }
+
     @Override
-    public BiConsumer<OngoingReplacement, IncludedService.WithContent> accumulator() {
+    public BiConsumer<OngoingComposition, IncludedService.WithContent> accumulator() {
         return (r, c) -> r.write(c);
     }
 
@@ -54,13 +68,12 @@ public class OngoingReplacement
     }
 
     @Override
-    public Function<OngoingReplacement, OngoingReplacement> finisher() {
+    public Function<OngoingComposition, OngoingComposition> finisher() {
         return r -> r.finish();
     }
 
-    private OngoingReplacement finish() {
+    private OngoingComposition finish() {
         writeFinalChunk();
-        writeAssets();
         return this;
     }
 
@@ -69,20 +82,15 @@ public class OngoingReplacement
         this.result = writer.toString();
     }
 
-    private void writeAssets() {
-        final String assets = assetLinks.stream().collect(Collectors.joining("\n"));
-        result = result.replaceFirst("</head>", assets + "\n</head>");
-    }
-
     @Override
-    public BinaryOperator<OngoingReplacement> combiner() {
+    public BinaryOperator<OngoingComposition> combiner() {
         return (r, s) -> {
             throw new NotImplementedException("Must not be used with parallel streams");
         };
     }
 
     @Override
-    public Supplier<OngoingReplacement> supplier() {
+    public Supplier<OngoingComposition> supplier() {
         return () -> this;
     }
 

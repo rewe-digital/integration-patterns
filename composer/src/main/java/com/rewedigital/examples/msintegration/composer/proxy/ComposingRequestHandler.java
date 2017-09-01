@@ -64,6 +64,7 @@ public class ComposingRequestHandler {
 
         final String responseAsUtf8 = response.payload().get().utf8();
         return composer.compose(responseAsUtf8)
+            .thenApply(c -> c.contentWithAssetLinks())
             .thenApply(r -> Response.forPayload(r).withHeaders(transformHeaders(response.headerEntries())));
     }
 

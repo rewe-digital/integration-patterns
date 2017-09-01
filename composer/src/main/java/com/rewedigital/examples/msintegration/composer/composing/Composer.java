@@ -8,6 +8,7 @@ import java.util.Objects;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Stream;
 
+import com.rewedigital.examples.msintegration.composer.composing.parser.Content;
 import com.rewedigital.examples.msintegration.composer.composing.parser.ContentExtractor;
 import com.rewedigital.examples.msintegration.composer.composing.parser.IncludedService;
 import com.rewedigital.examples.msintegration.composer.composing.parser.IncludedService.WithContent;
@@ -15,23 +16,22 @@ import com.spotify.apollo.Environment;
 
 public class Composer {
 
-    private final ContentExtractor contentExtractor = new ContentExtractor();
+    private final ContentExtractor contentExtractor;
     private final Environment environment;
 
     public Composer(final Environment environment) {
         this.environment = Objects.requireNonNull(environment);
+        this.contentExtractor = new ContentExtractor(this);
     }
 
-    public CompletionStage<String> compose(final String template) {
-        final List<IncludedService> includes = parse(template);
-
-        final CompletionStage<Stream<IncludedService.WithContent>> content =
-            fetchContent(includes);
-
-        return replaceInTemplate(template, content);
+    public CompletionStage<Content> compose(final String template) {
+        final List<IncludedService> includes = parseIncludes(template);
+        final CompletionStage<Stream<WithContent>> futureContentStream = fetchContent(includes);
+        CompletionStage<OngoingComposition> composition = replaceInTemplate(template, futureContentStream);
+        return composition.thenApply(comp -> new Content(comp.composition(), comp.assetLinks()));
     }
 
-    private List<IncludedService> parse(final String template) {
+    private List<IncludedService> parseIncludes(final String template) {
         return PARSER.parseIncludes(template);
     }
 
@@ -44,15 +44,16 @@ public class Composer {
             .map(include -> include
                 .fetchContent(environment.client()))
             .map(futureResponse -> futureResponse
-                .thenApply(response -> response
+                .thenCompose(response -> response
                     .extractContent(contentExtractor)));
     }
 
-    private CompletionStage<String> replaceInTemplate(final String template,
+    private CompletionStage<OngoingComposition> replaceInTemplate(final String template,
         final CompletionStage<Stream<IncludedService.WithContent>> futureContentStream) {
         return futureContentStream
             .thenApply(contentStream -> contentStream
-                .collect(new OngoingReplacement(template))
+                .collect(new OngoingComposition(template))
                 .result());
     }
+
 }
