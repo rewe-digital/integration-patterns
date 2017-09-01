@@ -9,11 +9,8 @@ public class ContentExtractionHandlerTest {
 
     @Test
     public void extractsContentFromMarkup() throws ParseException {
-        final ContentExtractionHandler handler = new ContentExtractionHandler();
-
-        Parser.PARSER.parse("<rewe-digital-content>test</rewe-digital-content>", handler);
-
-        assertThat(handler.content()).isEqualTo("test");
+        final String content = Parser.PARSER.parseContent("<rewe-digital-content>test</rewe-digital-content>");
+        assertThat(content).isEqualTo("test");
     }
 
 }

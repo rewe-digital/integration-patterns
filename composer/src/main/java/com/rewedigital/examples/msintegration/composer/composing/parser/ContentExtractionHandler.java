@@ -17,7 +17,7 @@ public class ContentExtractionHandler extends AbstractMarkupHandler {
 	@Override
 	public void handleOpenElementStart(final char[] buffer, final int nameOffset, final int nameLen, final int line,
 			final int col) throws ParseException {
-
+        super.handleOpenElementStart(buffer, nameOffset, nameLen, line, col);
 		if (isContentElement(buffer, nameOffset, nameLen)) {
 			contentStart = nameOffset + nameLen + 1;
 		}
@@ -26,6 +26,7 @@ public class ContentExtractionHandler extends AbstractMarkupHandler {
 	@Override
 	public void handleCloseElementEnd(final char[] buffer, final int nameOffset, final int nameLen, final int line,
 			final int col) throws ParseException {
+        super.handleCloseElementEnd(buffer, nameOffset, nameLen, line, col);
 		if (isContentElement(buffer, nameOffset, nameLen) && contentStart >= 0) {
 			content = new String(buffer, contentStart, nameOffset - contentStart - 2);
 		}
