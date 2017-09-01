@@ -29,8 +29,9 @@ public class ContentExtractor {
     }
 
     public CompletionStage<Content> contentFrom(final Response<ByteString> response, final String path) {
-        if (response.status().code() != Status.OK.code() || !response.payload().isPresent()) {
-            LOGGER.warn("Missing content from {} with status {} returning empty default", path,
+        if (response.status().code() != Status.OK.code() || !response.payload().isPresent()
+            || response.payload().get().size() == 0) {
+            LOGGER.warn("Missing content from {} with status {} - returning empty default", path,
                 response.status().code());
             return CompletableFuture.completedFuture(new Content());
         }

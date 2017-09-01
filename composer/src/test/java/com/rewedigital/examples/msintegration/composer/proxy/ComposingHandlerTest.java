@@ -14,10 +14,11 @@ import java.util.concurrent.ExecutionException;
 import org.junit.Test;
 
 import com.rewedigital.examples.msintegration.composer.composing.Composer;
+import com.rewedigital.examples.msintegration.composer.composing.ComposerFactory;
 import com.rewedigital.examples.msintegration.composer.routing.BackendRouting;
 import com.rewedigital.examples.msintegration.composer.routing.BackendRouting.RouteMatch;
 import com.rewedigital.examples.msintegration.composer.routing.StaticBackendRoutes.Match;
-import com.spotify.apollo.Environment;
+import com.spotify.apollo.Client;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.RequestContext;
 import com.spotify.apollo.Response;
@@ -33,8 +34,15 @@ public class ComposingHandlerTest {
 
     @Test
     public void happyPathSuccess() throws InterruptedException, ExecutionException {
-        final ComposingRequestHandler handler = new ComposingRequestHandler(new BackendRouting(aRouter()), new StubTemplateClient(),
-            new Composer(mock(Environment.class)));
+        final ComposingRequestHandler handler = new ComposingRequestHandler(new BackendRouting(aRouter()),
+            new StubTemplateClient(), new ComposerFactory() {
+
+                @Override
+                public Composer forRequestContext(RequestContext requestContext) {
+                    return new Composer(mock(Client.class));
+                }
+
+            });
 
         final Response<ByteString> response = handler.execute(aContext()).toCompletableFuture().get();
 
