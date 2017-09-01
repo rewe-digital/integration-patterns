@@ -12,7 +12,7 @@ import com.spotify.apollo.httpservice.HttpService;
 import com.spotify.apollo.httpservice.LoadingException;
 import com.spotify.apollo.route.Route;
 
-public class Application {
+public class ComposerApplication {
 
     public static void main(final String[] args) throws LoadingException {
 
