@@ -1,6 +1,8 @@
 package com.rewedigital.examples.msintegration.composer.proxy;
 
+import static com.spotify.apollo.Response.forPayload;
 import static java.util.stream.Collectors.toMap;
+import static okio.ByteString.encodeUtf8;
 
 import java.util.List;
 import java.util.Map;
@@ -24,8 +26,8 @@ import okio.ByteString;
 
 public class ComposingRequestHandler {
 
-    private static final CompletableFuture<Response<String>> ERROR_PAGE = CompletableFuture
-        .completedFuture(Response.of(Status.NOT_FOUND, "Ohh.. noose!"));
+    private static final CompletableFuture<Response<ByteString>> ERROR_PAGE = CompletableFuture
+        .completedFuture(Response.of(Status.NOT_FOUND, ByteString.encodeUtf8("Ohh.. noose!")));
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ComposingRequestHandler.class);
 
@@ -40,7 +42,7 @@ public class ComposingRequestHandler {
         this.composer = Objects.requireNonNull(composer);
     }
 
-    public CompletionStage<Response<String>> execute(final RequestContext context) {
+    public CompletionStage<Response<ByteString>> execute(final RequestContext context) {
         final Request request = context.request();
         final Optional<RouteMatch> match = routing.matches(request);
 
@@ -50,10 +52,9 @@ public class ComposingRequestHandler {
         }).orElse(defaultResponse());
     }
 
-    private CompletionStage<Response<String>> compose(final RouteMatch match, final Response<ByteString> response) {
+    private CompletionStage<Response<ByteString>> compose(final RouteMatch match, final Response<ByteString> response) {
         if (match.shouldProxy()) {
-            return CompletableFuture
-                .completedFuture(response.withPayload(response.payload().map(p -> p.utf8()).orElse("")));
+            return CompletableFuture.completedFuture(response);
         }
 
         if (response.status().code() != Status.OK.code() || !response.payload().isPresent()) {
@@ -64,7 +65,8 @@ public class ComposingRequestHandler {
 
         final String responseAsUtf8 = response.payload().get().utf8();
         return composer.compose(responseAsUtf8)
-            .thenApply(r -> Response.forPayload(r).withHeaders(transformHeaders(response.headerEntries())));
+            .thenApply(c -> c.contentWithAssetLinks())
+            .thenApply(r -> forPayload(encodeUtf8(r)).withHeaders(transformHeaders(response.headerEntries())));
     }
 
     private Map<String, String> transformHeaders(final List<Entry<String, String>> headerEntries) {
@@ -72,7 +74,7 @@ public class ComposingRequestHandler {
             .collect(toMap(Entry::getKey, Entry::getValue, (a, b) -> a));
     }
 
-    private static CompletableFuture<Response<String>> defaultResponse() {
+    private static CompletableFuture<Response<ByteString>> defaultResponse() {
         return ERROR_PAGE;
     }
 }

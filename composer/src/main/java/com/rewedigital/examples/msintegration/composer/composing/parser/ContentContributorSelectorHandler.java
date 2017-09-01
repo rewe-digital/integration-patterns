@@ -22,6 +22,7 @@ public class ContentContributorSelectorHandler extends AbstractMarkupHandler {
     public void handleOpenElementStart(final char[] buffer, final int nameOffset, final int nameLen, final int line,
         final int col)
         throws ParseException {
+        super.handleOpenElementStart(buffer, nameOffset, nameLen, line, col);
         if (isIncludeElement(buffer, nameOffset, nameLen)) {
             final IncludedService value = new IncludedService();
             value.startOffset(nameOffset - 1);
@@ -35,6 +36,8 @@ public class ContentContributorSelectorHandler extends AbstractMarkupHandler {
         final int operatorCol, final int valueContentOffset, final int valueContentLen, final int valueOuterOffset,
         final int valueOuterLen, final int valueLine, final int valueCol)
         throws ParseException {
+        super.handleAttribute(buffer, nameOffset, nameLen, nameLine, nameCol, operatorOffset, operatorLen, operatorLine,
+            operatorCol, valueContentOffset, valueContentLen, valueOuterOffset, valueOuterLen, valueLine, valueCol);
         if (include.isPresent()) {
             final IncludedService includedService = include.get();
             includedService.put(new String(buffer, nameOffset, nameLen),
@@ -46,6 +49,7 @@ public class ContentContributorSelectorHandler extends AbstractMarkupHandler {
     public void handleCloseElementEnd(final char[] buffer, final int nameOffset, final int nameLen, final int line,
         final int col)
         throws ParseException {
+        super.handleCloseElementEnd(buffer, nameOffset, nameLen, line, col);
         if (isIncludeElement(buffer, nameOffset, nameLen) && include.isPresent()) {
             final IncludedService value = include.get();
             value.endOffset(nameOffset + nameLen + 1);
