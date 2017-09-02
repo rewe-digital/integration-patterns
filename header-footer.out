@@ -1,0 +1,36 @@
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::        (v1.5.6.RELEASE)
+
+2017-09-02 18:09:37.771  INFO 27351 --- [           main] c.r.e.m.h.HeaderFooterApplication        : Starting HeaderFooterApplication v0.0.1-SNAPSHOT on Andreass-MacBook-Pro.local with PID 27351 (/Users/andreaskluth/solutions/integration-patterns/header-footer/target/header-footer-0.0.1-SNAPSHOT.jar started by andreaskluth in /Users/andreaskluth/solutions/integration-patterns)
+2017-09-02 18:09:37.781  INFO 27351 --- [           main] c.r.e.m.h.HeaderFooterApplication        : No active profile set, falling back to default profiles: default
+2017-09-02 18:09:38.750  INFO 27351 --- [           main] ationConfigEmbeddedWebApplicationContext : Refreshing org.springframework.boot.context.embedded.AnnotationConfigEmbeddedWebApplicationContext@bebdb06: startup date [Sat Sep 02 18:09:38 CEST 2017]; root of context hierarchy
+2017-09-02 18:09:41.899  INFO 27351 --- [           main] s.b.c.e.t.TomcatEmbeddedServletContainer : Tomcat initialized with port(s): 8081 (http)
+2017-09-02 18:09:41.916  INFO 27351 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2017-09-02 18:09:41.918  INFO 27351 --- [           main] org.apache.catalina.core.StandardEngine  : Starting Servlet Engine: Apache Tomcat/8.5.16
+2017-09-02 18:09:42.098  INFO 27351 --- [ost-startStop-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2017-09-02 18:09:42.099  INFO 27351 --- [ost-startStop-1] o.s.web.context.ContextLoader            : Root WebApplicationContext: initialization completed in 3356 ms
+2017-09-02 18:09:42.343  INFO 27351 --- [ost-startStop-1] o.s.b.w.servlet.ServletRegistrationBean  : Mapping servlet: 'dispatcherServlet' to [/]
+2017-09-02 18:09:42.350  INFO 27351 --- [ost-startStop-1] o.s.b.w.servlet.FilterRegistrationBean   : Mapping filter: 'characterEncodingFilter' to: [/*]
+2017-09-02 18:09:42.353  INFO 27351 --- [ost-startStop-1] o.s.b.w.servlet.FilterRegistrationBean   : Mapping filter: 'hiddenHttpMethodFilter' to: [/*]
+2017-09-02 18:09:42.354  INFO 27351 --- [ost-startStop-1] o.s.b.w.servlet.FilterRegistrationBean   : Mapping filter: 'httpPutFormContentFilter' to: [/*]
+2017-09-02 18:09:42.354  INFO 27351 --- [ost-startStop-1] o.s.b.w.servlet.FilterRegistrationBean   : Mapping filter: 'requestContextFilter' to: [/*]
+2017-09-02 18:09:43.025  INFO 27351 --- [           main] s.w.s.m.m.a.RequestMappingHandlerAdapter : Looking for @ControllerAdvice: org.springframework.boot.context.embedded.AnnotationConfigEmbeddedWebApplicationContext@bebdb06: startup date [Sat Sep 02 18:09:38 CEST 2017]; root of context hierarchy
+2017-09-02 18:09:43.267  INFO 27351 --- [           main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/header],methods=[GET]}" onto public java.lang.String com.rewedigital.examples.msintegration.headerfooter.WebController.header()
+2017-09-02 18:09:43.268  INFO 27351 --- [           main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/footer],methods=[GET]}" onto public java.lang.String com.rewedigital.examples.msintegration.headerfooter.WebController.footer(javax.servlet.http.HttpServletResponse)
+2017-09-02 18:09:43.272  INFO 27351 --- [           main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/error]}" onto public org.springframework.http.ResponseEntity<java.util.Map<java.lang.String, java.lang.Object>> org.springframework.boot.autoconfigure.web.BasicErrorController.error(javax.servlet.http.HttpServletRequest)
+2017-09-02 18:09:43.272  INFO 27351 --- [           main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/error],produces=[text/html]}" onto public org.springframework.web.servlet.ModelAndView org.springframework.boot.autoconfigure.web.BasicErrorController.errorHtml(javax.servlet.http.HttpServletRequest,javax.servlet.http.HttpServletResponse)
+2017-09-02 18:09:43.334  INFO 27351 --- [           main] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped URL path [/webjars/**] onto handler of type [class org.springframework.web.servlet.resource.ResourceHttpRequestHandler]
+2017-09-02 18:09:43.334  INFO 27351 --- [           main] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped URL path [/**] onto handler of type [class org.springframework.web.servlet.resource.ResourceHttpRequestHandler]
+2017-09-02 18:09:43.436  INFO 27351 --- [           main] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped URL path [/**/favicon.ico] onto handler of type [class org.springframework.web.servlet.resource.ResourceHttpRequestHandler]
+2017-09-02 18:09:44.479  INFO 27351 --- [           main] o.s.j.e.a.AnnotationMBeanExporter        : Registering beans for JMX exposure on startup
+2017-09-02 18:09:44.658  INFO 27351 --- [           main] s.b.c.e.t.TomcatEmbeddedServletContainer : Tomcat started on port(s): 8081 (http)
+2017-09-02 18:09:44.670  INFO 27351 --- [           main] c.r.e.m.h.HeaderFooterApplication        : Started HeaderFooterApplication in 7.988 seconds (JVM running for 9.181)
+2017-09-02 18:09:51.366  INFO 27351 --- [nio-8081-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring FrameworkServlet 'dispatcherServlet'
+2017-09-02 18:09:51.367  INFO 27351 --- [nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : FrameworkServlet 'dispatcherServlet': initialization started
+2017-09-02 18:09:51.386  INFO 27351 --- [nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : FrameworkServlet 'dispatcherServlet': initialization completed in 19 ms
