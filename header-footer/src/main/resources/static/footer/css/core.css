@@ -17,21 +17,17 @@ body {
 }
 /* A few directives for the reco demo.
 -------------------------------------------------- */
-.album {
-  padding-top: 3rem;
-  padding-bottom: 3rem;
-  background-color: #f7f7f7;
+.recos--container {
+	background-color: #cc071e;
 }
-.card {
-  float: left;
-  width: 33.333%;
-  padding: .75rem;
-  margin-bottom: 2rem;
-  border: 0;
+
+.recos--card {
+	float: left;
+	width: 33.333%;
+	padding: .75rem;
+	border: 0;
 }
-.card > img {
-  margin-bottom: .75rem;
-}
-.card-text {
-  font-size: 85%;
+
+.recos--card-img {
+	max-width: 100%;
 }
