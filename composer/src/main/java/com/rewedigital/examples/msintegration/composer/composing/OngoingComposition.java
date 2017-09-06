@@ -70,9 +70,9 @@ public class OngoingComposition
 
     private void write(final WithContent c) {
         writer.write(template, currentIndex, c.startOffset() - currentIndex);
-        writer.write(c.content());
+        writer.write(c.content().body());
         currentIndex = c.endOffset();
-        assetLinks.addAll(c.assets());
+        assetLinks.addAll(c.content().assetLinks());
     }
 
     private OngoingComposition finish() {
