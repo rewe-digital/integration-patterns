@@ -2,9 +2,10 @@ package com.rewedigital.examples.msintegration.composer.composing;
 
 import static com.rewedigital.examples.msintegration.composer.composing.parser.Parser.PARSER;
 import static com.rewedigital.examples.msintegration.composer.util.StreamUtil.flatten;
+import static java.util.Objects.requireNonNull;
 
 import java.util.List;
-import java.util.Objects;
+import java.util.Map;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Stream;
 
@@ -16,14 +17,17 @@ import com.spotify.apollo.Client;
 
 public class Composer implements ContentExtractor.Composer {
 
-    private final ContentExtractor contentExtractor;
     private final Client client;
+    private final Map<String, Object> parsedPathArguments;
+    private final ContentExtractor contentExtractor;
 
-    public Composer(final Client client) {
-        this.client = Objects.requireNonNull(client);
+    public Composer(final Client client, final Map<String, Object> parsedPathArguments) {
+        this.client = requireNonNull(client);
+        this.parsedPathArguments = requireNonNull(parsedPathArguments);
         this.contentExtractor = new ContentExtractor(this);
     }
 
+    @Override
     public CompletionStage<Content> compose(final String template) {
         final List<IncludedService> includes = parseIncludes(template);
         final CompletionStage<Stream<WithContent>> futureContentStream = fetchContent(includes);
@@ -41,7 +45,7 @@ public class Composer implements ContentExtractor.Composer {
     private Stream<CompletionStage<WithContent>> streamOfFutureContent(final List<IncludedService> includes) {
         return includes.stream()
             .map(include -> include
-                .fetchContent(client))
+                .fetchContent(client, parsedPathArguments))
             .map(futureResponse -> futureResponse
                 .thenCompose(response -> response.extractContent(contentExtractor)));
     }

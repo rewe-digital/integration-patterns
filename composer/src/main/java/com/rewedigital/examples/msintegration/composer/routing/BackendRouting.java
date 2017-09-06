@@ -1,5 +1,6 @@
 package com.rewedigital.examples.msintegration.composer.routing;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -34,11 +35,11 @@ public class BackendRouting {
     public static class RouteMatch {
 
         private final Match backend;
-        private final Map<String, String> parsedPathArguments;
+        private final Map<String, Object> parsedPathArguments;
 
         public RouteMatch(final Match backend, final Map<String, String> parsedPathArguments) {
             this.backend = backend;
-            this.parsedPathArguments = parsedPathArguments;
+            this.parsedPathArguments = Collections.<String, Object>unmodifiableMap(parsedPathArguments);
         }
 
         public String backend() {
@@ -49,7 +50,7 @@ public class BackendRouting {
             return backend.shouldProxy();
         }
 
-        public Map<String, String> parsedPathArguments() {
+        public Map<String, Object> parsedPathArguments() {
             return parsedPathArguments;
         }
 
