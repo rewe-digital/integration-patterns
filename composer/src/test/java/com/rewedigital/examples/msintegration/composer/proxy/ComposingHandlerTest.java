@@ -13,6 +13,7 @@ import java.util.concurrent.ExecutionException;
 
 import org.junit.Test;
 
+import com.rewedigital.examples.msintegration.composer.composing.ComposerFactory;
 import com.rewedigital.examples.msintegration.composer.routing.BackendRouting;
 import com.rewedigital.examples.msintegration.composer.routing.BackendRouting.RouteMatch;
 import com.rewedigital.examples.msintegration.composer.routing.StaticBackendRoutes.Match;
@@ -33,7 +34,7 @@ public class ComposingHandlerTest {
     @Test
     public void happyPathSuccess() throws InterruptedException, ExecutionException {
         final ComposingRequestHandler handler = new ComposingRequestHandler(new BackendRouting(aRouter()),
-            new StubTemplateClient());
+            new StubTemplateClient(), new ComposerFactory());
 
         final Response<ByteString> response = handler.execute(aContext()).toCompletableFuture().get();
 
