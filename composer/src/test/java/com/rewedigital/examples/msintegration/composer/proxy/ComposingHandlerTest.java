@@ -60,8 +60,7 @@ public class ComposingHandlerTest {
     private static class StubTemplateClient extends TemplateClient {
 
         @Override
-        public CompletionStage<Response<ByteString>> getTemplate(final RouteMatch match, final Request request,
-            final RequestContext context) {
+        public CompletionStage<Response<ByteString>> getTemplate(final RouteMatch match, final RequestContext context) {
             return CompletableFuture.completedFuture(Response.of(Status.OK, ByteString.encodeUtf8(SERVICE_RESPONSE)));
         }
 
