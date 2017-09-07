@@ -1,6 +1,5 @@
 package com.rewedigital.examples.msintegration.composer.composing.parser;
 
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -11,37 +10,18 @@ public class Composition {
         String enrichBody(String body);
     }
 
-    private final List<String> assetLinks;
-
     private final List<Part> parts;
 
     public Composition() {
-        this("", Collections.synchronizedList(new LinkedList<>()), new LinkedList<>());
+        this(new LinkedList<>());
     }
 
     public Composition(final List<Part> parts) {
-        this("", new LinkedList<>(), parts);
-    }
-
-    public Composition(final String body, final List<String> assetLinks) {
-        this(body, assetLinks, new LinkedList<>());
-    }
-
-    public Composition(final String body, final List<String> assetLinks, List<Part> parts) {
-        this.assetLinks = assetLinks;
-        this.parts = parts;
+       this.parts= parts;
     }
 
     public String body() {
-        String result = "";
-        for (Part p : parts) {
-            result = p.enrichBody(result);
-        }
-        return result;
-    }
-
-    public void addAssetLink(final String link) {
-        assetLinks.add(link);
+        return parts.stream().reduce("", (r, p) -> p.enrichBody(r), (r, s) -> null);
     }
 
     @SuppressWarnings("unchecked")

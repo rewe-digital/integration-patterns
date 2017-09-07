@@ -4,7 +4,7 @@ import java.io.StringWriter;
 
 import com.rewedigital.examples.msintegration.composer.composing.OngoingComposition.Handler;
 import com.rewedigital.examples.msintegration.composer.composing.parser.Composition;
-import com.rewedigital.examples.msintegration.composer.composing.parser.IncludedService.WithComposition;
+import com.rewedigital.examples.msintegration.composer.composing.parser.IncludedService;
 
 public class BodyContentCompositionHandler implements Handler {
 
@@ -38,16 +38,22 @@ public class BodyContentCompositionHandler implements Handler {
     }
 
     @Override
-    public void handle(WithComposition includedContent) {
-        includedContent.find(BodyContentPart.class).ifPresent(p -> {
-            writer.write(template, currentIndex, includedContent.startOffset() - currentIndex);
-            writer.write(p.content());
-            currentIndex = includedContent.endOffset();
-        });
+    public void handle(IncludedService.WithComposition includedContent) {
+        includedContent
+            .composition()
+            .find(BodyContentPart.class)
+            .ifPresent(p -> {
+                writer.write(template, currentIndex, includedContent.startOffset() - currentIndex);
+                writer.write(p.content());
+                currentIndex = includedContent.endOffset();
+            });
     }
 
     @Override
     public void finish() {
+        if (result != null) {
+            throw new IllegalStateException("Must not call finish() more than once");
+        }
         writer.write(template, currentIndex, template.length() - currentIndex);
         this.result = writer.toString();
     }

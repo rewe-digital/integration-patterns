@@ -4,7 +4,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.rewedigital.examples.msintegration.composer.composing.OngoingComposition;
 import com.rewedigital.examples.msintegration.composer.composing.parser.Composition;
 import com.rewedigital.examples.msintegration.composer.composing.parser.Composition.Part;
 import com.rewedigital.examples.msintegration.composer.composing.parser.IncludedService.WithComposition;
@@ -27,13 +26,22 @@ public class AssetLinkCompositionHander implements OngoingComposition.Handler {
         }
     }
 
+    public static final String STYLESHEET_HEADER = "x-uic-stylesheet";
+
     private final List<String> assetLinks = new LinkedList<>();
 
     @Override
-    public void handle(WithComposition includedContent) {
-        includedContent
+    public void handle(final WithComposition includedContent) {
+        includedContent.composition()
             .find(AssetLinkPart.class)
             .ifPresent(l -> assetLinks.addAll(l.assetLinks));
+        includedContent.response().header(STYLESHEET_HEADER)
+            .map(href -> buildCssLink(href))
+            .ifPresent(link -> assetLinks.add(link));
+    }
+
+    private String buildCssLink(final String href) {
+        return String.format("<link rel=\"stylesheet\" href=\"%s\" />", href);
     }
 
     @Override

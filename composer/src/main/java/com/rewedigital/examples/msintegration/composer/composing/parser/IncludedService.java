@@ -1,14 +1,19 @@
 package com.rewedigital.examples.msintegration.composer.composing.parser;
 
+import static com.rewedigital.examples.msintegration.composer.composing.parser.Parser.PARSER;
+
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
-import com.rewedigital.examples.msintegration.composer.composing.parser.Composition.Part;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.spotify.apollo.Client;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.Response;
+import com.spotify.apollo.Status;
 
 import okio.ByteString;
 
@@ -24,8 +29,10 @@ import okio.ByteString;
  * </ul>
  */
 public class IncludedService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(IncludedService.class);
 
     private final Map<String, String> attributes = new HashMap<>();
+
     private int startOffset;
     private int endOffset;
 
@@ -50,13 +57,24 @@ public class IncludedService {
         /**
          * Extracts the content of this response.
          *
-         * @param contentExtractor extracts relevant content from the response
+         * @param composer composer to handle nested composition
          * @return the content
          */
-        public CompletionStage<IncludedService.WithComposition> extractContent(
-            final ContentExtractor contentExtractor) {
-            final CompletionStage<Composition> composition = contentExtractor.compositionFrom(response, path);
-            return composition.thenApply(c -> new WithComposition(c, startOffset, endOffset));
+        public CompletionStage<IncludedService.WithComposition> extractContent(final Composer composer) {
+            return compositionWith(composer)
+                .thenApply(c -> new WithComposition(c, response, startOffset, endOffset));
+        }
+
+        private CompletionStage<Composition> compositionWith(final Composer composer) {
+            if (response.status().code() != Status.OK.code() || !response.payload().isPresent()
+                || response.payload().get().size() == 0) {
+                LOGGER.warn("Missing content from {} with status {} - returning empty default", path,
+                    response.status().code());
+                return CompletableFuture.completedFuture(new Composition());
+            }
+
+            final String rawContent = PARSER.parseContent(response.payload().get().utf8());
+            return composer.compose(rawContent);
         }
     }
 
@@ -66,11 +84,14 @@ public class IncludedService {
     public static class WithComposition {
 
         private final Composition composition;
+        private final Response<ByteString> response;
         private final int startOffset;
         private final int endOffset;
 
-        public WithComposition(final Composition composition, final int startOffset, final int endOffset) {
+        public WithComposition(final Composition composition, final Response<ByteString> response,
+            final int startOffset, final int endOffset) {
             this.composition = composition;
+            this.response = response;
             this.startOffset = startOffset;
             this.endOffset = endOffset;
         }
@@ -87,8 +108,8 @@ public class IncludedService {
             return composition;
         }
 
-        public <T extends Part> Optional<T> find(Class<T> type) {
-            return composition.find(type);
+        public Response<ByteString> response() {
+            return response;
         }
     }
 

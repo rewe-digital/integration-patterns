@@ -8,20 +8,18 @@ import java.util.Objects;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Stream;
 
+import com.rewedigital.examples.msintegration.composer.composing.parser.Composer;
 import com.rewedigital.examples.msintegration.composer.composing.parser.Composition;
-import com.rewedigital.examples.msintegration.composer.composing.parser.ContentExtractor;
 import com.rewedigital.examples.msintegration.composer.composing.parser.IncludedService;
 import com.rewedigital.examples.msintegration.composer.composing.parser.IncludedService.WithComposition;
 import com.spotify.apollo.Client;
 
-public class Composer implements ContentExtractor.Composer {
+public class TemplateComposer implements Composer {
 
-    private final ContentExtractor contentExtractor;
     private final Client client;
 
-    public Composer(final Client client) {
+    public TemplateComposer(final Client client) {
         this.client = Objects.requireNonNull(client);
-        this.contentExtractor = new ContentExtractor(this);
     }
 
     public CompletionStage<Composition> compose(final String template) {
@@ -34,7 +32,8 @@ public class Composer implements ContentExtractor.Composer {
         return PARSER.parseIncludes(template);
     }
 
-    private CompletionStage<Stream<IncludedService.WithComposition>> fetchContent(final List<IncludedService> includes) {
+    private CompletionStage<Stream<IncludedService.WithComposition>> fetchContent(
+        final List<IncludedService> includes) {
         return flatten(streamOfFutureContent(includes));
     }
 
@@ -43,7 +42,7 @@ public class Composer implements ContentExtractor.Composer {
             .map(include -> include
                 .fetchContent(client))
             .map(futureResponse -> futureResponse
-                .thenCompose(response -> response.extractContent(contentExtractor)));
+                .thenCompose(response -> response.extractContent(this)));
     }
 
     private CompletionStage<Composition> replaceInTemplate(final String template,
