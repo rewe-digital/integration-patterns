@@ -4,6 +4,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -23,7 +24,7 @@ public class ComposerTest {
 
     @Test
     public void composesSimpleTemplate() throws InterruptedException, ExecutionException {
-        final Composer composer = new Composer(aClientWithSimpleContent());
+        final Composer composer = new Composer(aClientWithSimpleContent(), Collections.emptyMap());
 
         final CompletableFuture<Content> content = composer.compose(TEMPLATE).toCompletableFuture();
 

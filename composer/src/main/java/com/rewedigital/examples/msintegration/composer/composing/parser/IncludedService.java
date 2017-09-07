@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletionStage;
 
+import com.damnhandy.uri.template.UriTemplate;
 import com.spotify.apollo.Client;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.Response;
@@ -115,9 +116,10 @@ public class IncludedService {
      * @param client the client to fetch the content
      * @return a future containing the response
      */
-    public CompletionStage<WithResponse> fetchContent(final Client client) {
-        return client.send(Request.forUri(path(), "GET"))
-            .thenApply(response -> new IncludedService.WithResponse(response, path(), startOffset, endOffset));
+    public CompletionStage<WithResponse> fetchContent(final Client client, final Map<String, Object> parsedPathArguments) {
+        final String expandedPath = UriTemplate.fromTemplate(path()).expand(parsedPathArguments);
+        return client.send(Request.forUri(expandedPath, "GET"))
+            .thenApply(response -> new IncludedService.WithResponse(response, expandedPath, startOffset, endOffset));
     }
 
 }

@@ -29,6 +29,8 @@ public class ContentExtractor {
     }
 
     public CompletionStage<Content> contentFrom(final Response<ByteString> response, final String path) {
+        // FIXME: Add an adapter that provides an empty response in case of a failed status,
+        // instead of accessing the response directly.
         if (response.status().code() != Status.OK.code() || !response.payload().isPresent()
             || response.payload().get().size() == 0) {
             LOGGER.warn("Missing content from {} with status {} - returning empty default", path,
@@ -45,7 +47,7 @@ public class ContentExtractor {
         return PARSER.parseContent(response.payload().get().utf8());
     }
 
-    private Content addAssetLinks(Content content, Response<ByteString> response) {
+    private Content addAssetLinks(final Content content, final Response<ByteString> response) {
         response.header(STYLESHEET_HEADER)
             .map(href -> buildCssLink(href))
             .ifPresent(link -> content.addAssetLink(link));
