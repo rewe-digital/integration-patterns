@@ -2,8 +2,10 @@ package com.rewedigital.examples.msintegration.composer.composing.parser;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 
+import com.rewedigital.examples.msintegration.composer.composing.parser.Composition.Part;
 import com.spotify.apollo.Client;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.Response;
@@ -17,8 +19,8 @@ import okio.ByteString;
  * <li>{@link #fetchContent(Client)} to start fetching the content</li>
  * <li>{@link WithResponse#extractContent()} on the result of fetchContent to extract relevant content from the
  * response</li>
- * <li>{@link WithContent#startOffset()}, {@link WithContent#endOffset()} return the position in the original template
- * of the element that should be replaced with {@link WithContent#content()}</li>
+ * <li>{@link WithComposition#startOffset()}, {@link WithComposition#endOffset()} return the position in the original
+ * template of the element that should be replaced with {@link WithComposition#composition()}</li>
  * </ul>
  */
 public class IncludedService {
@@ -51,23 +53,24 @@ public class IncludedService {
          * @param contentExtractor extracts relevant content from the response
          * @return the content
          */
-        public CompletionStage<IncludedService.WithContent> extractContent(final ContentExtractor contentExtractor) {
-            final CompletionStage<Content> content = contentExtractor.contentFrom(response, path);
-            return content.thenApply(c -> new WithContent(c, startOffset, endOffset));
+        public CompletionStage<IncludedService.WithComposition> extractContent(
+            final ContentExtractor contentExtractor) {
+            final CompletionStage<Composition> composition = contentExtractor.compositionFrom(response, path);
+            return composition.thenApply(c -> new WithComposition(c, startOffset, endOffset));
         }
     }
 
     /**
-     * Enhances the included service with the content from the response of the fetch call.
+     * Enhances the included service with the composition from the response of the fetch call.
      */
-    public static class WithContent {
+    public static class WithComposition {
 
-        private final Content content;
+        private final Composition composition;
         private final int startOffset;
         private final int endOffset;
 
-        public WithContent(final Content content, final int startOffset, final int endOffset) {
-            this.content = content;
+        public WithComposition(final Composition composition, final int startOffset, final int endOffset) {
+            this.composition = composition;
             this.startOffset = startOffset;
             this.endOffset = endOffset;
         }
@@ -80,8 +83,12 @@ public class IncludedService {
             return endOffset;
         }
 
-        public Content content() {
-            return content;
+        public Composition composition() {
+            return composition;
+        }
+
+        public <T extends Part> Optional<T> find(Class<T> type) {
+            return composition.find(type);
         }
     }
 

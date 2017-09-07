@@ -1,0 +1,49 @@
+package com.rewedigital.examples.msintegration.composer.composing;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import com.rewedigital.examples.msintegration.composer.composing.OngoingComposition;
+import com.rewedigital.examples.msintegration.composer.composing.parser.Composition;
+import com.rewedigital.examples.msintegration.composer.composing.parser.Composition.Part;
+import com.rewedigital.examples.msintegration.composer.composing.parser.IncludedService.WithComposition;
+
+public class AssetLinkCompositionHander implements OngoingComposition.Handler {
+
+    public static class AssetLinkPart implements Composition.Part {
+        private final List<String> assetLinks;
+
+        public AssetLinkPart(final List<String> assetLinks) {
+            this.assetLinks = assetLinks;
+        }
+
+        @Override
+        public String enrichBody(String body) {
+            final String assets = assetLinks.stream()
+                .distinct()
+                .collect(Collectors.joining("\n"));
+            return body.replaceFirst("</head>", assets + "\n</head>");
+        }
+    }
+
+    private final List<String> assetLinks = new LinkedList<>();
+
+    @Override
+    public void handle(WithComposition includedContent) {
+        includedContent
+            .find(AssetLinkPart.class)
+            .ifPresent(l -> assetLinks.addAll(l.assetLinks));
+    }
+
+    @Override
+    public void finish() {
+        // NOOP
+    }
+
+    @Override
+    public Part result() {
+        return new AssetLinkPart(assetLinks);
+    }
+
+}

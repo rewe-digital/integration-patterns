@@ -11,7 +11,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.Test;
 
 import com.google.common.base.Objects;
-import com.rewedigital.examples.msintegration.composer.composing.parser.Content;
+import com.rewedigital.examples.msintegration.composer.composing.parser.Composition;
 import com.spotify.apollo.Client;
 import com.spotify.apollo.Response;
 
@@ -25,9 +25,9 @@ public class ComposerTest {
     public void composesSimpleTemplate() throws InterruptedException, ExecutionException {
         final Composer composer = new Composer(aClientWithSimpleContent());
 
-        final CompletableFuture<Content> content = composer.compose(TEMPLATE).toCompletableFuture();
+        final CompletableFuture<Composition> content = composer.compose(TEMPLATE).toCompletableFuture();
 
-        assertThat(content).isCompletedWithValueMatching(p -> Objects.equal(p.body(), "content"));
+        assertThat(content).isCompletedWithValueMatching(composition -> Objects.equal(composition.body(), "content"));
     }
 
     private Client aClientWithSimpleContent() {

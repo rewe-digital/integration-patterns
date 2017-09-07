@@ -46,9 +46,8 @@ public class ComposingRequestHandler {
     public CompletionStage<Response<ByteString>> execute(final RequestContext context) {
         final Request request = context.request();
         final Optional<RouteMatch> match = routing.matches(request);
-
         return match.map(rm -> {
-            LOGGER.info("The request {} matched the backend route {}.", request, match);
+            LOGGER.info("The request {} matched the backend route {}.", request.uri(), match);
             return templateClient.getTemplate(rm, request, context).thenCompose(r -> compose(context, rm, r));
         }).orElse(defaultResponse());
     }
@@ -67,8 +66,9 @@ public class ComposingRequestHandler {
 
         final String responseAsUtf8 = response.payload().get().utf8();
         return composerFactory.build(context.requestScopedClient()).compose(responseAsUtf8)
-            .thenApply(c -> c.contentWithAssetLinks())
-            .thenApply(r -> forPayload(encodeUtf8(r)).withHeaders(transformHeaders(response.headerEntries())));
+            .thenApply(c -> c.body())
+            .thenApply(r -> forPayload(encodeUtf8(r))
+                .withHeaders(transformHeaders(response.headerEntries())));
     }
 
     private Map<String, String> transformHeaders(final List<Entry<String, String>> headerEntries) {

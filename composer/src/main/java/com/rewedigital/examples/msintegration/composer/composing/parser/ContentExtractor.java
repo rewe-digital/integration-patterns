@@ -16,7 +16,7 @@ import okio.ByteString;
 public class ContentExtractor {
 
     public interface Composer {
-        CompletionStage<Content> compose(String template);
+        CompletionStage<Composition> compose(String template);
     }
 
     private static final String STYLESHEET_HEADER = "x-uic-stylesheet";
@@ -28,12 +28,12 @@ public class ContentExtractor {
         this.composer = composer;
     }
 
-    public CompletionStage<Content> contentFrom(final Response<ByteString> response, final String path) {
+    public CompletionStage<Composition> compositionFrom(final Response<ByteString> response, final String path) {
         if (response.status().code() != Status.OK.code() || !response.payload().isPresent()
             || response.payload().get().size() == 0) {
             LOGGER.warn("Missing content from {} with status {} - returning empty default", path,
                 response.status().code());
-            return CompletableFuture.completedFuture(new Content());
+            return CompletableFuture.completedFuture(new Composition());
         }
 
         final String rawContent = parseContent(response);
@@ -45,7 +45,7 @@ public class ContentExtractor {
         return PARSER.parseContent(response.payload().get().utf8());
     }
 
-    private Content addAssetLinks(Content content, Response<ByteString> response) {
+    private Composition addAssetLinks(Composition content, Response<ByteString> response) {
         response.header(STYLESHEET_HEADER)
             .map(href -> buildCssLink(href))
             .ifPresent(link -> content.addAssetLink(link));
