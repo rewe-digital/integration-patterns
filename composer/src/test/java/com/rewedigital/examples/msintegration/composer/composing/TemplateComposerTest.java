@@ -4,6 +4,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -21,7 +22,8 @@ public class TemplateComposerTest {
     @Test
     public void composesSimpleTemplate() {
         final String content = "content";
-        final TemplateComposer composer = new TemplateComposer(aClientWithSimpleContent(content));
+        final TemplateComposer composer =
+            new TemplateComposer(aClientWithSimpleContent(content), Collections.emptyMap());
 
         final CompletableFuture<Composition> result = composer
             .compose("<rewe-digital-include path=\"http://mock/\"></rewe-digital-include>")
@@ -33,7 +35,8 @@ public class TemplateComposerTest {
 
     @Test
     public void appendsCSSLinksToHead() {
-        final TemplateComposer composer = new TemplateComposer(aClientWithSimpleContent("", "css/link"));
+        final TemplateComposer composer =
+            new TemplateComposer(aClientWithSimpleContent("", "css/link"), Collections.emptyMap());
         final CompletableFuture<Composition> result = composer
             .compose("<head></head><rewe-digital-include path=\"http://mock/\"></rewe-digital-include>")
             .toCompletableFuture();

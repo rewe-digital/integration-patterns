@@ -1,6 +1,5 @@
 package com.rewedigital.examples.msintegration.composer.proxy;
 
-import java.util.Collections;
 import java.util.concurrent.CompletionStage;
 
 import com.damnhandy.uri.template.UriTemplate;
@@ -13,12 +12,12 @@ import okio.ByteString;
 
 public class TemplateClient {
 
-    public CompletionStage<Response<ByteString>> getTemplate(final RouteMatch match, final Request request,
-        final RequestContext context) {
-        final String expandedBackedUri = UriTemplate.fromTemplate(match.backend())
-            .expand(Collections.<String, Object>unmodifiableMap(match.parsedPathArguments()));
+    public CompletionStage<Response<ByteString>> getTemplate(final RouteMatch match, final RequestContext context) {
+        return context.requestScopedClient().send(Request.forUri(expandPath(match), context.request().method()));
+    }
 
-        return context.requestScopedClient().send(Request.forUri(expandedBackedUri, request.method()));
+    private String expandPath(final RouteMatch match) {
+        return UriTemplate.fromTemplate(match.backend()).expand(match.parsedPathArguments());
     }
 
 }

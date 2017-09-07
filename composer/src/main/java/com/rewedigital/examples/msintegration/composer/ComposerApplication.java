@@ -2,7 +2,7 @@ package com.rewedigital.examples.msintegration.composer;
 
 import com.rewedigital.examples.msintegration.composer.client.ClientDecoratingModule;
 import com.rewedigital.examples.msintegration.composer.client.ErrorClientDecorator;
-import com.rewedigital.examples.msintegration.composer.composing.ComposerFactory;
+import com.rewedigital.examples.msintegration.composer.proxy.ComposerFactory;
 import com.rewedigital.examples.msintegration.composer.proxy.ComposingRequestHandler;
 import com.rewedigital.examples.msintegration.composer.proxy.TemplateClient;
 import com.rewedigital.examples.msintegration.composer.routing.BackendRouting;

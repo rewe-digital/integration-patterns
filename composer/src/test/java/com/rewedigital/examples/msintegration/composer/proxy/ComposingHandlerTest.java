@@ -13,7 +13,6 @@ import java.util.concurrent.ExecutionException;
 
 import org.junit.Test;
 
-import com.rewedigital.examples.msintegration.composer.composing.ComposerFactory;
 import com.rewedigital.examples.msintegration.composer.routing.BackendRouting;
 import com.rewedigital.examples.msintegration.composer.routing.BackendRouting.RouteMatch;
 import com.rewedigital.examples.msintegration.composer.routing.StaticBackendRoutes.Match;
@@ -60,8 +59,7 @@ public class ComposingHandlerTest {
     private static class StubTemplateClient extends TemplateClient {
 
         @Override
-        public CompletionStage<Response<ByteString>> getTemplate(final RouteMatch match, final Request request,
-            final RequestContext context) {
+        public CompletionStage<Response<ByteString>> getTemplate(final RouteMatch match, final RequestContext context) {
             return CompletableFuture.completedFuture(Response.of(Status.OK, ByteString.encodeUtf8(SERVICE_RESPONSE)));
         }
 

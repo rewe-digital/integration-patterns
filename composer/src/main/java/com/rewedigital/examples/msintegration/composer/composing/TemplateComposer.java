@@ -2,8 +2,10 @@ package com.rewedigital.examples.msintegration.composer.composing;
 
 import static com.rewedigital.examples.msintegration.composer.composing.parser.Parser.PARSER;
 import static com.rewedigital.examples.msintegration.composer.util.StreamUtil.flatten;
+import static java.util.Objects.requireNonNull;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Stream;
@@ -17,9 +19,11 @@ import com.spotify.apollo.Client;
 public class TemplateComposer implements Composer {
 
     private final Client client;
+    private final Map<String, Object> parsedPathArguments;
 
-    public TemplateComposer(final Client client) {
+    public TemplateComposer(final Client client, final Map<String, Object> parsedPathArguments) {
         this.client = Objects.requireNonNull(client);
+        this.parsedPathArguments = requireNonNull(parsedPathArguments);
     }
 
     public CompletionStage<Composition> compose(final String template) {
@@ -40,7 +44,7 @@ public class TemplateComposer implements Composer {
     private Stream<CompletionStage<WithComposition>> streamOfFutureContent(final List<IncludedService> includes) {
         return includes.stream()
             .map(include -> include
-                .fetchContent(client))
+                .fetchContent(client, parsedPathArguments))
             .map(futureResponse -> futureResponse
                 .thenCompose(response -> response.extractContent(this)));
     }

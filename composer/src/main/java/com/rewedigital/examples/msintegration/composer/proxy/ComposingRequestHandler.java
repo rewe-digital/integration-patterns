@@ -15,7 +15,6 @@ import java.util.concurrent.CompletionStage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.rewedigital.examples.msintegration.composer.composing.ComposerFactory;
 import com.rewedigital.examples.msintegration.composer.routing.BackendRouting;
 import com.rewedigital.examples.msintegration.composer.routing.BackendRouting.RouteMatch;
 import com.spotify.apollo.Request;
@@ -47,8 +46,8 @@ public class ComposingRequestHandler {
         final Request request = context.request();
         final Optional<RouteMatch> match = routing.matches(request);
         return match.map(rm -> {
-            LOGGER.info("The request {} matched the backend route {}.", request.uri(), match);
-            return templateClient.getTemplate(rm, request, context).thenCompose(r -> compose(context, rm, r));
+            LOGGER.info("The request {} matched the backend route {}.", request, match);
+            return templateClient.getTemplate(rm, context).thenCompose(r -> compose(context, rm, r));
         }).orElse(defaultResponse());
     }
 
@@ -65,7 +64,7 @@ public class ComposingRequestHandler {
         }
 
         final String responseAsUtf8 = response.payload().get().utf8();
-        return composerFactory.build(context.requestScopedClient()).compose(responseAsUtf8)
+        return composerFactory.build(context.requestScopedClient(), match.parsedPathArguments()).compose(responseAsUtf8)
             .thenApply(c -> c.body())
             .thenApply(r -> forPayload(encodeUtf8(r))
                 .withHeaders(transformHeaders(response.headerEntries())));
