@@ -64,7 +64,8 @@ public class ComposingRequestHandler {
         }
 
         final String responseAsUtf8 = response.payload().get().utf8();
-        return composerFactory.build(context.requestScopedClient(), match.parsedPathArguments()).compose(responseAsUtf8)
+        return composerFactory.build(context.requestScopedClient(), match.parsedPathArguments())
+            .compose(response.withPayload(responseAsUtf8))
             .thenApply(c -> c.body())
             .thenApply(r -> forPayload(encodeUtf8(r))
                 .withHeaders(transformHeaders(response.headerEntries())));

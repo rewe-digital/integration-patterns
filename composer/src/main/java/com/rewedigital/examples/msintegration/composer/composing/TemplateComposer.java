@@ -15,6 +15,7 @@ import com.rewedigital.examples.msintegration.composer.composing.parser.Composit
 import com.rewedigital.examples.msintegration.composer.composing.parser.IncludedService;
 import com.rewedigital.examples.msintegration.composer.composing.parser.IncludedService.WithComposition;
 import com.spotify.apollo.Client;
+import com.spotify.apollo.Response;
 
 public class TemplateComposer implements Composer {
 
@@ -26,7 +27,8 @@ public class TemplateComposer implements Composer {
         this.parsedPathArguments = requireNonNull(parsedPathArguments);
     }
 
-    public CompletionStage<Composition> compose(final String template) {
+    public CompletionStage<Composition> compose(final Response<String> response) {
+        final String template = response.payload().orElse("");
         final List<IncludedService> includes = parseIncludes(template);
         final CompletionStage<Stream<WithComposition>> futureContentStream = fetchContent(includes);
         return replaceInTemplate(template, futureContentStream);

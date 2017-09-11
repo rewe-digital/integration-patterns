@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.google.common.base.Objects;
@@ -23,17 +24,33 @@ import okio.ByteString;
 public class TemplateComposerTest {
 
     @Test
+    @Ignore
+    public void IgnoresIncludeWhenPathIsMissing() {
+        final TemplateComposer composer =
+            new TemplateComposer(aClientWithSimpleContent("should not be included"), Collections.emptyMap());
+
+        final CompletableFuture<Composition> result = composer
+            .compose(r("<rewe-digital-include></rewe-digital-include>"))
+            .toCompletableFuture();
+
+        assertThat(result)
+            .isCompletedWithValueMatching(composition -> Objects.equal(composition.body(), ""));
+    }
+
+    @Test
     public void composesSimpleTemplate() {
         final String content = "content";
         final TemplateComposer composer =
             new TemplateComposer(aClientWithSimpleContent(content), Collections.emptyMap());
 
         final CompletableFuture<Composition> result = composer
-            .compose("<rewe-digital-include path=\"http://mock/\"></rewe-digital-include>")
+            .compose(r(
+                "template content <rewe-digital-include path=\"http://mock/\"></rewe-digital-include> more content"))
             .toCompletableFuture();
 
         assertThat(result)
-            .isCompletedWithValueMatching(composition -> Objects.equal(composition.body(), content));
+            .isCompletedWithValueMatching(
+                composition -> Objects.equal(composition.body(), "template content " + content + " more content"));
     }
 
     @Test
@@ -41,7 +58,7 @@ public class TemplateComposerTest {
         final TemplateComposer composer =
             new TemplateComposer(aClientWithSimpleContent("", "css/link"), Collections.emptyMap());
         final CompletableFuture<Composition> result = composer
-            .compose("<head></head><rewe-digital-include path=\"http://mock/\"></rewe-digital-include>")
+            .compose(r("<head></head><rewe-digital-include path=\"http://mock/\"></rewe-digital-include>"))
             .toCompletableFuture();
         assertThat(result)
             .isCompletedWithValueMatching(composition -> {
@@ -55,11 +72,12 @@ public class TemplateComposerTest {
         final String innerContent = "some content";
         final TemplateComposer composer =
             new TemplateComposer(
-                aClientWithConsecutiveContent("<rewe-digital-include path=\"http://mock/\"></rewe-digital-include>",
+                aClientWithConsecutiveContent(
+                    "<rewe-digital-include path=\"http://other/mock/\"></rewe-digital-include>",
                     innerContent),
                 Collections.emptyMap());
         final CompletableFuture<Composition> result = composer
-            .compose("<rewe-digital-include path=\"http://mock/\"></rewe-digital-include>")
+            .compose(r("<rewe-digital-include path=\"http://mock/\"></rewe-digital-include>"))
             .toCompletableFuture();
         assertThat(result)
             .isCompletedWithValueMatching(composition -> Objects.equal(composition.body(), innerContent));
@@ -97,5 +115,9 @@ public class TemplateComposerTest {
     private Response<ByteString> contentResponse(final String content) {
         return Response
             .forPayload(ByteString.encodeUtf8("<rewe-digital-content>" + content + "</rewe-digital-content>"));
+    }
+
+    private Response<String> r(String body) {
+        return Response.forPayload(body);
     }
 }

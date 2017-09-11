@@ -18,6 +18,7 @@ import org.apache.commons.lang.NotImplementedException;
 import com.rewedigital.examples.msintegration.composer.composing.parser.Composition;
 import com.rewedigital.examples.msintegration.composer.composing.parser.IncludedService;
 import com.rewedigital.examples.msintegration.composer.composing.parser.IncludedService.WithComposition;
+import com.rewedigital.examples.msintegration.composer.composing.parser.Parser;
 
 public class OngoingComposition
     implements Collector<IncludedService.WithComposition, OngoingComposition, OngoingComposition> {
@@ -34,7 +35,8 @@ public class OngoingComposition
     private final List<Handler> handler;
 
     public OngoingComposition(final String template) {
-        this(Arrays.asList(new BodyContentCompositionHandler(template), new AssetLinkCompositionHander()));
+        this(Arrays.asList(new BodyContentCompositionHandler(template, Parser.PARSER),
+            new AssetLinkCompositionHander()));
     }
 
     public OngoingComposition(final List<Handler> handler) {
@@ -42,7 +44,7 @@ public class OngoingComposition
     }
 
     public Composition result() {
-        return new Composition(handler.stream().map(h -> h.result()).collect(toList()));
+        return new Composition(handler.stream().map(Handler::result).collect(toList()));
     }
 
     @Override

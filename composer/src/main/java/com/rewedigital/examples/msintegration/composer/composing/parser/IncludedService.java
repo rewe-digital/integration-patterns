@@ -1,7 +1,5 @@
 package com.rewedigital.examples.msintegration.composer.composing.parser;
 
-import static com.rewedigital.examples.msintegration.composer.composing.parser.Parser.PARSER;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -74,8 +72,7 @@ public class IncludedService {
                 return CompletableFuture.completedFuture(new Composition());
             }
 
-            final String rawContent = PARSER.parseContent(response.payload().get().utf8());
-            return composer.compose(rawContent);
+            return composer.compose(response.withPayload(response.payload().get().utf8()));
         }
     }
 
