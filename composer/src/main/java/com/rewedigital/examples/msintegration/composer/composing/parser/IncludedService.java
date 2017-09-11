@@ -1,15 +1,20 @@
 package com.rewedigital.examples.msintegration.composer.composing.parser;
 
-import java.util.Collection;
+import static com.rewedigital.examples.msintegration.composer.composing.parser.Parser.PARSER;
+
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.damnhandy.uri.template.UriTemplate;
 import com.spotify.apollo.Client;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.Response;
+import com.spotify.apollo.Status;
 
 import okio.ByteString;
 
@@ -20,13 +25,15 @@ import okio.ByteString;
  * <li>{@link #fetchContent(Client)} to start fetching the content</li>
  * <li>{@link WithResponse#extractContent()} on the result of fetchContent to extract relevant content from the
  * response</li>
- * <li>{@link WithContent#startOffset()}, {@link WithContent#endOffset()} return the position in the original template
- * of the element that should be replaced with {@link WithContent#content()}</li>
+ * <li>{@link WithComposition#startOffset()}, {@link WithComposition#endOffset()} return the position in the original
+ * template of the element that should be replaced with {@link WithComposition#composition()}</li>
  * </ul>
  */
 public class IncludedService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(IncludedService.class);
 
     private final Map<String, String> attributes = new HashMap<>();
+
     private int startOffset;
     private int endOffset;
 
@@ -51,28 +58,41 @@ public class IncludedService {
         /**
          * Extracts the content of this response.
          *
-         * @param contentExtractor extracts relevant content from the response
+         * @param composer composer to handle nested composition
          * @return the content
          */
-        public CompletionStage<IncludedService.WithContent> extractContent(final ContentExtractor contentExtractor) {
-            final CompletionStage<Content> content = contentExtractor.contentFrom(response, path);
-            return content.thenApply(c -> new WithContent(c, startOffset, endOffset));
+        public CompletionStage<IncludedService.WithComposition> extractContent(final Composer composer) {
+            return compositionWith(composer)
+                .thenApply(c -> new WithComposition(c, response, startOffset, endOffset));
+        }
+
+        private CompletionStage<Composition> compositionWith(final Composer composer) {
+            if (response.status().code() != Status.OK.code() || !response.payload().isPresent()
+                || response.payload().get().size() == 0) {
+                LOGGER.warn("Missing content from {} with status {} - returning empty default", path,
+                    response.status().code());
+                return CompletableFuture.completedFuture(new Composition());
+            }
+
+            final String rawContent = PARSER.parseContent(response.payload().get().utf8());
+            return composer.compose(rawContent);
         }
     }
 
     /**
-     * Enhances the included service with the content from the response of the fetch call.
+     * Enhances the included service with the composition from the response of the fetch call.
      */
-    public static class WithContent {
+    public static class WithComposition {
 
-        private final String content;
-        private final List<String> assetLinks;
+        private final Composition composition;
+        private final Response<ByteString> response;
         private final int startOffset;
         private final int endOffset;
 
-        public WithContent(final Content content, final int startOffset, final int endOffset) {
-            this.content = content.body();
-            this.assetLinks = content.assetLinks();
+        public WithComposition(final Composition composition, final Response<ByteString> response,
+            final int startOffset, final int endOffset) {
+            this.composition = composition;
+            this.response = response;
             this.startOffset = startOffset;
             this.endOffset = endOffset;
         }
@@ -85,12 +105,12 @@ public class IncludedService {
             return endOffset;
         }
 
-        public String content() {
-            return content;
+        public Composition composition() {
+            return composition;
         }
 
-        public Collection<String> assets() {
-            return assetLinks;
+        public Response<ByteString> response() {
+            return response;
         }
     }
 
@@ -116,7 +136,8 @@ public class IncludedService {
      * @param client the client to fetch the content
      * @return a future containing the response
      */
-    public CompletionStage<WithResponse> fetchContent(final Client client, final Map<String, Object> parsedPathArguments) {
+    public CompletionStage<WithResponse> fetchContent(final Client client,
+        final Map<String, Object> parsedPathArguments) {
         final String expandedPath = UriTemplate.fromTemplate(path()).expand(parsedPathArguments);
         return client.send(Request.forUri(expandedPath, "GET"))
             .thenApply(response -> new IncludedService.WithResponse(response, expandedPath, startOffset, endOffset));

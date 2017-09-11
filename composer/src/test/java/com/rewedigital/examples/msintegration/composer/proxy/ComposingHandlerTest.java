@@ -13,7 +13,6 @@ import java.util.concurrent.ExecutionException;
 
 import org.junit.Test;
 
-import com.rewedigital.examples.msintegration.composer.composing.ComposerFactory;
 import com.rewedigital.examples.msintegration.composer.routing.BackendRouting;
 import com.rewedigital.examples.msintegration.composer.routing.BackendRouting.RouteMatch;
 import com.rewedigital.examples.msintegration.composer.routing.StaticBackendRoutes.Match;

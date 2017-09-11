@@ -1,9 +1,10 @@
 package com.rewedigital.examples.msintegration.composer.composing;
 
-import java.io.StringWriter;
+import static java.util.stream.Collectors.toList;
+
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.BiConsumer;
@@ -14,35 +15,38 @@ import java.util.stream.Collector;
 
 import org.apache.commons.lang.NotImplementedException;
 
-import com.rewedigital.examples.msintegration.composer.composing.parser.Content;
+import com.rewedigital.examples.msintegration.composer.composing.parser.Composition;
 import com.rewedigital.examples.msintegration.composer.composing.parser.IncludedService;
-import com.rewedigital.examples.msintegration.composer.composing.parser.IncludedService.WithContent;
+import com.rewedigital.examples.msintegration.composer.composing.parser.IncludedService.WithComposition;
 
 public class OngoingComposition
-    implements Collector<IncludedService.WithContent, OngoingComposition, OngoingComposition> {
+    implements Collector<IncludedService.WithComposition, OngoingComposition, OngoingComposition> {
 
-    private final StringWriter writer;
-    private final String template;
-    private final List<String> assetLinks;
-    private int currentIndex;
-    private String result;
+    public interface Handler {
 
-    public OngoingComposition(final String template) {
-        this.template = template;
-        this.writer = new StringWriter(template.length());
-        this.assetLinks = new LinkedList<>();
-        this.currentIndex = 0;
+        void handle(IncludedService.WithComposition includedContent);
+
+        void finish();
+
+        Composition.Part result();
     }
 
-    public Content result() {
-        if (result == null) {
-            finish();
-        }
-        return new Content(result, assetLinks);
+    private final List<Handler> handler;
+
+    public OngoingComposition(final String template) {
+        this(Arrays.asList(new BodyContentCompositionHandler(template), new AssetLinkCompositionHander()));
+    }
+
+    public OngoingComposition(final List<Handler> handler) {
+        this.handler = handler;
+    }
+
+    public Composition result() {
+        return new Composition(handler.stream().map(h -> h.result()).collect(toList()));
     }
 
     @Override
-    public BiConsumer<OngoingComposition, IncludedService.WithContent> accumulator() {
+    public BiConsumer<OngoingComposition, IncludedService.WithComposition> accumulator() {
         return (r, c) -> r.write(c);
     }
 
@@ -68,20 +72,14 @@ public class OngoingComposition
         return Collections.unmodifiableSet(new HashSet<>());
     }
 
-    private void write(final WithContent c) {
-        writer.write(template, currentIndex, c.startOffset() - currentIndex);
-        writer.write(c.content());
-        currentIndex = c.endOffset();
-        assetLinks.addAll(c.assets());
+    private void write(final WithComposition c) {
+        handler.forEach(h -> h.handle(c));
     }
 
     private OngoingComposition finish() {
-        writeFinalChunk();
+        handler.forEach(h -> h.finish());
         return this;
     }
 
-    private void writeFinalChunk() {
-        writer.write(template, currentIndex, template.length() - currentIndex);
-        this.result = writer.toString();
-    }
+
 }
