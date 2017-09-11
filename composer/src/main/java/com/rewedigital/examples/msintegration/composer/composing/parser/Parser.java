@@ -42,4 +42,14 @@ public class Parser {
         return handler.content();
     }
 
+    public List<String> parseAssets(final String template) {
+        final AssetsExtractionHandler handler = new AssetsExtractionHandler();
+        try {
+            _PARSER.parse(template, handler);
+        } catch (final ParseException e) {
+            Throwables.propagate(e);
+        }
+        return handler.links();
+    }
+
 }
