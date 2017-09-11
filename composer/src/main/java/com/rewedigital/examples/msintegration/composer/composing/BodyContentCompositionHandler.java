@@ -8,16 +8,12 @@ import com.rewedigital.examples.msintegration.composer.composing.parser.Included
 
 public class BodyContentCompositionHandler implements Handler {
 
-    public static class BodyContentPart implements Composition.Part {
+    private static class BodyContentPart implements Composition.Part {
 
         private final String content;
 
         public BodyContentPart(String content) {
             this.content = content;
-        }
-
-        public String content() {
-            return content;
         }
 
         @Override
@@ -44,7 +40,7 @@ public class BodyContentCompositionHandler implements Handler {
             .find(BodyContentPart.class)
             .ifPresent(p -> {
                 writer.write(template, currentIndex, includedContent.startOffset() - currentIndex);
-                writer.write(p.content());
+                writer.write(p.content);
                 currentIndex = includedContent.endOffset();
             });
     }

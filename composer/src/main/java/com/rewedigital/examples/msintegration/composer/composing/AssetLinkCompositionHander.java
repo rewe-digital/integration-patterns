@@ -10,7 +10,7 @@ import com.rewedigital.examples.msintegration.composer.composing.parser.Included
 
 public class AssetLinkCompositionHander implements OngoingComposition.Handler {
 
-    public static class AssetLinkPart implements Composition.Part {
+    private static class AssetLinkPart implements Composition.Part {
         private final List<String> assetLinks;
 
         public AssetLinkPart(final List<String> assetLinks) {
