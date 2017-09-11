@@ -10,7 +10,7 @@ import com.spotify.apollo.module.AbstractApolloModule;
 
 public class ClientDecoratingModule extends AbstractApolloModule {
 
-    private ClientDecorator[] clientDecorators;
+    private final ClientDecorator[] clientDecorators;
 
     public ClientDecoratingModule(final ClientDecorator... clientDecorators) {
         this.clientDecorators = requireNonNull(clientDecorators);

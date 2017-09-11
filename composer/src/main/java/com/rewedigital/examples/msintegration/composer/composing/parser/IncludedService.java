@@ -127,7 +127,7 @@ public class IncludedService {
     }
 
     private String path() {
-        return attributes.get("path"); 
+        return attributes.get("path");
     }
 
     /**
