@@ -67,7 +67,7 @@ public class IncludedService {
         private CompletionStage<Composition> compositionWith(final Composer composer) {
             if (response.status().code() != Status.OK.code() || !response.payload().isPresent()
                 || response.payload().get().size() == 0) {
-                LOGGER.warn("Missing content from {} with status {} - returning empty default", path,
+                LOGGER.warn("Missing content from path [{}] with status [{}] - returning empty default", path,
                     response.status().code());
                 return CompletableFuture.completedFuture(new Composition());
             }
@@ -135,6 +135,12 @@ public class IncludedService {
      */
     public CompletionStage<WithResponse> fetchContent(final Client client,
         final Map<String, Object> parsedPathArguments) {
+        if (path() == null || path().trim().isEmpty()) {
+            LOGGER.warn("Empty path attribute in include found");
+            return CompletableFuture.completedFuture(new IncludedService.WithResponse(
+                Response.forStatus(Status.OK).withPayload(ByteString.encodeUtf8("")), "", startOffset, endOffset));
+        }
+        
         final String expandedPath = UriTemplate.fromTemplate(path()).expand(parsedPathArguments);
         return client.send(Request.forUri(expandedPath, "GET"))
             .thenApply(response -> new IncludedService.WithResponse(response, expandedPath, startOffset, endOffset));

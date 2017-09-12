@@ -1,5 +1,6 @@
 package com.rewedigital.examples.msintegration.composer.composing;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -9,9 +10,6 @@ import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.google.common.base.Objects;
@@ -24,7 +22,6 @@ import okio.ByteString;
 public class TemplateComposerTest {
 
     @Test
-    @Ignore
     public void IgnoresIncludeWhenPathIsMissing() {
         final TemplateComposer composer =
             new TemplateComposer(aClientWithSimpleContent("should not be included"), Collections.emptyMap());
@@ -34,7 +31,8 @@ public class TemplateComposerTest {
             .toCompletableFuture();
 
         assertThat(result)
-            .isCompletedWithValueMatching(composition -> Objects.equal(composition.body(), ""));
+            .isCompletedWithValueMatching(
+                composition -> Objects.equal(composition.body(), "<rewe-digital-include></rewe-digital-include>"));
     }
 
     @Test
@@ -64,12 +62,9 @@ public class TemplateComposerTest {
             .compose(r("<head></head><rewe-digital-include path=\"http://mock/\"></rewe-digital-include>"))
             .toCompletableFuture();
         assertThat(result)
-            .isCompletedWithValueMatching(composition -> {
-                System.out.println(composition.body());
-                return Objects.equal(composition.body(),
-                    "<head><link rel=\"stylesheet\" data-rd-options=\"include\" href=\"css/link\" />\n" +
-                        "</head>");
-            });
+            .isCompletedWithValueMatching(composition -> Objects.equal(composition.body(),
+                "<head><link rel=\"stylesheet\" data-rd-options=\"include\" href=\"css/link\" />\n" +
+                    "</head>"));
     }
 
     @Test
