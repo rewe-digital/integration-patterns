@@ -77,7 +77,7 @@ public class IncludedService {
     }
 
     /**
-     * Enhances the included service with the composition from the response of the fetch call.
+     * Enhances the included service with the composition of the response from the fetch call.
      */
     public static class WithComposition {
 

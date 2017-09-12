@@ -27,7 +27,7 @@ import okio.ByteString;
 public class ComposingRequestHandler {
 
     private static final CompletableFuture<Response<ByteString>> ERROR_PAGE = CompletableFuture
-        .completedFuture(Response.of(Status.NOT_FOUND, ByteString.encodeUtf8("Ohh.. noose!")));
+        .completedFuture(Response.of(Status.INTERNAL_SERVER_ERROR, ByteString.encodeUtf8("Ohh.. noose!")));
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ComposingRequestHandler.class);
 
