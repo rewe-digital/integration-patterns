@@ -56,14 +56,19 @@ public class TemplateComposerTest {
     @Test
     public void appendsCSSLinksToHead() {
         final TemplateComposer composer =
-            new TemplateComposer(aClientWithSimpleContent("", "css/link"), Collections.emptyMap());
+            new TemplateComposer(
+                aClientWithSimpleContent("",
+                    "<link href=\"css/link\" data-rd-options=\"include\" rel=\"stylesheet\"/>"),
+                Collections.emptyMap());
         final CompletableFuture<Composition> result = composer
             .compose(r("<head></head><rewe-digital-include path=\"http://mock/\"></rewe-digital-include>"))
             .toCompletableFuture();
         assertThat(result)
             .isCompletedWithValueMatching(composition -> {
-                return Objects.equal(composition.body(), "<head><link rel=\"stylesheet\" href=\"css/link\" />\n" +
-                    "</head>");
+                System.out.println(composition.body());
+                return Objects.equal(composition.body(),
+                    "<head><link rel=\"stylesheet\" data-rd-options=\"include\" href=\"css/link\" />\n" +
+                        "</head>");
             });
     }
 
@@ -85,14 +90,12 @@ public class TemplateComposerTest {
 
 
     private Client aClientWithSimpleContent(final String content) {
-        return aClientWithSimpleContent(content, null);
+        return aClientWithSimpleContent(content, "");
     }
 
-    private Client aClientWithSimpleContent(final String content, String cssLink) {
-        Response<ByteString> response = contentResponse(content);
-        if (cssLink != null) {
-            response = response.withHeader(AssetLinkCompositionHander.STYLESHEET_HEADER, cssLink);
-        }
+    private Client aClientWithSimpleContent(final String content, final String head) {
+        Response<ByteString> response = contentResponse(content, head);
+
         final Client client = mock(Client.class);
         when(client.send(any()))
             .thenReturn(CompletableFuture.completedFuture(response));
@@ -104,17 +107,19 @@ public class TemplateComposerTest {
         @SuppressWarnings("unchecked")
         final CompletableFuture<Response<ByteString>>[] otherResponses = Arrays.asList(other)
             .stream()
-            .map(c -> CompletableFuture.completedFuture(contentResponse(c)))
+            .map(c -> CompletableFuture.completedFuture(contentResponse(c, "")))
             .collect(Collectors.toList()).toArray(new CompletableFuture[0]);
 
-        when(client.send(any())).thenReturn(CompletableFuture.completedFuture(contentResponse(firstContent)),
+        when(client.send(any())).thenReturn(CompletableFuture.completedFuture(contentResponse(firstContent, "")),
             otherResponses);
         return client;
     }
 
-    private Response<ByteString> contentResponse(final String content) {
+    private Response<ByteString> contentResponse(final String content, final String head) {
         return Response
-            .forPayload(ByteString.encodeUtf8("<rewe-digital-content>" + content + "</rewe-digital-content>"));
+            .forPayload(
+                ByteString.encodeUtf8("<html><head>" + head + "</head><body><rewe-digital-content>" + content
+                    + "</rewe-digital-content></body></html>"));
     }
 
     private Response<String> r(String body) {

@@ -36,7 +36,7 @@ public class OngoingComposition
 
     public OngoingComposition(final String template) {
         this(Arrays.asList(new BodyContentCompositionHandler(template, Parser.PARSER),
-            new AssetLinkCompositionHander()));
+            new AssetLinkCompositionHander(Parser.PARSER)));
     }
 
     public OngoingComposition(final List<Handler> handler) {
