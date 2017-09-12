@@ -6,7 +6,6 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Stream;
 
@@ -23,7 +22,7 @@ public class TemplateComposer implements Composer {
     private final Map<String, Object> parsedPathArguments;
 
     public TemplateComposer(final Client client, final Map<String, Object> parsedPathArguments) {
-        this.client = Objects.requireNonNull(client);
+        this.client = requireNonNull(client);
         this.parsedPathArguments = requireNonNull(parsedPathArguments);
     }
 
