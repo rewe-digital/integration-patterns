@@ -17,7 +17,7 @@ public class Composition {
     }
 
     public Composition(final List<Part> parts) {
-       this.parts= parts;
+       this.parts = parts;
     }
 
     public String body() {
