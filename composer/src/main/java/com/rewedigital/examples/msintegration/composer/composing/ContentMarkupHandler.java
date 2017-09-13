@@ -121,11 +121,13 @@ public class ContentMarkupHandler extends AbstractMarkupHandler {
                 attributes
                     .entrySet()
                     .stream()
-                    // FIXME stringbuilder instead?
-                    .reduce("<link ",
-                        (l, e) -> l + e.getKey() + "=\"" + e.getValue() + "\" ", // FIXME string.format instead?
-                        (a, b) -> a + b)
-                    + "/>");
+                    .reduce(new StringBuilder("<link "),
+                        (builder, e) -> builder.append(e.getKey())
+                            .append("=\"")
+                            .append(e.getValue())
+                            .append("\" "),
+                        (a, b) -> a.append(b))
+                    .append("/>").toString());
         }
         parsingLink = false;
         attributes = null;
