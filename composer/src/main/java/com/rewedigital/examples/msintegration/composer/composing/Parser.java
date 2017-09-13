@@ -22,7 +22,7 @@ public class Parser {
     }
 
 
-    public void parseIncludes(final String template, final IMarkupHandler markupHandler) {
+    public void parse(final String template, final IMarkupHandler markupHandler) {
         try {
             _PARSER.parse(template, markupHandler);
         } catch (final ParseException e) {

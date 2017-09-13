@@ -1,8 +1,6 @@
 package com.rewedigital.examples.msintegration.composer.proxy;
 
-import static com.spotify.apollo.Response.forPayload;
 import static java.util.stream.Collectors.toMap;
-import static okio.ByteString.encodeUtf8;
 
 import java.util.List;
 import java.util.Map;
@@ -65,10 +63,13 @@ public class ComposingRequestHandler {
 
         final String responseAsUtf8 = response.payload().get().utf8();
         return composerFactory.build(context.requestScopedClient(), match.parsedPathArguments())
-            .compose(response.withPayload(responseAsUtf8))
-            .thenApply(c -> c.body())
-            .thenApply(r -> forPayload(encodeUtf8(r))
+            .composeTemplate(response.withPayload(responseAsUtf8))
+            .thenApply(r -> toByteString(r)
                 .withHeaders(transformHeaders(response.headerEntries())));
+    }
+
+    private Response<ByteString> toByteString(Response<String> r) {
+        return r.withPayload(r.payload().map(ByteString::encodeUtf8).orElse(ByteString.EMPTY));
     }
 
     private Map<String, String> transformHeaders(final List<Entry<String, String>> headerEntries) {

@@ -19,8 +19,8 @@ public class IncludedService {
             this.response = response;
         }
 
-        public CompletableFuture<Composition> compose(final TemplateComposer templateComposer) {
-            return templateComposer
+        public CompletableFuture<Composition> compose(final ContentComposer contentComposer) {
+            return contentComposer
                 .composeContent(response)
                 .thenApply(c -> c.forRange(startOffset, endOffset));
         }

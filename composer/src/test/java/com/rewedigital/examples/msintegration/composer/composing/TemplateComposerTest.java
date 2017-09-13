@@ -22,10 +22,10 @@ public class TemplateComposerTest {
     @Test
     public void IgnoresIncludeWhenPathIsMissing() throws Exception {
         final TemplateComposer composer =
-            new TemplateComposer(aClientWithSimpleContent("should not be included"), Collections.emptyMap());
+            new AttoParserBasedComposer(aClientWithSimpleContent("should not be included"), Collections.emptyMap());
 
         final Response<String> result = composer
-            .compose(r("template <rewe-digital-include></rewe-digital-include> content")).get();
+            .composeTemplate(r("template <rewe-digital-include></rewe-digital-include> content")).get();
 
         assertThat(result.payload().get()).isEqualTo("template  content");
     }
@@ -34,10 +34,10 @@ public class TemplateComposerTest {
     public void composesSimpleTemplate() throws Exception {
         final String content = "content";
         final TemplateComposer composer =
-            new TemplateComposer(aClientWithSimpleContent(content), Collections.emptyMap());
+            new AttoParserBasedComposer(aClientWithSimpleContent(content), Collections.emptyMap());
 
         final Response<String> result = composer
-            .compose(r(
+            .composeTemplate(r(
                 "template content <rewe-digital-include path=\"http://mock/\"></rewe-digital-include> more content"))
             .get();
 
@@ -47,12 +47,12 @@ public class TemplateComposerTest {
     @Test
     public void appendsCSSLinksToHead() throws Exception {
         final TemplateComposer composer =
-            new TemplateComposer(
+            new AttoParserBasedComposer(
                 aClientWithSimpleContent("",
                     "<link href=\"css/link\" data-rd-options=\"include\" rel=\"stylesheet\"/>"),
                 Collections.emptyMap());
         final Response<String> result = composer
-            .compose(r("<head></head><rewe-digital-include path=\"http://mock/\"></rewe-digital-include>")).get();
+            .composeTemplate(r("<head></head><rewe-digital-include path=\"http://mock/\"></rewe-digital-include>")).get();
         assertThat(result.payload().get()).isEqualTo(
             "<head><link rel=\"stylesheet\" data-rd-options=\"include\" href=\"css/link\" />\n" +
                 "</head>");
@@ -62,13 +62,13 @@ public class TemplateComposerTest {
     public void composesRecursiveTemplate() throws Exception {
         final String innerContent = "some content";
         final TemplateComposer composer =
-            new TemplateComposer(
+            new AttoParserBasedComposer(
                 aClientWithConsecutiveContent(
                     "<rewe-digital-include path=\"http://other/mock/\"></rewe-digital-include>",
                     innerContent),
                 Collections.emptyMap());
         final Response<String> result = composer
-            .compose(r("<rewe-digital-include path=\"http://mock/\"></rewe-digital-include>"))
+            .composeTemplate(r("<rewe-digital-include path=\"http://mock/\"></rewe-digital-include>"))
             .get();
         assertThat(result.payload().get()).isEqualTo(innerContent);
     }

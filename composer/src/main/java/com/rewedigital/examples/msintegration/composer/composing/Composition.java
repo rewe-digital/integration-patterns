@@ -20,7 +20,7 @@ public class Composition {
         this(0, template.length(), template, contentRange, assetLinks, children);
     }
 
-    public Composition(final int startOffset, final int endOffset, final String template,
+    private Composition(final int startOffset, final int endOffset, final String template,
         final ContentRange contentRange, final List<String> assetLinks,
         final List<Composition> children) {
         this.startOffset = startOffset;
@@ -35,13 +35,12 @@ public class Composition {
         return new Composition(startOffset, endOffset, template, contentRange, assetLinks, children);
     }
 
-    public String body() {
+    private String body() {
         final StringWriter writer = new StringWriter(template.length());
         int currentIndex = contentRange.start();
         for (final Composition c : children) {
             writer.write(template, currentIndex, c.startOffset - currentIndex);
-            final String content = c.body();
-            writer.write(content);
+            writer.write(c.body());
             currentIndex = c.endOffset;
             assetLinks.addAll(c.assetLinks);
         }
