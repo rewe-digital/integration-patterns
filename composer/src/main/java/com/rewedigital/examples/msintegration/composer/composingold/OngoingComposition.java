@@ -1,4 +1,4 @@
-package com.rewedigital.examples.msintegration.composer.composing;
+package com.rewedigital.examples.msintegration.composer.composingold;
 
 import static java.util.stream.Collectors.toList;
 
@@ -15,10 +15,10 @@ import java.util.stream.Collector;
 
 import org.apache.commons.lang.NotImplementedException;
 
-import com.rewedigital.examples.msintegration.composer.composing.parser.Composition;
-import com.rewedigital.examples.msintegration.composer.composing.parser.IncludedService;
-import com.rewedigital.examples.msintegration.composer.composing.parser.IncludedService.WithComposition;
-import com.rewedigital.examples.msintegration.composer.composing.parser.Parser;
+import com.rewedigital.examples.msintegration.composer.composingold.parser.Composition;
+import com.rewedigital.examples.msintegration.composer.composingold.parser.IncludedService;
+import com.rewedigital.examples.msintegration.composer.composingold.parser.Parser;
+import com.rewedigital.examples.msintegration.composer.composingold.parser.IncludedService.WithComposition;
 
 public class OngoingComposition
     implements Collector<IncludedService.WithComposition, OngoingComposition, OngoingComposition> {

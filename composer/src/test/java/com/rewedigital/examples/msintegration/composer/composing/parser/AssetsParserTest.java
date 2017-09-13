@@ -7,6 +7,8 @@ import java.util.List;
 
 import org.junit.Test;
 
+import com.rewedigital.examples.msintegration.composer.composingold.parser.Parser;
+
 public class AssetsParserTest {
 
     @Test

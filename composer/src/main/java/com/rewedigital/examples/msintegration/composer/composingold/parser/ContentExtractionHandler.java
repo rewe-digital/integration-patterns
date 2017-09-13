@@ -1,4 +1,4 @@
-package com.rewedigital.examples.msintegration.composer.composing.parser;
+package com.rewedigital.examples.msintegration.composer.composingold.parser;
 
 import org.attoparser.AbstractMarkupHandler;
 import org.attoparser.ParseException;

@@ -1,23 +1,29 @@
-package com.rewedigital.examples.msintegration.composer.composing.parser;
+package com.rewedigital.examples.msintegration.composer.composing;
 
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.attoparser.AbstractMarkupHandler;
+import org.attoparser.AbstractChainedMarkupHandler;
+import org.attoparser.IMarkupHandler;
 import org.attoparser.ParseException;
 import org.attoparser.util.TextUtil;
 
-public class AssetsExtractionHandler extends AbstractMarkupHandler {
+public class AssetMarkupHandler extends AbstractChainedMarkupHandler {
+
+    public AssetMarkupHandler(IMarkupHandler next) {
+        super(next);
+    }
+
+    private final List<String> links = new LinkedList<>();
 
     private boolean parsingHead = false;
     private boolean parsingLink = false;
 
-    private final List<String> links = new LinkedList<>();
     private Map<String, String> attributes;
 
-    public List<String> links() {
+    public List<String> assetLinks() {
         return links;
     }
 
@@ -31,8 +37,7 @@ public class AssetsExtractionHandler extends AbstractMarkupHandler {
         }
 
         if (parsingHead && isLinkElement(buffer, nameOffset, nameLen)) {
-            parsingLink = true;
-            attributes = new HashMap<>();
+            startLink();
         }
     }
 
@@ -48,8 +53,7 @@ public class AssetsExtractionHandler extends AbstractMarkupHandler {
         if (isHeadElement(buffer, nameOffset, nameLen)) {
             parsingHead = true;
         } else if (parsingHead && isLinkElement(buffer, nameOffset, nameLen)) {
-            parsingLink = true;
-            attributes = new HashMap<>();
+            startLink();
         }
 
     }
@@ -88,14 +92,21 @@ public class AssetsExtractionHandler extends AbstractMarkupHandler {
         return TextUtil.contains(true, buffer, nameOffset, nameLen, "head", 0, "head".length());
     }
 
+
+    private void startLink() {
+        parsingLink = true;
+        attributes = new HashMap<>();
+    }
+
     private void pushLink() {
         if (attributes.getOrDefault("data-rd-options", "").contains("include")) {
             links.add(
                 attributes
                     .entrySet()
                     .stream()
+                    // FIXME stringbuilder instead?
                     .reduce("<link ",
-                        (l, e) -> l + e.getKey() + "=\"" + e.getValue() + "\" ",
+                        (l, e) -> l + e.getKey() + "=\"" + e.getValue() + "\" ", //FIXME string.format instead?
                         (a, b) -> a + b)
                     + "/>");
         }

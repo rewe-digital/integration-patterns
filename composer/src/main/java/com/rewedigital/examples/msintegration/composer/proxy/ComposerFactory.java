@@ -2,7 +2,7 @@ package com.rewedigital.examples.msintegration.composer.proxy;
 
 import java.util.Map;
 
-import com.rewedigital.examples.msintegration.composer.composing.TemplateComposer;
+import com.rewedigital.examples.msintegration.composer.composingold.TemplateComposer;
 import com.spotify.apollo.Client;
 
 public class ComposerFactory {

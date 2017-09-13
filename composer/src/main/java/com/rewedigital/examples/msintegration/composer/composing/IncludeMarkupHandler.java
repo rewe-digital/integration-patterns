@@ -1,14 +1,19 @@
-package com.rewedigital.examples.msintegration.composer.composing.parser;
+package com.rewedigital.examples.msintegration.composer.composing;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.attoparser.AbstractMarkupHandler;
+import org.attoparser.AbstractChainedMarkupHandler;
+import org.attoparser.IMarkupHandler;
 import org.attoparser.ParseException;
 import org.attoparser.util.TextUtil;
 
-public class ContentContributorSelectorHandler extends AbstractMarkupHandler {
+public class IncludeMarkupHandler extends AbstractChainedMarkupHandler {
+
+    public IncludeMarkupHandler(IMarkupHandler next) {
+        super(next);
+    }
 
     private Optional<IncludedService> include = Optional.empty();
     private final List<IncludedService> includedServices = new ArrayList<>();

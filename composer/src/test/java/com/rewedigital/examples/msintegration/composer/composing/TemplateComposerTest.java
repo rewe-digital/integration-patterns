@@ -12,8 +12,6 @@ import java.util.stream.Collectors;
 
 import org.junit.Test;
 
-import com.google.common.base.Objects;
-import com.rewedigital.examples.msintegration.composer.composing.parser.Composition;
 import com.spotify.apollo.Client;
 import com.spotify.apollo.Response;
 
@@ -22,53 +20,46 @@ import okio.ByteString;
 public class TemplateComposerTest {
 
     @Test
-    public void IgnoresIncludeWhenPathIsMissing() {
+    public void IgnoresIncludeWhenPathIsMissing() throws Exception {
         final TemplateComposer composer =
             new TemplateComposer(aClientWithSimpleContent("should not be included"), Collections.emptyMap());
 
-        final CompletableFuture<Composition> result = composer
-            .compose(r("<rewe-digital-include></rewe-digital-include>"))
-            .toCompletableFuture();
+        final Response<String> result = composer
+            .compose(r("template <rewe-digital-include></rewe-digital-include> content")).get();
 
-        assertThat(result)
-            .isCompletedWithValueMatching(
-                composition -> Objects.equal(composition.body(), "<rewe-digital-include></rewe-digital-include>"));
+        assertThat(result.payload().get()).isEqualTo("template  content");
     }
 
     @Test
-    public void composesSimpleTemplate() {
+    public void composesSimpleTemplate() throws Exception {
         final String content = "content";
         final TemplateComposer composer =
             new TemplateComposer(aClientWithSimpleContent(content), Collections.emptyMap());
 
-        final CompletableFuture<Composition> result = composer
+        final Response<String> result = composer
             .compose(r(
                 "template content <rewe-digital-include path=\"http://mock/\"></rewe-digital-include> more content"))
-            .toCompletableFuture();
+            .get();
 
-        assertThat(result)
-            .isCompletedWithValueMatching(
-                composition -> Objects.equal(composition.body(), "template content " + content + " more content"));
+        assertThat(result.payload().get()).isEqualTo("template content " + content + " more content");
     }
 
     @Test
-    public void appendsCSSLinksToHead() {
+    public void appendsCSSLinksToHead() throws Exception {
         final TemplateComposer composer =
             new TemplateComposer(
                 aClientWithSimpleContent("",
                     "<link href=\"css/link\" data-rd-options=\"include\" rel=\"stylesheet\"/>"),
                 Collections.emptyMap());
-        final CompletableFuture<Composition> result = composer
-            .compose(r("<head></head><rewe-digital-include path=\"http://mock/\"></rewe-digital-include>"))
-            .toCompletableFuture();
-        assertThat(result)
-            .isCompletedWithValueMatching(composition -> Objects.equal(composition.body(),
-                "<head><link rel=\"stylesheet\" data-rd-options=\"include\" href=\"css/link\" />\n" +
-                    "</head>"));
+        final Response<String> result = composer
+            .compose(r("<head></head><rewe-digital-include path=\"http://mock/\"></rewe-digital-include>")).get();
+        assertThat(result.payload().get()).isEqualTo(
+            "<head><link rel=\"stylesheet\" data-rd-options=\"include\" href=\"css/link\" />\n" +
+                "</head>");
     }
 
     @Test
-    public void composesRecursiveTemplate() {
+    public void composesRecursiveTemplate() throws Exception {
         final String innerContent = "some content";
         final TemplateComposer composer =
             new TemplateComposer(
@@ -76,11 +67,10 @@ public class TemplateComposerTest {
                     "<rewe-digital-include path=\"http://other/mock/\"></rewe-digital-include>",
                     innerContent),
                 Collections.emptyMap());
-        final CompletableFuture<Composition> result = composer
+        final Response<String> result = composer
             .compose(r("<rewe-digital-include path=\"http://mock/\"></rewe-digital-include>"))
-            .toCompletableFuture();
-        assertThat(result)
-            .isCompletedWithValueMatching(composition -> Objects.equal(composition.body(), innerContent));
+            .get();
+        assertThat(result.payload().get()).isEqualTo(innerContent);
     }
 
 

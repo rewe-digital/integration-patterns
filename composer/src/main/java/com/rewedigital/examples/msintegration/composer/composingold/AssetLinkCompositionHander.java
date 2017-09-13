@@ -1,13 +1,13 @@
-package com.rewedigital.examples.msintegration.composer.composing;
+package com.rewedigital.examples.msintegration.composer.composingold;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.rewedigital.examples.msintegration.composer.composing.parser.Composition;
-import com.rewedigital.examples.msintegration.composer.composing.parser.Composition.Part;
-import com.rewedigital.examples.msintegration.composer.composing.parser.IncludedService.WithComposition;
-import com.rewedigital.examples.msintegration.composer.composing.parser.Parser;
+import com.rewedigital.examples.msintegration.composer.composingold.parser.Composition;
+import com.rewedigital.examples.msintegration.composer.composingold.parser.Parser;
+import com.rewedigital.examples.msintegration.composer.composingold.parser.Composition.Part;
+import com.rewedigital.examples.msintegration.composer.composingold.parser.IncludedService.WithComposition;
 
 public class AssetLinkCompositionHander implements OngoingComposition.Handler {
 

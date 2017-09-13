@@ -1,9 +1,8 @@
-package com.rewedigital.examples.msintegration.composer.composing.parser;
+package com.rewedigital.examples.msintegration.composer.composingold.parser;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,12 +58,12 @@ public class IncludedService {
          * @param composer composer to handle nested composition
          * @return the content
          */
-        public CompletionStage<IncludedService.WithComposition> extractContent(final Composer composer) {
+        public CompletableFuture<IncludedService.WithComposition> extractContent(final Composer composer) {
             return compositionWith(composer)
                 .thenApply(c -> new WithComposition(c, response, startOffset, endOffset));
         }
 
-        private CompletionStage<Composition> compositionWith(final Composer composer) {
+        private CompletableFuture<Composition> compositionWith(final Composer composer) {
             if (response.status().code() != Status.OK.code() || !response.payload().isPresent()
                 || response.payload().get().size() == 0) {
                 LOGGER.warn("Missing content from path [{}] with status [{}] - returning empty default", path,
@@ -133,17 +132,18 @@ public class IncludedService {
      * @param client the client to fetch the content
      * @return a future containing the response
      */
-    public CompletionStage<WithResponse> fetchContent(final Client client,
+    public CompletableFuture<WithResponse> fetchContent(final Client client,
         final Map<String, Object> parsedPathArguments) {
         if (path() == null || path().trim().isEmpty()) {
             LOGGER.warn("Empty path attribute in include found");
             return CompletableFuture.completedFuture(new IncludedService.WithResponse(
                 Response.forStatus(Status.OK).withPayload(ByteString.encodeUtf8("")), "", startOffset, endOffset));
         }
-        
+
         final String expandedPath = UriTemplate.fromTemplate(path()).expand(parsedPathArguments);
         return client.send(Request.forUri(expandedPath, "GET"))
-            .thenApply(response -> new IncludedService.WithResponse(response, expandedPath, startOffset, endOffset));
+            .thenApply(response -> new IncludedService.WithResponse(response, expandedPath, startOffset, endOffset))
+            .toCompletableFuture();
     }
 
 }

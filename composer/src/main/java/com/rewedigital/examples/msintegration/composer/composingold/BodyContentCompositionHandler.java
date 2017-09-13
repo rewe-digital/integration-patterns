@@ -1,11 +1,11 @@
-package com.rewedigital.examples.msintegration.composer.composing;
+package com.rewedigital.examples.msintegration.composer.composingold;
 
 import java.io.StringWriter;
 
-import com.rewedigital.examples.msintegration.composer.composing.OngoingComposition.Handler;
-import com.rewedigital.examples.msintegration.composer.composing.parser.Composition;
-import com.rewedigital.examples.msintegration.composer.composing.parser.IncludedService;
-import com.rewedigital.examples.msintegration.composer.composing.parser.Parser;
+import com.rewedigital.examples.msintegration.composer.composingold.OngoingComposition.Handler;
+import com.rewedigital.examples.msintegration.composer.composingold.parser.Composition;
+import com.rewedigital.examples.msintegration.composer.composingold.parser.IncludedService;
+import com.rewedigital.examples.msintegration.composer.composingold.parser.Parser;
 
 public class BodyContentCompositionHandler implements Handler {
 

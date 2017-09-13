@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.attoparser.ParseException;
 import org.junit.Test;
 
+import com.rewedigital.examples.msintegration.composer.composingold.parser.Parser;
+
 public class ContentExtractionHandlerTest {
 
     @Test

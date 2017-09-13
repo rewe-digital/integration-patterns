@@ -1,4 +1,4 @@
-package com.rewedigital.examples.msintegration.composer.composing.parser;
+package com.rewedigital.examples.msintegration.composer.composingold.parser;
 
 import java.util.List;
 
