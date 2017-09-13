@@ -4,7 +4,6 @@ import java.util.Map;
 
 import com.rewedigital.examples.msintegration.composer.composing.AttoParserBasedComposer;
 import com.rewedigital.examples.msintegration.composer.composing.TemplateComposer;
-import com.rewedigital.examples.msintegration.composer.composing.ValidatingContentFetcher;
 import com.spotify.apollo.Client;
 
 public class ComposerFactory {

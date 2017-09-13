@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 
 import com.spotify.apollo.Response;
 
-public class Composition {
+class Composition {
 
     private final List<Composition> children;
     private final List<String> assetLinks;

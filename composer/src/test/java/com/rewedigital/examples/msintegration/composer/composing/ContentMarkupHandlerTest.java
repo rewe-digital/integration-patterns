@@ -1,4 +1,4 @@
-package com.rewedigital.examples.msintegration.composer.composing.parser;
+package com.rewedigital.examples.msintegration.composer.composing;
 
 import static com.rewedigital.examples.msintegration.composer.composing.Parser.PARSER;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -12,7 +12,7 @@ import org.junit.Test;
 import com.rewedigital.examples.msintegration.composer.composing.ContentMarkupHandler;
 import com.rewedigital.examples.msintegration.composer.composing.ContentRange;
 
-public class AssetsParserTest {
+public class ContentMarkupHandlerTest {
 
     private static final ContentRange defaultContentRange = new ContentRange(123, 456);
 

@@ -6,7 +6,7 @@ import java.util.concurrent.CompletableFuture;
 
 import com.spotify.apollo.Response;
 
-public class IncludedService {
+class IncludedService {
 
     public static class WithResponse {
         private final int startOffset;

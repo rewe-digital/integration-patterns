@@ -4,6 +4,6 @@ import java.util.concurrent.CompletableFuture;
 
 import com.spotify.apollo.Response;
 
-public interface ContentComposer {
+interface ContentComposer {
     CompletableFuture<Composition> composeContent(final Response<String> templateResponse);
 }

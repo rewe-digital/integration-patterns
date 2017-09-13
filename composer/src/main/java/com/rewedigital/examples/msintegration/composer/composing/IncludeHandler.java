@@ -14,7 +14,7 @@ import org.attoparser.AbstractChainedMarkupHandler;
 import org.attoparser.ParseException;
 import org.attoparser.util.TextUtil;
 
-public class IncludeHandler extends AbstractChainedMarkupHandler {
+class IncludeHandler extends AbstractChainedMarkupHandler {
 
     private static final char[] INCLUDE = "rewe-digital-include".toCharArray();
 

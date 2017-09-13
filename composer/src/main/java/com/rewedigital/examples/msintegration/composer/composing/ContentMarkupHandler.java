@@ -9,7 +9,7 @@ import org.attoparser.AbstractMarkupHandler;
 import org.attoparser.ParseException;
 import org.attoparser.util.TextUtil;
 
-public class ContentMarkupHandler extends AbstractMarkupHandler {
+class ContentMarkupHandler extends AbstractMarkupHandler {
 
     private int contentStart = 0;
     private int contentEnd = 0;

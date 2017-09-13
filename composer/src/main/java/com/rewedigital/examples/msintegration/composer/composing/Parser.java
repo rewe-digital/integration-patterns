@@ -10,7 +10,7 @@ import org.attoparser.config.ParseConfiguration.ElementBalancing;
 import com.google.common.base.Throwables;
 
 
-public class Parser {
+class Parser {
 
     private static final IMarkupParser _PARSER = new MarkupParser(parserConfig());
     public static final Parser PARSER = new Parser();

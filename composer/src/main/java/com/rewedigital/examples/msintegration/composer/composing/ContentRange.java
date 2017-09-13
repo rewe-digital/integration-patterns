@@ -1,6 +1,6 @@
 package com.rewedigital.examples.msintegration.composer.composing;
 
-public class ContentRange {
+class ContentRange {
 
     private final int start;
     private final int end;

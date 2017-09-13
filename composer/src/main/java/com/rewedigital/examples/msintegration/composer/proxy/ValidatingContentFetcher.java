@@ -1,4 +1,4 @@
-package com.rewedigital.examples.msintegration.composer.composing;
+package com.rewedigital.examples.msintegration.composer.proxy;
 
 import static java.util.Objects.requireNonNull;
 
@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.damnhandy.uri.template.UriTemplate;
+import com.rewedigital.examples.msintegration.composer.composing.ContentFetcher;
 import com.spotify.apollo.Client;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.Response;
