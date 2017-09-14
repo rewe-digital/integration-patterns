@@ -1,21 +1,53 @@
-package com.rewedigital.examples.msintegration.composer.composing.parser;
+package com.rewedigital.examples.msintegration.composer.composing;
+
+import static com.rewedigital.examples.msintegration.composer.util.StreamUtil.flatten;
+import static java.util.stream.Collectors.toList;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Stream;
 
-import org.attoparser.AbstractMarkupHandler;
+import org.attoparser.AbstractChainedMarkupHandler;
 import org.attoparser.ParseException;
 import org.attoparser.util.TextUtil;
 
-public class ContentContributorSelectorHandler extends AbstractMarkupHandler {
+class IncludeHandler extends AbstractChainedMarkupHandler {
 
-    private Optional<IncludedService> include = Optional.empty();
-    private final List<IncludedService> includedServices = new ArrayList<>();
     private static final char[] INCLUDE = "rewe-digital-include".toCharArray();
 
-    public List<IncludedService> includedServices() {
-        return includedServices;
+    private final ContentFetcher contentFetcher;
+    private final ContentComposer composer;
+    private final List<IncludedService> includedServices = new ArrayList<>();
+    private final String template;
+
+    private Optional<IncludedService> include = Optional.empty();
+
+    public IncludeHandler(final ContentFetcher contentFetcher, final ContentComposer composer,
+        final ContentRange defaultContentRange, final String template) {
+        super(new ContentMarkupHandler(defaultContentRange));
+        this.template = template;
+        this.contentFetcher = Objects.requireNonNull(contentFetcher);
+        this.composer = Objects.requireNonNull(composer);
+    }
+
+    public CompletableFuture<Composition> composeIncludes() {
+        Stream<CompletableFuture<Composition>> composedIncludes = includedServices.stream()
+            .filter(s -> s.isInRage(contentRange()))
+            .map(s -> s.fetch(contentFetcher)
+                .thenCompose(r -> r.compose(composer)));
+        return flatten(composedIncludes)
+            .thenApply(c -> new Composition(template, contentRange(), assetLinks(), c.collect(toList())));
+    }
+
+    private ContentRange contentRange() {
+        return ((ContentMarkupHandler) getNext()).contentRange();
+    }
+
+    private List<String> assetLinks() {
+        return ((ContentMarkupHandler) getNext()).assetLinks();
     }
 
     @Override
@@ -61,5 +93,4 @@ public class ContentContributorSelectorHandler extends AbstractMarkupHandler {
     private boolean isIncludeElement(final char[] buffer, final int nameOffset, final int nameLen) {
         return TextUtil.contains(true, buffer, nameOffset, nameLen, INCLUDE, 0, INCLUDE.length);
     }
-
 }
