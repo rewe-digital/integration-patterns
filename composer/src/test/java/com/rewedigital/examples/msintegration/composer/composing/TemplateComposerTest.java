@@ -77,9 +77,9 @@ public class TemplateComposerTest {
         final TemplateComposer composer = makeComposer(aClientReturning(Status.BAD_REQUEST));
         final Response<String> result = composer
             .composeTemplate(
-                r("template content <rewe-digital-include path=\"http://mock/\">default content</rewe-digital-include>"))
+                r("template content <rewe-digital-include path=\"http://mock/\"><rewe-digital-content><div>default content</div></rewe-digital-content></rewe-digital-include>"))
             .get();
-        assertThat(result.payload()).contains("template content default content");
+        assertThat(result.payload().get()).contains("template content <div>default content</div>");
     }
 
 
@@ -92,7 +92,7 @@ public class TemplateComposerTest {
     }
 
     private Client aClientWithSimpleContent(final String content, final String head) {
-        Response<ByteString> response = contentResponse(content, head);
+        final Response<ByteString> response = contentResponse(content, head);
 
         final Client client = mock(Client.class);
         when(client.send(any()))
@@ -128,11 +128,11 @@ public class TemplateComposerTest {
             .withHeader("Content-Type", "text/html");
     }
 
-    private CompletionStage<Response<ByteString>> statusResponse(Status status) {
+    private CompletionStage<Response<ByteString>> statusResponse(final Status status) {
         return completedFuture(Response.forStatus(status));
     }
 
-    private Response<String> r(String body) {
+    private Response<String> r(final String body) {
         return Response.forPayload(body);
     }
 }

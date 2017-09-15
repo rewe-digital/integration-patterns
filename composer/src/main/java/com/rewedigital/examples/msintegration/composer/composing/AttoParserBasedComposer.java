@@ -33,7 +33,7 @@ public class AttoParserBasedComposer implements ContentComposer, TemplateCompose
         return includeHandler;
     }
 
-    private static String bodyOf(Response<String> templateResponse) {
+    private static String bodyOf(final Response<String> templateResponse) {
         return templateResponse.payload().orElse("");
     }
 }

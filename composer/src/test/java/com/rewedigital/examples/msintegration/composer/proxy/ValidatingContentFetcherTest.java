@@ -26,7 +26,7 @@ public class ValidatingContentFetcherTest {
     @Test
     public void fetchesEmptyContentForMissingPath() throws Exception {
         final Response<String> result =
-            new ValidatingContentFetcher(mock(Client.class), emptyMap()).fetch(null).get();
+            new ValidatingContentFetcher(mock(Client.class), emptyMap()).fetch(null, null).get();
         assertThat(result.payload()).contains("");
     }
 
@@ -34,8 +34,8 @@ public class ValidatingContentFetcherTest {
     public void fetchesContentFromPath() throws Exception {
         final Client client = mock(Client.class);
         when(client.send(aRequestWithPath("/some/path"))).thenReturn(aResponse("ok"));
-        Response<String> result =
-            new ValidatingContentFetcher(client, emptyMap()).fetch("/some/path").get();
+        final Response<String> result =
+            new ValidatingContentFetcher(client, emptyMap()).fetch("/some/path", "fallback").get();
         assertThat(result.payload()).contains("ok");
     }
 
@@ -43,8 +43,8 @@ public class ValidatingContentFetcherTest {
     public void expandsPathWithParameters() throws Exception {
         final Client client = mock(Client.class);
         when(client.send(aRequestWithPath("/some/path/val"))).thenReturn(aResponse("ok"));
-        Response<String> result =
-            new ValidatingContentFetcher(client, params("var", "val")).fetch("/some/path/{var}").get();
+        final Response<String> result =
+            new ValidatingContentFetcher(client, params("var", "val")).fetch("/some/path/{var}", "fallback").get();
         assertThat(result.payload()).contains("ok");
     }
 
@@ -52,8 +52,8 @@ public class ValidatingContentFetcherTest {
     public void defaultsNonHTMLResponsesToEmpty() throws Exception {
         final Client client = mock(Client.class);
         when(client.send(aRequestWithPath("/some/path"))).thenReturn(aResponse("ok", "text/json"));
-        Response<String> result =
-            new ValidatingContentFetcher(client, emptyMap()).fetch("/some/path").get();
+        final Response<String> result =
+            new ValidatingContentFetcher(client, emptyMap()).fetch("/some/path", "").get();
         assertThat(result.payload()).contains("");
     }
 
