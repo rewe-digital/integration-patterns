@@ -103,7 +103,8 @@ public class TemplateComposerTest {
         return Response
             .forPayload(
                 ByteString.encodeUtf8("<html><head>" + head + "</head><body><rewe-digital-content>" + content
-                    + "</rewe-digital-content></body></html>"));
+                    + "</rewe-digital-content></body></html>"))
+            .withHeader("Content-Type", "text/html");
     }
 
     private Response<String> r(String body) {

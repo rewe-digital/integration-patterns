@@ -37,11 +37,20 @@ public class ValidatingContentFetcher implements ContentFetcher {
 
         final String expandedPath = UriTemplate.fromTemplate(path).expand(parsedPathArguments);
         return client.send(Request.forUri(expandedPath, "GET"))
+            .thenApply(this::acceptHtmlOnly)
             .thenApply(this::toStringPayload)
             .toCompletableFuture();
     }
 
     private Response<String> toStringPayload(final Response<ByteString> response) {
         return response.withPayload(response.payload().map(p -> p.utf8()).orElse(""));
+    }
+
+    private Response<ByteString> acceptHtmlOnly(final Response<ByteString> response) {
+        final String contentType = response.header("Content-Type").orElse("other");
+        if (contentType != null && contentType.contains("text/html")) {
+            return response;
+        }
+        return response.withPayload(ByteString.EMPTY);
     }
 }
