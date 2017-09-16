@@ -15,8 +15,7 @@ class IncludeProcessor {
     private final String template;
 
     public IncludeProcessor(final String template, final List<IncludedService> includedServices,
-        final ContentRange contentRange,
-        final List<String> assetLinks) {
+        final ContentRange contentRange, final List<String> assetLinks) {
         this.template = template;
         this.includedServices = includedServices;
         this.contentRange = contentRange;
