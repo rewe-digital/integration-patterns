@@ -9,7 +9,6 @@ import java.util.List;
 
 import org.junit.Test;
 
-import com.rewedigital.examples.msintegration.composer.composing.ContentMarkupHandler;
 import com.rewedigital.examples.msintegration.composer.composing.ContentRange;
 
 public class ContentMarkupHandlerTest {

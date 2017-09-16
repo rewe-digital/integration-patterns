@@ -17,23 +17,23 @@ public class AttoParserBasedComposer implements ContentComposer, TemplateCompose
     @Override
     public CompletableFuture<Response<String>> composeTemplate(final Response<String> templateResponse) {
         return parse(bodyOf(templateResponse), ContentRange.allOf(bodyOf(templateResponse)))
-            .composeIncludes()
+            .composeIncludes(contentFetcher, this)
             .thenApply(c -> c.toResponse());
     }
 
     @Override
     public CompletableFuture<Composition> composeContent(final Response<String> templateResponse) {
         return parse(bodyOf(templateResponse), ContentRange.empty())
-            .composeIncludes();
+            .composeIncludes(contentFetcher, this);
     }
 
-    private IncludeHandler parse(final String template, final ContentRange defaultContentRange) {
-        final IncludeHandler includeHandler = new IncludeHandler(contentFetcher, this, defaultContentRange, template);
+    private IncludeProcessor parse(final String template, final ContentRange defaultContentRange) {
+        final IncludeMarkupHandler includeHandler = new IncludeMarkupHandler(defaultContentRange);
         Parser.PARSER.parse(template, includeHandler);
-        return includeHandler;
+        return includeHandler.processor(template);
     }
 
-    private static String bodyOf(Response<String> templateResponse) {
+    private static String bodyOf(final Response<String> templateResponse) {
         return templateResponse.payload().orElse("");
     }
 }

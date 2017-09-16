@@ -1,13 +1,16 @@
 package com.rewedigital.examples.msintegration.composer.composing;
 
+import static java.util.Arrays.asList;
+import static java.util.concurrent.CompletableFuture.completedFuture;
+import static okio.ByteString.encodeUtf8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
 import org.junit.Test;
@@ -15,6 +18,7 @@ import org.junit.Test;
 import com.rewedigital.examples.msintegration.composer.proxy.ValidatingContentFetcher;
 import com.spotify.apollo.Client;
 import com.spotify.apollo.Response;
+import com.spotify.apollo.Status;
 
 import okio.ByteString;
 
@@ -27,7 +31,7 @@ public class TemplateComposerTest {
         final Response<String> result = composer
             .composeTemplate(r("template <rewe-digital-include></rewe-digital-include> content")).get();
 
-        assertThat(result.payload().get()).isEqualTo("template  content");
+        assertThat(result.payload()).contains("template  content");
     }
 
     @Test
@@ -40,7 +44,7 @@ public class TemplateComposerTest {
                 "template content <rewe-digital-include path=\"http://mock/\"></rewe-digital-include> more content"))
             .get();
 
-        assertThat(result.payload().get()).isEqualTo("template content " + content + " more content");
+        assertThat(result.payload()).contains("template content " + content + " more content");
     }
 
     @Test
@@ -50,7 +54,7 @@ public class TemplateComposerTest {
         final Response<String> result = composer
             .composeTemplate(r("<head></head><rewe-digital-include path=\"http://mock/\"></rewe-digital-include>"))
             .get();
-        assertThat(result.payload().get()).isEqualTo(
+        assertThat(result.payload()).contains(
             "<head><link rel=\"stylesheet\" data-rd-options=\"include\" href=\"css/link\" />\n" +
                 "</head>");
     }
@@ -65,7 +69,17 @@ public class TemplateComposerTest {
         final Response<String> result = composer
             .composeTemplate(r("<rewe-digital-include path=\"http://mock/\"></rewe-digital-include>"))
             .get();
-        assertThat(result.payload().get()).isEqualTo(innerContent);
+        assertThat(result.payload()).contains(innerContent);
+    }
+
+    @Test
+    public void usesFallbackIfContentReturnsWithError() throws Exception {
+        final TemplateComposer composer = makeComposer(aClientReturning(Status.BAD_REQUEST));
+        final Response<String> result = composer
+            .composeTemplate(
+                r("template content <rewe-digital-include path=\"http://mock/\"><rewe-digital-content><div>default content</div></rewe-digital-content></rewe-digital-include>"))
+            .get();
+        assertThat(result.payload().get()).contains("template content <div>default content</div>");
     }
 
 
@@ -78,35 +92,47 @@ public class TemplateComposerTest {
     }
 
     private Client aClientWithSimpleContent(final String content, final String head) {
-        Response<ByteString> response = contentResponse(content, head);
+        final Response<ByteString> response = contentResponse(content, head);
 
         final Client client = mock(Client.class);
         when(client.send(any()))
-            .thenReturn(CompletableFuture.completedFuture(response));
+            .thenReturn(completedFuture(response));
         return client;
     }
 
     private Client aClientWithConsecutiveContent(final String firstContent, final String... other) {
         final Client client = mock(Client.class);
         @SuppressWarnings("unchecked")
-        final CompletableFuture<Response<ByteString>>[] otherResponses = Arrays.asList(other)
+        final CompletableFuture<Response<ByteString>>[] otherResponses = asList(other)
             .stream()
-            .map(c -> CompletableFuture.completedFuture(contentResponse(c, "")))
+            .map(c -> completedFuture(contentResponse(c, "")))
             .collect(Collectors.toList()).toArray(new CompletableFuture[0]);
 
-        when(client.send(any())).thenReturn(CompletableFuture.completedFuture(contentResponse(firstContent, "")),
+        when(client.send(any())).thenReturn(completedFuture(contentResponse(firstContent, "")),
             otherResponses);
         return client;
     }
 
+    private Client aClientReturning(final Status status) {
+        final Client client = mock(Client.class);
+        when(client.send(any())).thenReturn(statusResponse(status));
+        return client;
+    }
+
+
     private Response<ByteString> contentResponse(final String content, final String head) {
         return Response
             .forPayload(
-                ByteString.encodeUtf8("<html><head>" + head + "</head><body><rewe-digital-content>" + content
-                    + "</rewe-digital-content></body></html>"));
+                encodeUtf8("<html><head>" + head + "</head><body><rewe-digital-content>" + content
+                    + "</rewe-digital-content></body></html>"))
+            .withHeader("Content-Type", "text/html");
     }
 
-    private Response<String> r(String body) {
+    private CompletionStage<Response<ByteString>> statusResponse(final Status status) {
+        return completedFuture(Response.forStatus(status));
+    }
+
+    private Response<String> r(final String body) {
         return Response.forPayload(body);
     }
 }

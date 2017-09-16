@@ -29,7 +29,7 @@ public class ValidatingContentFetcher implements ContentFetcher {
     }
 
     @Override
-    public CompletableFuture<Response<String>> fetch(final String path) {
+    public CompletableFuture<Response<String>> fetch(final String path, final String fallback) {
         if (path == null || path.trim().isEmpty()) {
             LOGGER.warn("Empty path attribute in include found");
             return CompletableFuture.completedFuture(Response.forPayload(""));
@@ -37,11 +37,21 @@ public class ValidatingContentFetcher implements ContentFetcher {
 
         final String expandedPath = UriTemplate.fromTemplate(path).expand(parsedPathArguments);
         return client.send(Request.forUri(expandedPath, "GET"))
-            .thenApply(this::toStringPayload)
+            .thenApply(this::acceptHtmlOnly)
+            .thenApply(r -> toStringPayload(r, fallback))
             .toCompletableFuture();
     }
 
-    private Response<String> toStringPayload(final Response<ByteString> response) {
-        return response.withPayload(response.payload().map(p -> p.utf8()).orElse(""));
+    private Response<String> toStringPayload(final Response<ByteString> response, final String fallback) {
+        final String value = response.payload().map(p -> p.utf8()).orElse(fallback);
+        return response.withPayload(value);
+    }
+
+    private Response<ByteString> acceptHtmlOnly(final Response<ByteString> response) {
+        final String contentType = response.header("Content-Type").orElse("other");
+        if (contentType != null && contentType.contains("text/html")) {
+            return response;
+        }
+        return response.withPayload(null);
     }
 }
