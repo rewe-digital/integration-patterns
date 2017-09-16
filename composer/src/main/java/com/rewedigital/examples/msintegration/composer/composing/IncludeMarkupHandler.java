@@ -1,15 +1,9 @@
 package com.rewedigital.examples.msintegration.composer.composing;
 
-import static com.rewedigital.examples.msintegration.composer.util.StreamUtil.flatten;
-import static java.util.stream.Collectors.toList;
-
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Stream;
 
 import org.attoparser.AbstractChainedMarkupHandler;
 import org.attoparser.IMarkupHandler;
@@ -17,37 +11,26 @@ import org.attoparser.ParseException;
 import org.attoparser.output.OutputMarkupHandler;
 import org.attoparser.util.TextUtil;
 
-class IncludeHandler extends AbstractChainedMarkupHandler {
+class IncludeMarkupHandler extends AbstractChainedMarkupHandler {
 
     private static final char[] INCLUDE = "rewe-digital-include".toCharArray();
 
-    private final ContentFetcher contentFetcher;
-    private final ContentComposer composer;
     private final List<IncludedService> includedServices = new ArrayList<>();
-    private final String template;
-
     private Optional<IncludedService> include = Optional.empty();
     private StringWriter fallbackWriter;
     private IMarkupHandler next;
     private boolean collectAttributes = false;
 
-    public IncludeHandler(final ContentFetcher contentFetcher, final ContentComposer composer,
-        final ContentRange defaultContentRange, final String template) {
+    public IncludeMarkupHandler(final ContentRange defaultContentRange) {
         super(new ContentMarkupHandler(defaultContentRange));
-        this.template = template;
-        this.contentFetcher = Objects.requireNonNull(contentFetcher);
-        this.composer = Objects.requireNonNull(composer);
         next = super.getNext();
     }
 
-    public CompletableFuture<Composition> composeIncludes() {
-        final Stream<CompletableFuture<Composition>> composedIncludes = includedServices.stream()
-            .filter(s -> s.isInRage(contentRange()))
-            .map(s -> s.fetch(contentFetcher)
-                .thenCompose(r -> r.compose(composer)));
-        return flatten(composedIncludes)
-            .thenApply(c -> new Composition(template, contentRange(), assetLinks(), c.collect(toList())));
+    public IncludeProcessor processor(final String template) {
+        return new IncludeProcessor(template, includedServices, contentRange(),
+            assetLinks());
     }
+
 
     private ContentRange contentRange() {
         return ((ContentMarkupHandler) getNext()).contentRange();
@@ -332,4 +315,5 @@ class IncludeHandler extends AbstractChainedMarkupHandler {
             contentOffset, contentLen, contentLine, contentCol,
             outerOffset, outerLen, line, col);
     }
+
 }
