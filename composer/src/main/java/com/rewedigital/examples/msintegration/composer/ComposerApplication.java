@@ -35,7 +35,7 @@ public class ComposerApplication {
                 new ComposingRequestHandler(
                     new BackendRouting(StaticBackendRoutes.routes()),
                     new TemplateClient(),
-                    new ComposerFactory());
+                    new ComposerFactory(environment.config().getConfig("composer.html")));
 
             environment.routingEngine()
                 .registerAutoRoute(Route.async("GET", "/", rc -> handler.execute(rc)))

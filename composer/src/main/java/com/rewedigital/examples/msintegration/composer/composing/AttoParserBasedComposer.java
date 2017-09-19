@@ -9,8 +9,10 @@ import com.spotify.apollo.Response;
 public class AttoParserBasedComposer implements ContentComposer, TemplateComposer {
 
     private final ContentFetcher contentFetcher;
+    private final ComposerConfiguration configuration;
 
-    public AttoParserBasedComposer(final ContentFetcher contentFetcher) {
+    public AttoParserBasedComposer(final ContentFetcher contentFetcher, final ComposerConfiguration configuration) {
+        this.configuration = configuration;
         this.contentFetcher = requireNonNull(contentFetcher);
     }
 
@@ -28,7 +30,7 @@ public class AttoParserBasedComposer implements ContentComposer, TemplateCompose
     }
 
     private IncludeProcessor parse(final String template, final ContentRange defaultContentRange) {
-        final IncludeMarkupHandler includeHandler = new IncludeMarkupHandler(defaultContentRange);
+        final IncludeMarkupHandler includeHandler = new IncludeMarkupHandler(defaultContentRange, configuration);
         Parser.PARSER.parse(template, includeHandler);
         return includeHandler.processor(template);
     }

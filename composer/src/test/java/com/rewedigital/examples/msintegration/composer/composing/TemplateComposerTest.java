@@ -84,7 +84,8 @@ public class TemplateComposerTest {
 
 
     private TemplateComposer makeComposer(final Client client) {
-        return new AttoParserBasedComposer(new ValidatingContentFetcher(client, Collections.emptyMap()));
+        return new AttoParserBasedComposer(new ValidatingContentFetcher(client, Collections.emptyMap()),
+            new ComposerConfiguration("rewe-digital-include", "rewe-digital-content", "data-rd-options"));
     }
 
     private Client aClientWithSimpleContent(final String content) {

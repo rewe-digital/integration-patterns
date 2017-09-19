@@ -47,7 +47,9 @@ public class ContentMarkupHandlerTest {
     }
 
     private ContentMarkupHandler parse(final String data) {
-        final ContentMarkupHandler markupHandler = new ContentMarkupHandler(defaultContentRange);
+        final ContentMarkupHandler markupHandler =
+            new ContentMarkupHandler(defaultContentRange,
+                new ComposerConfiguration("", "rewe-digital-content", "data-rd-options"));
         PARSER.parse(data, markupHandler);
         return markupHandler;
     }

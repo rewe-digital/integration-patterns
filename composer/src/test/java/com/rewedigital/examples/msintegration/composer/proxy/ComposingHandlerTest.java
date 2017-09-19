@@ -25,6 +25,7 @@ import com.spotify.apollo.Response;
 import com.spotify.apollo.Status;
 import com.spotify.apollo.route.Rule;
 import com.spotify.apollo.route.RuleRouter;
+import com.typesafe.config.Config;
 
 import okio.ByteString;
 
@@ -36,18 +37,18 @@ public class ComposingHandlerTest {
     public void returnsResponseFromTemplateRoute() throws Exception {
         final ComposingRequestHandler handler =
             new ComposingRequestHandler(new BackendRouting(aRouter("/<path:path>", TEMPLATE)),
-                StubTemplateClient.returning(Status.OK, SERVICE_RESPONSE), new ComposerFactory());
+                StubTemplateClient.returning(Status.OK, SERVICE_RESPONSE), composerFactory());
 
         final Response<ByteString> response = handler.execute(aContext()).toCompletableFuture().get();
 
         assertThat(response.payload().get().utf8()).isEqualTo(SERVICE_RESPONSE);
     }
-    
+
     @Test
     public void returnsDefaultResponseFromErrorOnTemplateRoute() throws Exception {
         final ComposingRequestHandler handler =
             new ComposingRequestHandler(new BackendRouting(aRouter("/<path:path>", TEMPLATE)),
-                 StubTemplateClient.returning(Status.BAD_REQUEST, ""), new ComposerFactory());
+                StubTemplateClient.returning(Status.BAD_REQUEST, ""), composerFactory());
 
         final Response<ByteString> response = handler.execute(aContext()).toCompletableFuture().get();
         assertThat(response.status()).isEqualTo(Status.INTERNAL_SERVER_ERROR);
@@ -57,7 +58,7 @@ public class ComposingHandlerTest {
     public void returnsErrorResponseFromProxyRoute() throws Exception {
         final ComposingRequestHandler handler =
             new ComposingRequestHandler(new BackendRouting(aRouter("/<path:path>", PROXY)),
-                 StubTemplateClient.returning(Status.BAD_REQUEST, ""), new ComposerFactory());
+                StubTemplateClient.returning(Status.BAD_REQUEST, ""), composerFactory());
 
         final Response<ByteString> response = handler.execute(aContext()).toCompletableFuture().get();
         assertThat(response.status()).isEqualTo(Status.BAD_REQUEST);
@@ -80,6 +81,15 @@ public class ComposingHandlerTest {
         when(client.send(any())).thenThrow(new RuntimeException());
         when(context.requestScopedClient()).thenReturn(client);
         return context;
+    }
+
+
+    private ComposerFactory composerFactory() {
+        final Config config = mock(Config.class);
+        when(config.getString("include-tag")).thenReturn("rewe-digital-include");
+        when(config.getString("content-tag")).thenReturn("rewe-content-include");
+        when(config.getString("asset-options-attribute")).thenReturn("data-rd-options");
+        return new ComposerFactory(config);
     }
 
     private static class StubTemplateClient extends TemplateClient {
