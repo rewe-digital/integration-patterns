@@ -22,7 +22,7 @@ class IncludeMarkupHandler extends AbstractChainedMarkupHandler {
     private boolean collectAttributes = false;
 
 
-    public IncludeMarkupHandler(final ContentRange defaultContentRange, final ComposerConfiguration configuration) {
+    public IncludeMarkupHandler(final ContentRange defaultContentRange, final ComposerHtmlConfiguration configuration) {
         super(new ContentMarkupHandler(defaultContentRange, configuration));
         this.includeTag = configuration.includeTag().toCharArray();
         next = super.getNext();

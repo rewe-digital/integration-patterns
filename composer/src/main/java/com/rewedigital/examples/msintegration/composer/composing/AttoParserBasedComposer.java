@@ -9,9 +9,9 @@ import com.spotify.apollo.Response;
 public class AttoParserBasedComposer implements ContentComposer, TemplateComposer {
 
     private final ContentFetcher contentFetcher;
-    private final ComposerConfiguration configuration;
+    private final ComposerHtmlConfiguration configuration;
 
-    public AttoParserBasedComposer(final ContentFetcher contentFetcher, final ComposerConfiguration configuration) {
+    public AttoParserBasedComposer(final ContentFetcher contentFetcher, final ComposerHtmlConfiguration configuration) {
         this.configuration = configuration;
         this.contentFetcher = requireNonNull(contentFetcher);
     }

@@ -29,7 +29,7 @@ class ContentMarkupHandler extends AbstractMarkupHandler {
         return links;
     }
 
-    public ContentMarkupHandler(final ContentRange defaultContentRange, final ComposerConfiguration configuration) {
+    public ContentMarkupHandler(final ContentRange defaultContentRange, final ComposerHtmlConfiguration configuration) {
         this.defaultContentRange = defaultContentRange;
         this.contentTag = configuration.contentTag().toCharArray();
         this.assetOptionsAttribute = configuration.assetOptionsAttribute();

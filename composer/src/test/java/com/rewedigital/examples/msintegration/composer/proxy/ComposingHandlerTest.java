@@ -14,6 +14,7 @@ import java.util.concurrent.CompletionStage;
 
 import org.junit.Test;
 
+import com.rewedigital.examples.msintegration.composer.configuration.DefaultConfiguration;
 import com.rewedigital.examples.msintegration.composer.routing.BackendRouting;
 import com.rewedigital.examples.msintegration.composer.routing.BackendRouting.RouteMatch;
 import com.rewedigital.examples.msintegration.composer.routing.StaticBackendRoutes;
@@ -25,7 +26,6 @@ import com.spotify.apollo.Response;
 import com.spotify.apollo.Status;
 import com.spotify.apollo.route.Rule;
 import com.spotify.apollo.route.RuleRouter;
-import com.typesafe.config.Config;
 
 import okio.ByteString;
 
@@ -85,11 +85,7 @@ public class ComposingHandlerTest {
 
 
     private ComposerFactory composerFactory() {
-        final Config config = mock(Config.class);
-        when(config.getString("include-tag")).thenReturn("rewe-digital-include");
-        when(config.getString("content-tag")).thenReturn("rewe-content-include");
-        when(config.getString("asset-options-attribute")).thenReturn("data-rd-options");
-        return new ComposerFactory(config);
+        return new ComposerFactory(DefaultConfiguration.defaultConfiguration().getConfig("composer.html"));
     }
 
     private static class StubTemplateClient extends TemplateClient {
