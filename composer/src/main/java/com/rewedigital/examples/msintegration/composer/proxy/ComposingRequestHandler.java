@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import com.rewedigital.examples.msintegration.composer.routing.BackendRouting;
 import com.rewedigital.examples.msintegration.composer.routing.BackendRouting.RouteMatch;
+import com.rewedigital.examples.msintegration.composer.session.Session;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.RequestContext;
 import com.spotify.apollo.Response;
@@ -42,15 +43,16 @@ public class ComposingRequestHandler {
 
     public CompletionStage<Response<ByteString>> execute(final RequestContext context) {
         final Request request = context.request();
-        final Optional<RouteMatch> match = routing.matches(request);
+        final Session session = null; // FIXME TV
+        final Optional<RouteMatch> match = routing.matches(request, session);
         return match.map(rm -> {
             LOGGER.info("The request {} matched the backend route {}.", request, match);
-            return templateClient.getTemplate(rm, context).thenCompose(r -> compose(context, rm, r));
+            return templateClient.getTemplate(rm, context, session).thenCompose(r -> compose(context, rm, r, session));
         }).orElse(defaultResponse());
     }
 
     private CompletionStage<Response<ByteString>> compose(final RequestContext context, final RouteMatch match,
-        final Response<ByteString> response) {
+        final Response<ByteString> response, final Session session) {
         if (match.shouldProxy()) {
             return CompletableFuture.completedFuture(response);
         }
@@ -62,7 +64,7 @@ public class ComposingRequestHandler {
         }
 
         final String responseAsUtf8 = response.payload().get().utf8();
-        return composerFactory.build(context.requestScopedClient(), match.parsedPathArguments())
+        return composerFactory.build(context.requestScopedClient(), match.parsedPathArguments(), session)
             .composeTemplate(response.withPayload(responseAsUtf8))
             .thenApply(r -> toByteString(r)
                 .withHeaders(transformHeaders(response.headerEntries())));

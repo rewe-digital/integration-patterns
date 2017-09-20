@@ -15,6 +15,7 @@ import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mockito;
 
+import com.rewedigital.examples.msintegration.composer.session.Session;
 import com.spotify.apollo.Client;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.Response;
@@ -26,7 +27,7 @@ public class ValidatingContentFetcherTest {
     @Test
     public void fetchesEmptyContentForMissingPath() throws Exception {
         final Response<String> result =
-            new ValidatingContentFetcher(mock(Client.class), emptyMap()).fetch(null, null).get();
+            new ValidatingContentFetcher(mock(Client.class), emptyMap(), Session.empty()).fetch(null, null).get();
         assertThat(result.payload()).contains("");
     }
 
@@ -35,7 +36,7 @@ public class ValidatingContentFetcherTest {
         final Client client = mock(Client.class);
         when(client.send(aRequestWithPath("/some/path"))).thenReturn(aResponse("ok"));
         final Response<String> result =
-            new ValidatingContentFetcher(client, emptyMap()).fetch("/some/path", "fallback").get();
+            new ValidatingContentFetcher(client, emptyMap(), Session.empty()).fetch("/some/path", "fallback").get();
         assertThat(result.payload()).contains("ok");
     }
 
@@ -44,7 +45,8 @@ public class ValidatingContentFetcherTest {
         final Client client = mock(Client.class);
         when(client.send(aRequestWithPath("/some/path/val"))).thenReturn(aResponse("ok"));
         final Response<String> result =
-            new ValidatingContentFetcher(client, params("var", "val")).fetch("/some/path/{var}", "fallback").get();
+            new ValidatingContentFetcher(client, params("var", "val"), Session.empty())
+                .fetch("/some/path/{var}", "fallback").get();
         assertThat(result.payload()).contains("ok");
     }
 
@@ -53,7 +55,7 @@ public class ValidatingContentFetcherTest {
         final Client client = mock(Client.class);
         when(client.send(aRequestWithPath("/some/path"))).thenReturn(aResponse("ok", "text/json"));
         final Response<String> result =
-            new ValidatingContentFetcher(client, emptyMap()).fetch("/some/path", "").get();
+            new ValidatingContentFetcher(client, emptyMap(), Session.empty()).fetch("/some/path", "").get();
         assertThat(result.payload()).contains("");
     }
 

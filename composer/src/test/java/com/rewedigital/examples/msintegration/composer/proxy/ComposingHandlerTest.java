@@ -19,6 +19,7 @@ import com.rewedigital.examples.msintegration.composer.routing.BackendRouting;
 import com.rewedigital.examples.msintegration.composer.routing.BackendRouting.RouteMatch;
 import com.rewedigital.examples.msintegration.composer.routing.StaticBackendRoutes;
 import com.rewedigital.examples.msintegration.composer.routing.StaticBackendRoutes.Match;
+import com.rewedigital.examples.msintegration.composer.session.Session;
 import com.spotify.apollo.Client;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.RequestContext;
@@ -94,7 +95,7 @@ public class ComposingHandlerTest {
             return new TemplateClient() {
                 @Override
                 public CompletionStage<Response<ByteString>> getTemplate(final RouteMatch match,
-                    final RequestContext context) {
+                    final RequestContext context, final Session session) {
                     return CompletableFuture.completedFuture(Response.of(status, ByteString.encodeUtf8(responseBody)));
                 }
             };

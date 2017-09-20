@@ -25,6 +25,7 @@ public class DefaultConfiguration {
         result.put("composer.html.asset-options-attribute", "data-rd-options");
 
         result.put("composer.session.enable", Boolean.TRUE);
+        result.put("composer.session.prefix", "x-rd");
         return result;
     }
 }
