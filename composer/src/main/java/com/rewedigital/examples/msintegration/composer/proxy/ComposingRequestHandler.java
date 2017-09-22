@@ -49,7 +49,7 @@ public class ComposingRequestHandler {
     public CompletionStage<Response<ByteString>> execute(final RequestContext context) {
         final Request request = context.request();
         final SessionLifecylce sessionLifecylce = sessionLifecycleFactory.build();
-        final Session session = sessionLifecylce.newSession(context);
+        final Session session = sessionLifecylce.buildSession(context);
         final Optional<RouteMatch> match = routing.matches(request, session);
         return match.map(rm -> {
             LOGGER.debug("The request {} matched the backend route {}.", request, match);

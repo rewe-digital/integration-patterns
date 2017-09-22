@@ -23,12 +23,12 @@ public interface SessionLifecylce extends Session.Serializer {
             }
 
             @Override
-            public Session newSession(final RequestContext requestContext) {
+            public Session buildSession(final RequestContext requestContext) {
                 return Session.empty();
             }
         };
     }
 
-    Session newSession(final RequestContext requestContext);
+    Session buildSession(final RequestContext requestContext);
 
 }

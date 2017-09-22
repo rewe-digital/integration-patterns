@@ -69,7 +69,7 @@ public class CookieBasedSessionLifecycle implements SessionLifecylce {
     }
 
     @Override
-    public Session newSession(RequestContext requestContext) {
+    public Session buildSession(RequestContext requestContext) {
         return Session.of(requestContext.request(), this);
     }
 
@@ -154,6 +154,7 @@ public class CookieBasedSessionLifecycle implements SessionLifecylce {
         return serialize(httpCookie);
     }
 
+    // helper method to write a set-cookie header from a HttpCookie instance
     private static String serialize(final HttpCookie cookie) {
         StringBuilder result = new StringBuilder();
         result.append(cookie.getName());
