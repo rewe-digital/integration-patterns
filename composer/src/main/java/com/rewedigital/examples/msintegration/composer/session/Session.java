@@ -20,15 +20,11 @@ public class Session {
         <T> Response<T> writeTo(final Response<T> response, final Map<String, String> sessionData);
     }
 
-    private static String sessionPrefix = "x-rd-";
+    private static final Session EMPTY = new Session(new LinkedList<>());
+    private static final String sessionPrefix = "x-rd-";
 
     private final List<Map.Entry<String, String>> data;
 
-    private static final Session EMPTY = new Session();
-
-    private Session() {
-        this(new LinkedList<>());
-    }
 
     private Session(final List<Map.Entry<String, String>> data) {
         this.data = data;
@@ -42,6 +38,10 @@ public class Session {
         return new Session(new LinkedList<>(data.entrySet()));
     }
 
+    public static Session of(final Request request, final Serializer serializer) {
+        return Session.of(serializer.readFrom(request));
+    }
+
     public static <T> Session of(final Response<T> response) {
         final List<Map.Entry<String, String>> data = response.headerEntries()
             .stream()
@@ -52,10 +52,6 @@ public class Session {
 
     private static boolean isSessionEntry(Entry<String, String> entry) {
         return entry.getKey().toLowerCase().startsWith(sessionPrefix);
-    }
-
-    public static Session of(final Request request, final Serializer serializer) {
-        return Session.of(serializer.readFrom(request));
     }
 
     public Request enrich(final Request request) {
