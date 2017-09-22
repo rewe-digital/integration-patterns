@@ -15,7 +15,8 @@ public class TemplateClient {
 
     public CompletionStage<Response<ByteString>> getTemplate(final RouteMatch match, final RequestContext context,
         final Session session) {
-        return context.requestScopedClient().send(Request.forUri(expandPath(match), context.request().method()));
+        return context.requestScopedClient()
+            .send(session.enrich(Request.forUri(expandPath(match), context.request().method())));
     }
 
     private String expandPath(final RouteMatch match) {

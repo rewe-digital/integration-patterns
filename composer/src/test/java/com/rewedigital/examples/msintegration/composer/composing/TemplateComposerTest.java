@@ -30,7 +30,9 @@ public class TemplateComposerTest {
         final TemplateComposer composer = makeComposer(aClientWithSimpleContent("should not be included"));
 
         final Response<String> result = composer
-            .composeTemplate(r("template <rewe-digital-include></rewe-digital-include> content")).get();
+            .composeTemplate(r("template <rewe-digital-include></rewe-digital-include> content"))
+            .get()
+            .response();
 
         assertThat(result.payload()).contains("template  content");
     }
@@ -43,7 +45,7 @@ public class TemplateComposerTest {
         final Response<String> result = composer
             .composeTemplate(r(
                 "template content <rewe-digital-include path=\"http://mock/\"></rewe-digital-include> more content"))
-            .get();
+            .get().response();
 
         assertThat(result.payload()).contains("template content " + content + " more content");
     }
@@ -54,7 +56,7 @@ public class TemplateComposerTest {
             "<link href=\"css/link\" data-rd-options=\"include\" rel=\"stylesheet\"/>"));
         final Response<String> result = composer
             .composeTemplate(r("<head></head><rewe-digital-include path=\"http://mock/\"></rewe-digital-include>"))
-            .get();
+            .get().response();
         assertThat(result.payload()).contains(
             "<head><link rel=\"stylesheet\" data-rd-options=\"include\" href=\"css/link\" />\n" +
                 "</head>");
@@ -69,7 +71,7 @@ public class TemplateComposerTest {
                 innerContent));
         final Response<String> result = composer
             .composeTemplate(r("<rewe-digital-include path=\"http://mock/\"></rewe-digital-include>"))
-            .get();
+            .get().response();
         assertThat(result.payload()).contains(innerContent);
     }
 
@@ -79,7 +81,7 @@ public class TemplateComposerTest {
         final Response<String> result = composer
             .composeTemplate(
                 r("template content <rewe-digital-include path=\"http://mock/\"><rewe-digital-content><div>default content</div></rewe-digital-content></rewe-digital-include>"))
-            .get();
+            .get().response();
         assertThat(result.payload().get()).contains("template content <div>default content</div>");
     }
 

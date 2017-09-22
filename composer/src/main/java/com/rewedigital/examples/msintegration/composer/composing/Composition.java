@@ -4,6 +4,7 @@ import java.io.StringWriter;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.rewedigital.examples.msintegration.composer.session.ResponseWithSession;
 import com.rewedigital.examples.msintegration.composer.session.Session;
 import com.spotify.apollo.Response;
 
@@ -56,8 +57,8 @@ class Composition {
         return writer.toString();
     }
 
-    public Response<String> toResponse() {
-        return mergedSession().writeTo(Response.forPayload(withAssetLinks(body())));
+    public ResponseWithSession<String> toResponse() {
+        return new ResponseWithSession<>(Response.forPayload(withAssetLinks(body())), mergedSession());
     }
 
     private Session mergedSession() {

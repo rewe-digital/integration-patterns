@@ -8,6 +8,8 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -38,7 +40,7 @@ public class ComposingHandlerTest {
     public void returnsResponseFromTemplateRoute() throws Exception {
         final ComposingRequestHandler handler =
             new ComposingRequestHandler(new BackendRouting(aRouter("/<path:path>", TEMPLATE)),
-                StubTemplateClient.returning(Status.OK, SERVICE_RESPONSE), composerFactory());
+                StubTemplateClient.returning(Status.OK, SERVICE_RESPONSE), composerFactory(), sessionSerializer());
 
         final Response<ByteString> response = handler.execute(aContext()).toCompletableFuture().get();
 
@@ -49,7 +51,7 @@ public class ComposingHandlerTest {
     public void returnsDefaultResponseFromErrorOnTemplateRoute() throws Exception {
         final ComposingRequestHandler handler =
             new ComposingRequestHandler(new BackendRouting(aRouter("/<path:path>", TEMPLATE)),
-                StubTemplateClient.returning(Status.BAD_REQUEST, ""), composerFactory());
+                StubTemplateClient.returning(Status.BAD_REQUEST, ""), composerFactory(), sessionSerializer());
 
         final Response<ByteString> response = handler.execute(aContext()).toCompletableFuture().get();
         assertThat(response.status()).isEqualTo(Status.INTERNAL_SERVER_ERROR);
@@ -59,7 +61,7 @@ public class ComposingHandlerTest {
     public void returnsErrorResponseFromProxyRoute() throws Exception {
         final ComposingRequestHandler handler =
             new ComposingRequestHandler(new BackendRouting(aRouter("/<path:path>", PROXY)),
-                StubTemplateClient.returning(Status.BAD_REQUEST, ""), composerFactory());
+                StubTemplateClient.returning(Status.BAD_REQUEST, ""), composerFactory(), sessionSerializer());
 
         final Response<ByteString> response = handler.execute(aContext()).toCompletableFuture().get();
         assertThat(response.status()).isEqualTo(Status.BAD_REQUEST);
@@ -87,6 +89,21 @@ public class ComposingHandlerTest {
 
     private ComposerFactory composerFactory() {
         return new ComposerFactory(DefaultConfiguration.defaultConfiguration().getConfig("composer.html"));
+    }
+
+    private Session.Serializer sessionSerializer() {
+        return new Session.Serializer() {
+
+            @Override
+            public <T> Response<T> writeTo(final Response<T> response, final Map<String, String> session) {
+                return response;
+            }
+
+            @Override
+            public Map<String, String> readFrom(final Request request) {
+                return Collections.emptyMap();
+            }
+        };
     }
 
     private static class StubTemplateClient extends TemplateClient {

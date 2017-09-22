@@ -33,17 +33,19 @@ public class ComposingRequestHandler {
     private final BackendRouting routing;
     private final TemplateClient templateClient;
     private final ComposerFactory composerFactory;
+    private final Session.Serializer sessionSerializer;
 
     public ComposingRequestHandler(final BackendRouting routing, final TemplateClient templateClient,
-        final ComposerFactory composerFactory) {
+        final ComposerFactory composerFactory, final Session.Serializer sessionSerializer) {
         this.routing = Objects.requireNonNull(routing);
         this.templateClient = Objects.requireNonNull(templateClient);
         this.composerFactory = Objects.requireNonNull(composerFactory);
+        this.sessionSerializer = sessionSerializer;
     }
 
     public CompletionStage<Response<ByteString>> execute(final RequestContext context) {
         final Request request = context.request();
-        final Session session = null; // FIXME TV
+        final Session session = Session.of(context.request(), sessionSerializer);
         final Optional<RouteMatch> match = routing.matches(request, session);
         return match.map(rm -> {
             LOGGER.info("The request {} matched the backend route {}.", request, match);
@@ -66,6 +68,7 @@ public class ComposingRequestHandler {
         final String responseAsUtf8 = response.payload().get().utf8();
         return composerFactory.build(context.requestScopedClient(), match.parsedPathArguments(), session)
             .composeTemplate(response.withPayload(responseAsUtf8))
+            .thenApply(r -> r.writeSessionToResponse(sessionSerializer))
             .thenApply(r -> toByteString(r)
                 .withHeaders(transformHeaders(response.headerEntries())));
     }

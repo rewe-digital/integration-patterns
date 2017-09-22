@@ -4,6 +4,7 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.concurrent.CompletableFuture;
 
+import com.rewedigital.examples.msintegration.composer.session.ResponseWithSession;
 import com.rewedigital.examples.msintegration.composer.session.Session;
 import com.spotify.apollo.Response;
 
@@ -21,7 +22,7 @@ public class AttoParserBasedComposer implements ContentComposer, TemplateCompose
     }
 
     @Override
-    public CompletableFuture<Response<String>> composeTemplate(final Response<String> templateResponse) {
+    public CompletableFuture<ResponseWithSession<String>> composeTemplate(final Response<String> templateResponse) {
         return parse(bodyOf(templateResponse), ContentRange.allOf(bodyOf(templateResponse)))
             .composeIncludes(contentFetcher, this)
             .thenApply(c -> c.withSession(session.mergeWith(Session.of(templateResponse))))
