@@ -8,8 +8,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.Collections;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -21,7 +19,10 @@ import com.rewedigital.examples.msintegration.composer.routing.BackendRouting;
 import com.rewedigital.examples.msintegration.composer.routing.BackendRouting.RouteMatch;
 import com.rewedigital.examples.msintegration.composer.routing.StaticBackendRoutes;
 import com.rewedigital.examples.msintegration.composer.routing.StaticBackendRoutes.Match;
+import com.rewedigital.examples.msintegration.composer.session.ResponseWithSession;
 import com.rewedigital.examples.msintegration.composer.session.Session;
+import com.rewedigital.examples.msintegration.composer.session.SessionLifecycleFactory;
+import com.rewedigital.examples.msintegration.composer.session.SessionLifecylce;
 import com.spotify.apollo.Client;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.RequestContext;
@@ -91,17 +92,12 @@ public class ComposingHandlerTest {
         return new ComposerFactory(DefaultConfiguration.defaultConfiguration().getConfig("composer.html"));
     }
 
-    private Session.Serializer sessionSerializer() {
-        return new Session.Serializer() {
+    private SessionLifecycleFactory sessionSerializer() {
+        return new SessionLifecycleFactory() {
 
             @Override
-            public <T> Response<T> writeTo(final Response<T> response, final Map<String, String> session) {
-                return response;
-            }
-
-            @Override
-            public Map<String, String> readFrom(final Request request) {
-                return Collections.emptyMap();
+            public SessionLifecylce build() {
+                return SessionLifecylce.noSession();
             }
         };
     }
@@ -111,9 +107,10 @@ public class ComposingHandlerTest {
         public static TemplateClient returning(final Status status, final String responseBody) {
             return new TemplateClient() {
                 @Override
-                public CompletionStage<Response<ByteString>> getTemplate(final RouteMatch match,
+                public CompletionStage<ResponseWithSession<ByteString>> getTemplate(final RouteMatch match,
                     final RequestContext context, final Session session) {
-                    return CompletableFuture.completedFuture(Response.of(status, ByteString.encodeUtf8(responseBody)));
+                    return CompletableFuture.completedFuture(
+                        new ResponseWithSession<>(Response.of(status, ByteString.encodeUtf8(responseBody)), session));
                 }
             };
         }

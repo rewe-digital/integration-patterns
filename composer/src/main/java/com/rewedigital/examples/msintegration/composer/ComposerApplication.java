@@ -9,13 +9,14 @@ import com.rewedigital.examples.msintegration.composer.proxy.ComposingRequestHan
 import com.rewedigital.examples.msintegration.composer.proxy.TemplateClient;
 import com.rewedigital.examples.msintegration.composer.routing.BackendRouting;
 import com.rewedigital.examples.msintegration.composer.routing.StaticBackendRoutes;
-import com.rewedigital.examples.msintegration.composer.session.CookieBasedSessionSerializer;
+import com.rewedigital.examples.msintegration.composer.session.CookieBasedSessionLifecycle;
 import com.spotify.apollo.Environment;
 import com.spotify.apollo.core.Service;
 import com.spotify.apollo.http.client.HttpClientModule;
 import com.spotify.apollo.httpservice.HttpService;
 import com.spotify.apollo.httpservice.LoadingException;
 import com.spotify.apollo.route.Route;
+import com.typesafe.config.Config;
 
 public class ComposerApplication {
 
@@ -34,13 +35,14 @@ public class ComposerApplication {
     private static class Initializer {
 
         private static void init(final Environment environment) {
+            final Config configuration = withDefaults(environment.config());
+
             final ComposingRequestHandler handler =
                 new ComposingRequestHandler(
                     new BackendRouting(StaticBackendRoutes.routes()),
                     new TemplateClient(),
-                    new ComposerFactory(withDefaults(environment.config())
-                        .getConfig("composer.html")),
-                    new CookieBasedSessionSerializer());
+                    new ComposerFactory(configuration.getConfig("composer.html")),
+                    new CookieBasedSessionLifecycle.Factory(configuration.getConfig("composer.session")));
 
             environment.routingEngine()
                 .registerAutoRoute(Route.async("GET", "/", rc -> handler.execute(rc)))

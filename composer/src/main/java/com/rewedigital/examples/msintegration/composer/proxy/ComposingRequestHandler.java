@@ -15,7 +15,10 @@ import org.slf4j.LoggerFactory;
 
 import com.rewedigital.examples.msintegration.composer.routing.BackendRouting;
 import com.rewedigital.examples.msintegration.composer.routing.BackendRouting.RouteMatch;
+import com.rewedigital.examples.msintegration.composer.session.ResponseWithSession;
 import com.rewedigital.examples.msintegration.composer.session.Session;
+import com.rewedigital.examples.msintegration.composer.session.SessionLifecycleFactory;
+import com.rewedigital.examples.msintegration.composer.session.SessionLifecylce;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.RequestContext;
 import com.spotify.apollo.Response;
@@ -33,28 +36,32 @@ public class ComposingRequestHandler {
     private final BackendRouting routing;
     private final TemplateClient templateClient;
     private final ComposerFactory composerFactory;
-    private final Session.Serializer sessionSerializer;
+    private final SessionLifecycleFactory sessionLifecycleFactory;
 
     public ComposingRequestHandler(final BackendRouting routing, final TemplateClient templateClient,
-        final ComposerFactory composerFactory, final Session.Serializer sessionSerializer) {
+        final ComposerFactory composerFactory, final SessionLifecycleFactory sessionLifecycleFactory) {
         this.routing = Objects.requireNonNull(routing);
         this.templateClient = Objects.requireNonNull(templateClient);
         this.composerFactory = Objects.requireNonNull(composerFactory);
-        this.sessionSerializer = sessionSerializer;
+        this.sessionLifecycleFactory = sessionLifecycleFactory;
     }
 
     public CompletionStage<Response<ByteString>> execute(final RequestContext context) {
         final Request request = context.request();
-        final Session session = Session.of(context.request(), sessionSerializer);
+        final SessionLifecylce sessionLifecylce = sessionLifecycleFactory.build();
+        final Session session = sessionLifecylce.newSession(context);
         final Optional<RouteMatch> match = routing.matches(request, session);
         return match.map(rm -> {
-            LOGGER.info("The request {} matched the backend route {}.", request, match);
-            return templateClient.getTemplate(rm, context, session).thenCompose(r -> compose(context, rm, r, session));
+            LOGGER.debug("The request {} matched the backend route {}.", request, match);
+            
+            return templateClient.getTemplate(rm, context, session)
+                .thenCompose(templateResponse -> compose(context, rm, templateResponse, sessionLifecylce));
         }).orElse(defaultResponse());
     }
 
     private CompletionStage<Response<ByteString>> compose(final RequestContext context, final RouteMatch match,
-        final Response<ByteString> response, final Session session) {
+        final ResponseWithSession<ByteString> responseWithSession, final SessionLifecylce sessionLifecylce) {
+        final Response<ByteString> response = responseWithSession.response();
         if (match.shouldProxy()) {
             return CompletableFuture.completedFuture(response);
         }
@@ -65,16 +72,16 @@ public class ComposingRequestHandler {
             return defaultResponse();
         }
 
-        final String responseAsUtf8 = response.payload().get().utf8();
-        return composerFactory.build(context.requestScopedClient(), match.parsedPathArguments(), session)
-            .composeTemplate(response.withPayload(responseAsUtf8))
-            .thenApply(r -> r.writeSessionToResponse(sessionSerializer))
+        return composerFactory
+            .build(context.requestScopedClient(), match.parsedPathArguments(), responseWithSession.session())
+            .composeTemplate(response.withPayload(response.payload().get().utf8()))
+            .thenApply(r -> r.writeSessionToResponse(sessionLifecylce))
             .thenApply(r -> toByteString(r)
                 .withHeaders(transformHeaders(response.headerEntries())));
     }
 
-    private Response<ByteString> toByteString(Response<String> r) {
-        return r.withPayload(r.payload().map(ByteString::encodeUtf8).orElse(ByteString.EMPTY));
+    private Response<ByteString> toByteString(Response<String> response) {
+        return response.withPayload(response.payload().map(ByteString::encodeUtf8).orElse(ByteString.EMPTY));
     }
 
     private Map<String, String> transformHeaders(final List<Entry<String, String>> headerEntries) {

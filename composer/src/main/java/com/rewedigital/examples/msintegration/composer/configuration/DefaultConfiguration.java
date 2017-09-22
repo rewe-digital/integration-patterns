@@ -24,8 +24,9 @@ public class DefaultConfiguration {
         result.put("composer.html.content-tag", "rewe-digital-content");
         result.put("composer.html.asset-options-attribute", "data-rd-options");
 
-        result.put("composer.session.enable", Boolean.TRUE);
-        result.put("composer.session.prefix", "x-rd");
+        result.put("composer.session.enabled", Boolean.TRUE);
+        result.put("composer.session.cookie", "rdsession");
+        result.put("composer.session.signing-algorithm", "HS512");
         return result;
     }
 }

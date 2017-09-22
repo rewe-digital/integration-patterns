@@ -13,7 +13,6 @@
 		<attoparser.version>2.0.4.RELEASE</attoparser.version>
 		<handy-uri-templates.version>2.1.5</handy-uri-templates.version>
 		<jjwt.version>0.7.0</jjwt.version>
-
 		<assertj-core.version>3.8.0</assertj-core.version>
 	</properties>
 
