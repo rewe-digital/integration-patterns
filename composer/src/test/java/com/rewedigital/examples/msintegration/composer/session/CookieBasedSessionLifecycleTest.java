@@ -12,12 +12,15 @@ import com.spotify.apollo.Response;
 
 public class CookieBasedSessionLifecycleTest {
 
+    private final CookieBasedSessionLifecycle sessionLifecycle = new CookieBasedSessionLifecycle(configuration());
+
     @Test
     public void shouldWriteAndReadCookie() {
-        final CookieBasedSessionLifecycle serializer = new CookieBasedSessionLifecycle(configuration());
         final String cookieHeader =
-            serializer.writeTo(Response.ok(), session("x-rd-key", "value")).header("Set-Cookie").get();
-        final Map<String, String> session = serializer.readFrom(Request.forUri("/").withHeader("Cookie", cookieHeader));
+            sessionLifecycle.writeTo(Response.ok(), session("x-rd-key", "value")).header("Set-Cookie").get();
+        final Map<String, String> session =
+            sessionLifecycle.readFrom(Request.forUri("/").withHeader("Cookie", cookieHeader));
+        
         assertEquals("value", session.get("x-rd-key"));
     }
 
