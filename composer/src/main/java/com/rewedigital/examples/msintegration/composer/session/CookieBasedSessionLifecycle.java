@@ -22,7 +22,6 @@ import com.spotify.apollo.RequestContext;
 import com.spotify.apollo.Response;
 import com.typesafe.config.Config;
 
-import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
@@ -49,11 +48,11 @@ public class CookieBasedSessionLifecycle implements SessionLifecylce {
     }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CookieBasedSessionLifecycle.class);
+    private static final TypeReference<HashMap<String, String>> typeRef = new TypeReference<HashMap<String, String>>() {};
     private static final String PAYLOAD = "payload";
     private static final Key defaultSigningKey = MacProvider.generateKey();
 
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final TypeReference<HashMap<String, String>> typeRef = new TypeReference<HashMap<String, String>>() {};
 
     private final SessionConfiguration configuration;
     private final JwtParser parser;
@@ -118,8 +117,7 @@ public class CookieBasedSessionLifecycle implements SessionLifecylce {
 
     private String parseSessionCookie(final HttpCookie value) {
         try {
-            final Claims body = parser.parseClaimsJws(value.getValue()).getBody();
-            return body.get(PAYLOAD, String.class);
+            return parser.parseClaimsJws(value.getValue()).getBody().get(PAYLOAD, String.class);
         } catch (JwtException e) {
             LOGGER.warn("error parsing session cookie, defaulting to empty session", e);
             return "{}";

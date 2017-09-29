@@ -1,5 +1,7 @@
 package com.rewedigital.examples.msintegration.composer.session;
 
+import java.util.Objects;
+
 import com.typesafe.config.Config;
 
 public class SessionConfiguration {
@@ -15,8 +17,8 @@ public class SessionConfiguration {
 
     SessionConfiguration(final boolean sessionEnabled, final String cookieName, final String signingAlgorithm) {
         this.sessionEnabled = sessionEnabled;
-        this.cookieName = cookieName;
-        this.signingAlgorithm = signingAlgorithm;
+        this.cookieName = Objects.requireNonNull(cookieName);
+        this.signingAlgorithm = Objects.requireNonNull(signingAlgorithm);
     }
 
     public String cookieName() {
