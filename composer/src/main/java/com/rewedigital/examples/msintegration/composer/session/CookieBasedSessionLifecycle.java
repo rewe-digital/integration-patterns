@@ -70,11 +70,10 @@ public class CookieBasedSessionLifecycle implements SessionLifecylce {
 
     @Override
     public Session buildSession(RequestContext requestContext) {
-        return Session.of(requestContext.request(), this);
+        return Session.of(readFrom(requestContext.request()));
     }
 
-    @Override
-    public Map<String, String> readFrom(final Request request) {
+    private Map<String, String> readFrom(final Request request) {
         return request.header("Cookie")
             .map(this::readFromHeader)
             .orElse(emptyMap());

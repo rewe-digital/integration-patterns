@@ -15,8 +15,6 @@ import com.spotify.apollo.Response;
 public class Session {
 
     public interface Serializer {
-        Map<String, String> readFrom(final Request request);
-
         <T> Response<T> writeTo(final Response<T> response, final Map<String, String> sessionData);
     }
 
@@ -36,10 +34,6 @@ public class Session {
 
     public static Session of(final Map<String, String> data) {
         return new Session(new LinkedList<>(data.entrySet()));
-    }
-
-    public static Session of(final Request request, final Serializer serializer) {
-        return Session.of(serializer.readFrom(request));
     }
 
     public static <T> Session of(final Response<T> response) {
