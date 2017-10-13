@@ -1,12 +1,11 @@
 package com.rewedigital.examples.msintegration.productinformation.product;
 
-import javax.persistence.Id;
-
+import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document
 public class Product {
-    @Id
+
     private String id;
     private String name;
     private String vendor;
@@ -14,70 +13,39 @@ public class Product {
     private String description;
     private String productNumber;
     private String image;
-    private long version;
+    @Version
+    private Long version;
 
-    public static class Builder {
-        private String id = "";
-        private String name = "";
-        private String vendor = "";
-        private String price = "€ 0,00";
-        private String description = "";
-        private String productNumber = "";
-        private String image = null;
-        private long version = 0;
+    public void setId(final String id) {
+        this.id = id;
+    }
 
-        public Builder withId(final String id) {
-            this.id = id;
-            return this;
-        }
+    public void setName(final String name) {
+        this.name = name;
+    }
 
-        public Builder withName(String name) {
-            this.name = name;
-            return this;
-        }
+    public void setVendor(final String vendor) {
+        this.vendor = vendor;
+    }
 
-        public Builder withVendor(String vendor) {
-            this.vendor = vendor;
-            return this;
-        }
+    public void setPrice(final String price) {
+        this.price = price;
+    }
 
-        public Builder withPrice(String price) {
-            this.price = price;
-            return this;
-        }
+    public void setDescription(final String description) {
+        this.description = description;
+    }
 
-        public Builder withDescription(String description) {
-            this.description = description;
-            return this;
-        }
+    public void setProductNumber(final String productNumber) {
+        this.productNumber = productNumber;
+    }
 
-        public Builder withProductNumber(String number) {
-            this.productNumber = number;
-            return this;
-        }
+    public void setImage(final String image) {
+        this.image = image;
+    }
 
-        public Builder withImage(String image) {
-            this.image = image;
-            return this;
-        }
-
-        public Builder withVersion(long version) {
-            this.version = version;
-            return this;
-        }
-
-        public Product build() {
-            Product result = new Product();
-            result.id = this.id;
-            result.name = this.name;
-            result.vendor = this.vendor;
-            result.description = this.description;
-            result.price = this.price;
-            result.image = this.image;
-            result.productNumber = this.productNumber;
-            result.version = this.version;
-            return result;
-        }
+    public void setVersion(final Long version) {
+        this.version = version;
     }
 
     public String getId() {
@@ -108,7 +76,7 @@ public class Product {
         return productNumber;
     }
 
-    public long getVersion() {
+    public Long getVersion() {
         return version;
     }
 }
