@@ -18,7 +18,8 @@ import kafka.server.KafkaServerStartable;
  * Created by arunmohzi on 7/13/17.
  */
 public class KafkaStarter {
-
+    
+    // FIXME TV useful tmp dir usage
     public static final String DEFAULT_KAFKA_LOG_DIR = "/tmp/test/kafka_embedded";
     public static final int BROKER_ID = 0;
     public static final int BROKER_PORT = 5000;

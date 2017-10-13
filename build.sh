@@ -12,3 +12,6 @@ cd ..
 cd product-information
 mvn clean verify -DskipTests
 cd ..
+cd simplekafka
+mvn clean verify -DskipTests
+cd ..
