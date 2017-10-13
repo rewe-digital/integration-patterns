@@ -26,7 +26,9 @@ public class ProductEntity {
         productEntity.description = product.getDescription();
         productEntity.productNumber = product.getProductNumber();
         productEntity.image = product.getImage();
-        productEntity.version = product.getVersion()
+        productEntity.version = product.getVersion();
+        
+        return productEntity;
 
     }
 

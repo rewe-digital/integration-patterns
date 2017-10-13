@@ -21,7 +21,7 @@ public class ProductRestController {
 
     @RequestMapping(value = "/products", method = RequestMethod.PUT )
     public Product addProduct(final Product product) {
-
+        return null;
     }
 
 }
