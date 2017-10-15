@@ -7,14 +7,14 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<kafka_2.9.2.version>0.8.1.1</kafka_2.9.2.version>
+		<kafka_2.11.version>0.11.0.1</kafka_2.11.version>
 	</properties>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.kafka</groupId>
-			<artifactId>kafka_2.9.2</artifactId>
-			<version>${kafka_2.9.2.version}</version>
+			<artifactId>kafka_2.11</artifactId>
+			<version>${kafka_2.11.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>log4j</groupId>
@@ -26,7 +26,7 @@
 		<dependency>
 			<groupId>org.apache.zookeeper</groupId>
 			<artifactId>zookeeper</artifactId>
-			<version>3.3.4</version>
+			<version>3.4.10</version>
 		</dependency>
 
 		<dependency>

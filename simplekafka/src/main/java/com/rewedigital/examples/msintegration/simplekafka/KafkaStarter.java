@@ -156,6 +156,7 @@ public class KafkaStarter {
         properties.put("zookeeper.connect", ZOOKEEPER_HOST);
         properties.put("default.replication.factor", "1");
         properties.put("delete.topic.enable", "true");
+        properties.put("offsets.topic.replication.factor","1");
         return properties;
     }
 
