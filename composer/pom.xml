@@ -44,6 +44,12 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>guru.nidi</groupId>
+            <artifactId>code-assert</artifactId>
+            <version>0.8.5</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <dependencyManagement>
