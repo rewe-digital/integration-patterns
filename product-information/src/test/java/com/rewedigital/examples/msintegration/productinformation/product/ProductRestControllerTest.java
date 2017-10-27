@@ -1,9 +1,6 @@
 package com.rewedigital.examples.msintegration.productinformation.product;
 
 import com.rewedigital.examples.msintegration.productinformation.ProductInformationApplication;
-import com.rewedigital.examples.msintegration.productinformation.product.Product;
-import org.assertj.core.api.Assertions;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.inject.Inject;
-import java.util.Random;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -40,7 +36,7 @@ public class ProductRestControllerTest {
         Product product = new Product();
         product.setId("108");
 
-        ResponseEntity response = restTemplate.postForEntity("/products", product, Object.class);
+        ResponseEntity<?> response = restTemplate.postForEntity("/products", product, Object.class);
 
         assertThat(response).isNotNull();
         assertThat(response.getStatusCode()).isEqualByComparingTo(HttpStatus.BAD_REQUEST);
