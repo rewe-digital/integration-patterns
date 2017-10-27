@@ -13,9 +13,9 @@ public class ProductEvent {
 
     private String key;
 
-    private LocalDateTime dateTime;
+    private LocalDateTime time;
 
-    private String eventType;
+    private String type;
 
     private String payload;
 
@@ -35,20 +35,20 @@ public class ProductEvent {
         this.key = key;
     }
 
-    public LocalDateTime getDateTime() {
-        return dateTime;
+    public LocalDateTime getTime() {
+        return time;
     }
 
-    public void setDateTime(final LocalDateTime dateTime) {
-        this.dateTime = dateTime;
+    public void setTime(final LocalDateTime time) {
+        this.time = time;
     }
 
-    public String getEventType() {
-        return eventType;
+    public String getType() {
+        return type;
     }
 
-    public void setEventType(final String eventType) {
-        this.eventType = eventType;
+    public void setType(final String type) {
+        this.type = type;
     }
 
     public String getPayload() {
@@ -57,10 +57,5 @@ public class ProductEvent {
 
     public void setPayload(final String payload) {
         this.payload = payload;
-    }
-
-    public String toMessage() {
-        // TODO Auto-generated method stub
-        return null;
     }
 }
