@@ -1,12 +1,11 @@
 package com.rewedigital.examples.msintegration.productinformation.infrastructure;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 @Configuration
 public class ObjectMapperConfiguration {
@@ -14,8 +13,8 @@ public class ObjectMapperConfiguration {
     @Bean
     public ObjectMapper objectMapper() {
         final ObjectMapper objectMapper = new ObjectMapper();
-        final DateFormat df = new SimpleDateFormat("yyyy-MM-ddTHH:mm:ssz");
-        objectMapper.setDateFormat(df);
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         return objectMapper;
     }
 }
