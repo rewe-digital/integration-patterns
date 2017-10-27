@@ -1,12 +1,27 @@
 package com.rewedigital.examples.msintegration.productinformation.product;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.UUID;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 @Entity
 public class ProductEvent {
+
+    public static ProductEvent of(final Product product, final String eventType, final ObjectMapper objectMapper)
+        throws Exception {
+        final ProductEvent result = new ProductEvent();
+        result.setId(UUID.randomUUID().toString());
+        result.setKey(product.getId());
+        result.setType(eventType);
+        result.setTime(LocalDateTime.now(ZoneOffset.UTC));
+        result.setPayload(objectMapper.writeValueAsString(product));
+        return result;
+    }
 
     @Id
     private String id;
