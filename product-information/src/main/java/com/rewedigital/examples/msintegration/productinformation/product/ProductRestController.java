@@ -14,21 +14,34 @@ public class ProductRestController {
 
     private final ProductRepository productRepository;
     private final ProductEventRepository productEventRepository;
+    private final ObjectMapper objectMapper;
 
     @Inject
-    public ProductRestController(final ProductRepository productRepository, final ProductEventRepository productEventRepository) {
+    public ProductRestController(final ProductRepository productRepository, final ProductEventRepository productEventRepository, final ObjectMapper objectMapper) {
         this.productRepository = Objects.requireNonNull(productRepository);
         this.productEventRepository = Objects.requireNonNull(productEventRepository);
+        this.objectMapper = objectMapper;
     }
 
     @RequestMapping(value = "/products", method = RequestMethod.POST)
+    @Transactional
     public Product addProduct(@RequestBody final Product product) {
         if (product.getId() != null) {
             throw new ProductBadRequestException("Must not provide id");
         }
 
         product.setId(UUID.randomUUID().toString());
-        return productRepository.save(product);
+
+        Product persistentProduct = productRepository.save(product);
+        try {
+            ProductEvent productEvent = ProductEvent.of(persistentProduct, ProductEventType.PRODUCT_CREATED, objectMapper);
+            productEventRepository.save(productEvent);
+        }
+        catch (Exception e) {
+            throw new RuntimeException("could not create ProductEvent from Product ", e);
+        }
+
+        return persistentProduct;
     }
 
     @RequestMapping(value = "/products/{productId}", method = RequestMethod.PUT)
@@ -49,7 +62,7 @@ public class ProductRestController {
 
         Product persistentProduct = productRepository.save(product);
         try {
-            ProductEvent productEvent = ProductEvent.of(persistentProduct, ProductEventType.PRODUCT_CREATED.toString(), new ObjectMapper());
+            ProductEvent productEvent = ProductEvent.of(persistentProduct, ProductEventType.PRODUCT_UPDATED, objectMapper);
             productEventRepository.save(productEvent);
         }
         catch (Exception e) {

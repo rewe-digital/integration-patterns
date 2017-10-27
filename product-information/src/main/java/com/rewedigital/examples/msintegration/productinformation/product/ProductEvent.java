@@ -1,15 +1,13 @@
 package com.rewedigital.examples.msintegration.productinformation.product;
 
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.util.UUID;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.context.ApplicationEvent;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
-
-import org.springframework.context.ApplicationEvent;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.util.UUID;
 
 @Entity
 public class ProductEvent {
@@ -28,12 +26,12 @@ public class ProductEvent {
         }
     }
 
-    public static ProductEvent of(final Product product, final String eventType, final ObjectMapper objectMapper)
+    public static ProductEvent of(final Product product, final ProductEventType eventType, final ObjectMapper objectMapper)
         throws Exception {
         final ProductEvent result = new ProductEvent();
         result.setId(UUID.randomUUID().toString());
         result.setKey(product.getId());
-        result.setType(eventType);
+        result.setType(eventType.toString());
         result.setTime(ZonedDateTime.now(ZoneOffset.UTC));
         result.setPayload(objectMapper.writeValueAsString(product));
         return result;
