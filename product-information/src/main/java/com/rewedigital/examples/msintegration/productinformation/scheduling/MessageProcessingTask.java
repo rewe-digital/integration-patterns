@@ -1,15 +1,18 @@
 package com.rewedigital.examples.msintegration.productinformation.scheduling;
 
-import com.rewedigital.examples.msintegration.productinformation.product.ProductEvent;
-import com.rewedigital.examples.msintegration.productinformation.product.ProductEventPublisher;
+import java.util.Collections;
+import java.util.List;
+
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.inject.Inject;
-import java.util.List;
+import com.rewedigital.examples.msintegration.productinformation.product.ProductEvent;
+import com.rewedigital.examples.msintegration.productinformation.product.ProductEventPublisher;
 
 @Component
 public class MessageProcessingTask {
@@ -19,7 +22,7 @@ public class MessageProcessingTask {
     final private ProductEventPublisher eventPublisher;
 
     @Inject
-    public MessageProcessingTask(ProductEventPublisher eventPublisher) {
+    public MessageProcessingTask(final ProductEventPublisher eventPublisher) {
         this.eventPublisher=eventPublisher;
     }
 
@@ -33,11 +36,11 @@ public class MessageProcessingTask {
     }
 
     private List<ProductEvent> pickUnprocessedMessages() {
-        return null;
+        return Collections.emptyList();
     }
 
     @Transactional
-    private void publishEventAndDeleteFromDB(ProductEvent productEvent) {
+    private void publishEventAndDeleteFromDB(final ProductEvent productEvent) {
         eventPublisher.publish(productEvent);
         //TODO delete
     }
