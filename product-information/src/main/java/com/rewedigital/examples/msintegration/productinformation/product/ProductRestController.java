@@ -29,7 +29,7 @@ public class ProductRestController {
         }
 
         product.setId(UUID.randomUUID().toString());
-        return productRepository.insert(product);
+        return productRepository.save(product);
     }
 
     @RequestMapping(value = "/products/{productId}", method = RequestMethod.PUT)
