@@ -14,7 +14,7 @@ public class ObjectMapperConfiguration {
     @Bean
     public ObjectMapper objectMapper() {
         final ObjectMapper objectMapper = new ObjectMapper();
-        final DateFormat df = new SimpleDateFormat("yyyy-MM-ddTHH:mm:ss");
+        final DateFormat df = new SimpleDateFormat("yyyy-MM-ddTHH:mm:ssz");
         objectMapper.setDateFormat(df);
         return objectMapper;
     }

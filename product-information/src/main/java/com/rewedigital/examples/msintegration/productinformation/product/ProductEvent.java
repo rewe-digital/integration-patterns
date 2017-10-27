@@ -1,7 +1,7 @@
 package com.rewedigital.examples.msintegration.productinformation.product;
 
-import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 import javax.persistence.Entity;
@@ -18,7 +18,7 @@ public class ProductEvent {
         result.setId(UUID.randomUUID().toString());
         result.setKey(product.getId());
         result.setType(eventType);
-        result.setTime(LocalDateTime.now(ZoneOffset.UTC));
+        result.setTime(ZonedDateTime.now(ZoneOffset.UTC));
         result.setPayload(objectMapper.writeValueAsString(product));
         return result;
     }
@@ -28,7 +28,7 @@ public class ProductEvent {
 
     private String key;
 
-    private LocalDateTime time;
+    private ZonedDateTime time;
 
     private String type;
 
@@ -50,11 +50,11 @@ public class ProductEvent {
         this.key = key;
     }
 
-    public LocalDateTime getTime() {
+    public ZonedDateTime getTime() {
         return time;
     }
 
-    public void setTime(final LocalDateTime time) {
+    public void setTime(final ZonedDateTime time) {
         this.time = time;
     }
 
