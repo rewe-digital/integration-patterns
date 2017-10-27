@@ -1,19 +1,15 @@
 package com.rewedigital.examples.msintegration.productinformation.scheduling;
 
-import java.util.List;
-
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationListener;
-import org.springframework.data.domain.Sort;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
-
 import com.rewedigital.examples.msintegration.productinformation.product.ProductEvent;
 import com.rewedigital.examples.msintegration.productinformation.product.ProductEventPublisher;
 import com.rewedigital.examples.msintegration.productinformation.product.ProductEventRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationListener;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
 
 @Component
 public class ProductEventProcessingTask implements ApplicationListener<ProductEvent.Message> {
@@ -44,11 +40,7 @@ public class ProductEventProcessingTask implements ApplicationListener<ProductEv
     public void processNextMessageBatch() {
         LOG.debug("performing next message batch");
 
-        pickUnprocessedMessages().stream().forEach(e -> publishEventAndDeleteFromDB(e));
-    }
-
-    private List<ProductEvent> pickUnprocessedMessages() {
-        return productEventRepository.findAll(new Sort(Sort.Direction.ASC, "time"));
+        publishEventAndDeleteFromDB(productEventRepository.findFirstByOrderByTimeAsc());
     }
 
     private void publishEventAndDeleteFromDB(final ProductEvent productEvent) {
