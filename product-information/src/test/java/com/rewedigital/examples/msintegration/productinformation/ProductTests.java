@@ -21,8 +21,6 @@ public class ProductTests {
     public void testProductInsert() {
 
         Product product = new Product();
-        product.setId("108");
-        product.setVersion(42L);
         product.setName("Bla!");
 
         Product response = restTemplate.postForObject("/products", product, Product.class);
