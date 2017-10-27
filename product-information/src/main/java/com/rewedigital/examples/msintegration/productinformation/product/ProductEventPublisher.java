@@ -19,12 +19,14 @@ public class ProductEventPublisher {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProductEventPublisher.class);
 
     private final KafkaTemplate<String, String> kafkaTemplate;
+    private final ObjectMapper objectMapper;
     private final String topic;
 
     @Inject
-    public ProductEventPublisher(final KafkaTemplate<String, String> kafkaTemplate,
+    public ProductEventPublisher(final KafkaTemplate<String, String> kafkaTemplate, final ObjectMapper objectMapper,
         @Value("${productqueue.topic_name}") final String topic) {
         this.kafkaTemplate = kafkaTemplate;
+        this.objectMapper = objectMapper;
         this.topic = topic;
     }
 
@@ -34,13 +36,11 @@ public class ProductEventPublisher {
     }
 
     private String toMessage(final ProductEvent productEvent) {
-        // FIXME inject mapper and configure time mapping
-        final ObjectMapper mapper = new ObjectMapper();
         try {
-            return mapper.writeValueAsString(productEvent);
+            return objectMapper.writeValueAsString(productEvent);
         } catch (final JsonProcessingException e) {
             LOGGER.error("Could not serialize event [%s]", productEvent, e);
-            // FIXME error handling
+            // FIXME error handling?
             return "";
         }
     }
