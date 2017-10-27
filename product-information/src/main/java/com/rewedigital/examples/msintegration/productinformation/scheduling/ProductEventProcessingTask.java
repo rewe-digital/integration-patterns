@@ -48,6 +48,10 @@ public class ProductEventProcessingTask implements ApplicationListener<ProductEv
     }
 
     private void publishEventAndDeleteFromDB(final ProductEvent productEvent) {
+        if (productEvent == null) {
+            return;
+        }
+
         eventPublisher.publish(productEvent);
         productEventRepository.delete(productEvent);
     }
