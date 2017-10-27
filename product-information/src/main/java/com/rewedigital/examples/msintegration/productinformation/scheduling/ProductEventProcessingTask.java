@@ -32,8 +32,12 @@ public class ProductEventProcessingTask implements ApplicationListener<ProductEv
 
     @Override
     public void onApplicationEvent(final ProductEvent.Message event) {
-        final ProductEvent productEvent = productEventRepository.getOne(event.id());
-        publishEventAndDeleteFromDB(productEvent);
+        try {
+            final ProductEvent productEvent = productEventRepository.getOne(event.id());
+            publishEventAndDeleteFromDB(productEvent);
+        } catch (final Exception ex) {
+            LOG.error("error publishing event with id [%s] due to %s", event.id(), ex.getMessage(), ex);
+        }
     }
 
     @Scheduled(fixedRate = 1000)
@@ -52,7 +56,12 @@ public class ProductEventProcessingTask implements ApplicationListener<ProductEv
             return;
         }
 
-        eventPublisher.publish(productEvent);
-        productEventRepository.delete(productEvent);
+        eventPublisher.publish(productEvent)
+            .addCallback(sendResult -> productEventRepository.delete(productEvent),
+                ex -> logException(ex));
+    }
+
+    private void logException(final Throwable ex) {
+        LOG.error("error publishing event", ex);
     }
 }
