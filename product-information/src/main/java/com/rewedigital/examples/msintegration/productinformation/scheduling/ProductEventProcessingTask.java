@@ -55,5 +55,4 @@ public class ProductEventProcessingTask implements ApplicationListener<ProductEv
         eventPublisher.publish(productEvent);
         productEventRepository.delete(productEvent);
     }
-
 }
