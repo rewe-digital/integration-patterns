@@ -1,5 +1,6 @@
-package com.rewedigital.examples.msintegration.productinformation;
+package com.rewedigital.examples.msintegration.productinformation.product;
 
+import com.rewedigital.examples.msintegration.productinformation.ProductInformationApplication;
 import com.rewedigital.examples.msintegration.productinformation.product.Product;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
@@ -13,7 +14,7 @@ import java.util.Random;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = ProductInformationApplication.class)
-public class ProductTests {
+public class ProductRestControllerTest {
 
     @Inject private TestRestTemplate restTemplate;
 
@@ -22,6 +23,17 @@ public class ProductTests {
 
         Product product = new Product();
         product.setName("Bla!");
+
+        Product response = restTemplate.postForObject("/products", product, Product.class);
+
+        Assertions.assertThat(response).isNotNull();
+    }
+
+    @Test
+    public void testProductBadInsert() {
+
+        Product product = new Product();
+        product.setId("108");
 
         Product response = restTemplate.postForObject("/products", product, Product.class);
 
