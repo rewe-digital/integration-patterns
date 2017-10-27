@@ -7,10 +7,26 @@ import java.util.UUID;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
+import org.springframework.context.ApplicationEvent;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Entity
 public class ProductEvent {
+
+    public static class Message extends ApplicationEvent {
+        private static final long serialVersionUID = 1L;
+        private final String id;
+
+        private Message(final String id, final Object source) {
+            super(source);
+            this.id = id;
+        }
+
+        public String id() {
+            return id;
+        }
+    }
 
     public static ProductEvent of(final Product product, final String eventType, final ObjectMapper objectMapper)
         throws Exception {
@@ -33,6 +49,10 @@ public class ProductEvent {
     private String type;
 
     private String payload;
+
+    public Message message(final Object source) {
+        return new Message(id, source);
+    }
 
     public String getId() {
         return id;
