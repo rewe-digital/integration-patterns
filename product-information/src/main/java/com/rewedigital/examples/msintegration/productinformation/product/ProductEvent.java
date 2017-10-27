@@ -37,11 +37,14 @@ public class ProductEvent {
         result.setType(eventType.getName());
         result.setTime(ZonedDateTime.now(ZoneOffset.UTC));
         result.setPayload(objectMapper.writeValueAsString(product));
+        result.setVersion(product.getVersion());
         return result;
     }
 
     @Id
     private String id;
+
+    private Long version;
 
     private String key;
 
@@ -65,6 +68,14 @@ public class ProductEvent {
 
     public String getKey() {
         return key;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(final Long version) {
+        this.version = version;
     }
 
     public void setKey(final String key) {
