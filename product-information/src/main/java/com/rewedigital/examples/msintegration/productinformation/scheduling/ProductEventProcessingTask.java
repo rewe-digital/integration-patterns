@@ -10,6 +10,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
+import java.util.Optional;
 
 @Component
 public class ProductEventProcessingTask implements ApplicationListener<ProductEvent.Message> {
@@ -37,20 +38,21 @@ public class ProductEventProcessingTask implements ApplicationListener<ProductEv
     }
 
     @Scheduled(fixedRate = 1000)
-    public void processNextMessageBatch() {
-        LOG.debug("performing next message batch");
+    public Optional<ProductEvent> processNextMessage() {
+        LOG.debug("performing next message");
 
-        publishEventAndDeleteFromDB(productEventRepository.findFirstByOrderByTimeAsc());
+        return publishEventAndDeleteFromDB(productEventRepository.findFirstByOrderByTimeAsc());
     }
 
-    private void publishEventAndDeleteFromDB(final ProductEvent productEvent) {
+    private Optional<ProductEvent> publishEventAndDeleteFromDB(final ProductEvent productEvent) {
         if (productEvent == null) {
-            return;
+            return Optional.empty();
         }
 
         eventPublisher.publish(productEvent)
             .addCallback(sendResult -> productEventRepository.delete(productEvent),
                 ex -> logException(ex));
+        return Optional.of(productEvent);
     }
 
     private void logException(final Throwable ex) {
