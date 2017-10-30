@@ -6,8 +6,6 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.concurrent.ListenableFuture;
 
-import java.time.ZonedDateTime;
-
 import static org.mockito.Mockito.*;
 
 public class ProductEventProcessingTaskTest {
@@ -26,37 +24,25 @@ public class ProductEventProcessingTaskTest {
         repo = mock(ProductEventRepository.class);
         publisher = mock(ProductEventPublisher.class);
 
-        p1 = setupProductEvent("1", 1L);
-        p2 = setupProductEvent("2", 1L);
-        
+        p1 = mock(ProductEvent.class);
+        p2 = mock(ProductEvent.class);
+
         when(publisher.publish(any(ProductEvent.class))).thenReturn(mock(ListenableFuture.class));
 
         task = new ProductEventProcessingTask(publisher, repo);
     }
 
-    private ProductEvent setupProductEvent(String id, long version) {
-        ProductEvent p = new ProductEvent();
-        p.setId(id);
-        p.setKey("event1");
-        p.setPayload("{}");
-        p.setTime(ZonedDateTime.now());
-        p.setType("product.created");
-        p.setVersion(version);
-        repo.save(p);
-
-        return p;
-    }
-
     @Test
     public void testProcessingNextSingleBatch() {
         when(repo.findFirstByOrderByTimeAsc()).thenReturn(p1);
-        task.processNextMessageBatch();
+        assert task.processNextMessage().isPresent();
 
         when(repo.findFirstByOrderByTimeAsc()).thenReturn(p2);
-        task.processNextMessageBatch();
+        assert task.processNextMessage().isPresent();
 
         when(repo.findFirstByOrderByTimeAsc()).thenReturn(null);
-        task.processNextMessageBatch();
+        assert !task.processNextMessage().isPresent();
+
         verify(publisher, times(2)).publish(any(ProductEvent.class));
     }
 }
