@@ -22,7 +22,7 @@ public class ComposerApplication {
             HttpService
                 .usingAppInit(Initializer::init, "composer")
                 .withModule(HttpClientModule.create())
-                .withModule(new ClientDecoratingModule(new ErrorClientDecorator()))
+                .withModule(ClientDecoratingModule.create(new ErrorClientDecorator()))
                 .build();
 
         HttpService.boot(service, args);

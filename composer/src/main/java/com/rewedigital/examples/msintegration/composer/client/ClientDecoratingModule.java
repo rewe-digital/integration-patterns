@@ -7,13 +7,18 @@ import java.util.stream.Stream;
 import com.google.inject.multibindings.Multibinder;
 import com.spotify.apollo.environment.ClientDecorator;
 import com.spotify.apollo.module.AbstractApolloModule;
+import com.spotify.apollo.module.ApolloModule;
 
 public class ClientDecoratingModule extends AbstractApolloModule {
 
     private final ClientDecorator[] clientDecorators;
 
-    public ClientDecoratingModule(final ClientDecorator... clientDecorators) {
+    private ClientDecoratingModule(final ClientDecorator... clientDecorators) {
         this.clientDecorators = requireNonNull(clientDecorators);
+    }
+
+    public static ApolloModule create(final ClientDecorator... clientDecorators) {
+        return new ClientDecoratingModule(clientDecorators);
     }
 
     @Override
@@ -21,7 +26,7 @@ public class ClientDecoratingModule extends AbstractApolloModule {
         Stream.of(clientDecorators).forEach(this::bindClientDecorator);
     }
 
-    private void bindClientDecorator(ClientDecorator clientDecorator) {
+    private void bindClientDecorator(final ClientDecorator clientDecorator) {
         Multibinder.newSetBinder(binder(), ClientDecorator.class).addBinding().toInstance(clientDecorator);
     }
 
