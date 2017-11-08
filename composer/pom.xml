@@ -9,11 +9,12 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <maven.compiler.source>1.8</maven.compiler.source>
 
-        <apollo.version>1.5.0</apollo.version>
+        <apollo.version>1.6.1</apollo.version>
         <attoparser.version>2.0.4.RELEASE</attoparser.version>
-        <handy-uri-templates.version>2.1.5</handy-uri-templates.version>
+        <handy-uri-templates.version>2.1.6</handy-uri-templates.version>
 
         <assertj-core.version>3.8.0</assertj-core.version>
+        <code-assert.version>0.8.5</code-assert.version>
     </properties>
 
     <dependencies>
@@ -47,7 +48,6 @@
         <dependency>
             <groupId>guru.nidi</groupId>
             <artifactId>code-assert</artifactId>
-            <version>0.8.5</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -75,6 +75,11 @@
                 <groupId>org.assertj</groupId>
                 <artifactId>assertj-core</artifactId>
                 <version>${assertj-core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>guru.nidi</groupId>
+                <artifactId>code-assert</artifactId>
+                <version>${code-assert.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
