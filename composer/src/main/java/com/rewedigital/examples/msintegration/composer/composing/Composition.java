@@ -15,11 +15,6 @@ class Composition {
     private final String template;
     private final ContentRange contentRange;
 
-    public Composition(final String template, final ContentRange contentRange, final List<String> assetLinks,
-        final List<Composition> children) {
-        this(0, template.length(), template, contentRange, assetLinks, children);
-    }
-
     private Composition(final int startOffset, final int endOffset, final String template,
         final ContentRange contentRange, final List<String> assetLinks,
         final List<Composition> children) {
@@ -31,8 +26,17 @@ class Composition {
         this.children = children;
     }
 
-    public Composition forRange(int startOffset, int endOffset) {
+    public static Composition forRoot(final String template, final ContentRange contentRange,
+        final List<String> assetLinks, final List<Composition> children) {
+        return new Composition(0, template.length(), template, contentRange, assetLinks, children);
+    }
+
+    public Composition forRange(final int startOffset, final int endOffset) {
         return new Composition(startOffset, endOffset, template, contentRange, assetLinks, children);
+    }
+
+    public Response<String> toResponse() {
+        return Response.forPayload(withAssetLinks(body()));
     }
 
     private String body() {
@@ -48,15 +52,13 @@ class Composition {
         return writer.toString();
     }
 
-    public Response<String> toResponse() {
-        return Response.forPayload(withAssetLinks(body()));
-    }
-
-    private String withAssetLinks(String body) {
+    private String withAssetLinks(final String body) {
         final String assets = assetLinks.stream()
             .distinct()
             .collect(Collectors.joining("\n"));
         return body.replaceFirst("</head>", assets + "\n</head>");
     }
+
+
 
 }

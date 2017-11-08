@@ -29,7 +29,7 @@ class IncludeProcessor {
             .map(s -> s.fetch(contentFetcher)
                 .thenCompose(r -> r.compose(composer)));
         return flatten(composedIncludes)
-            .thenApply(c -> new Composition(template, contentRange, assetLinks, c.collect(toList())));
+            .thenApply(c -> Composition.forRoot(template, contentRange, assetLinks, c.collect(toList())));
     }
 
 }
