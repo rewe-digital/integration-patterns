@@ -26,13 +26,14 @@ public class DependenciesTest {
     @Test
     public void clientDoesNotRelyOnComposing() {
         class ComRewedigitalExamplesMsintegrationComposer extends DependencyRuler {
-            DependencyRule client, composing, proxy, routing, util;
+            DependencyRule client, composing, parser, proxy, routing, util;
 
             @Override
             public void defineRules() {
                 base().mayUse(base().allSub());
                 client.mayUse(util).mustNotUse(composing);
-                composing.mayUse(util, client).mustNotUse(proxy, routing);
+                parser.mayUse(util).mustNotUse(composing);
+                composing.mayUse(client, parser, util).mustNotUse(proxy, routing);
                 proxy.mayUse(composing, routing, util).mustNotUse(client);
             }
         }

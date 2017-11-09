@@ -1,12 +1,14 @@
 package com.rewedigital.examples.msintegration.composer.composing;
 
+import java.util.Objects;
+
 class ContentRange {
 
     private final int start;
     private final int end;
 
-    public static ContentRange allOf(final String template) {
-        return new ContentRange(0, template.length());
+    public static ContentRange allUpToo(final int end) {
+        return new ContentRange(0, end);
     }
 
     public static ContentRange empty() {
@@ -32,11 +34,7 @@ class ContentRange {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + end;
-        result = prime * result + start;
-        return result;
+        return Objects.hash(end, start);
     }
 
     @Override
@@ -48,11 +46,7 @@ class ContentRange {
         if (getClass() != obj.getClass())
             return false;
         ContentRange other = (ContentRange) obj;
-        if (end != other.end)
-            return false;
-        if (start != other.start)
-            return false;
-        return true;
+        return Objects.equals(this.end, other.end) && Objects.equals(this.start, other.start);
     }
 
     @Override
