@@ -4,8 +4,10 @@ import kafka.server.KafkaConfig;
 import kafka.server.KafkaServerStartable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.ReflectionUtils;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.Properties;
 
 public class KafkaLocal  {
@@ -21,23 +23,32 @@ public class KafkaLocal  {
         KafkaConfig kafkaConfig = new KafkaConfig(kafkaProperties);
 
         kafka = new KafkaServerStartable(kafkaConfig);
-        //log.invokeMethod("info", new Object[]{"starting local kafka broker..."});
+        LOG.info("starting local kafka broker...");
         kafka.startup();
-        //log.invokeMethod("info", new Object[]{"done"});
+        LOG.info("done");
 
-        // TODO: wait
-        /*
-        while (!kafka.server.startupComplete) {
-            Thread.sleep(500);
+        Field serverField = ReflectionUtils.findField(KafkaServerStartable.class, "server");
+        serverField.setAccessible(true);
+        kafka.server.KafkaServer kafkaServer = (kafka.server.KafkaServer) ReflectionUtils.getField(serverField, kafka);
+
+
+        while (kafkaServer.brokerState().currentState() !=  3) {
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException ignored) {
+                // ignored
+            }
         }
-        */
+
+        //}
+
 
     }
 
     public Object stop() {
-        //log.invokeMethod("info", new Object[]{"stopping kafka..."});
+        LOG.info("stopping kafka...");
         kafka.shutdown();
-        //return log.invokeMethod("info", new Object[]{"done"});
+        LOG.info("done");
         return null;
     }
 

@@ -59,7 +59,6 @@ public class ZooKeeperLocal {
     }
 
     public void shutdown() {
-
         Field cnxnFactoryField = ReflectionUtils.findField(ZooKeeperServerMain.class, "cnxnFactory");
         ServerCnxnFactory cnxnFactory = (ServerCnxnFactory) ReflectionUtils.getField(cnxnFactoryField, zooKeeperServer);
 

@@ -7,6 +7,7 @@ import kafka.utils.ZkUtils;
 import org.I0Itec.zkclient.ZkClient;
 import org.I0Itec.zkclient.ZkConnection;
 import org.apache.commons.io.FileUtils;
+import org.apache.kafka.common.errors.UnknownTopicOrPartitionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +29,7 @@ public class KafkaServer {
      * @return The port of the zookeeper server.
      */
     public static Integer startKafkaServer(String topicName) {
-        if (null != kafkaLocal) {
+        if (null == kafkaLocal) {
             kafkaLocal = provideKafkaServer();
             createTopicWithThreePartitions(topicName);
         }
@@ -102,8 +103,12 @@ public class KafkaServer {
         Integer replicationFactor = 1;
         Properties topicConfig = new Properties();
 
-        LOG.info("Deleting topic " + topicName);
-        AdminUtils.deleteTopic(zkUtils, topicName);
+        try {
+            LOG.info("Deleting topic " + topicName);
+            AdminUtils.deleteTopic(zkUtils, topicName);
+        } catch (UnknownTopicOrPartitionException e) {
+            LOG.info("Topic was not existing.");
+        }
         LOG.info("Creating topic " + topicName);
         AdminUtils.createTopic(zkUtils, topicName, numPartitions, replicationFactor, topicConfig, null);
 
