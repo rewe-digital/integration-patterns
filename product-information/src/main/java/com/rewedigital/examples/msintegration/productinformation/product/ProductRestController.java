@@ -74,8 +74,8 @@ public class ProductRestController {
     private Product persist(final Product product, final ProductEventType eventType) {
         final Product persistentProduct = productRepository.save(product);
         try {
-            final ProductEvent productEvent = ProductEvent.of(persistentProduct, eventType, objectMapper);
-            productEventRepository.save(productEvent);
+            final ProductEvent productEvent =
+                productEventRepository.save(ProductEvent.of(persistentProduct, eventType, objectMapper));
             applicationEventPublisher.publishEvent(productEvent.message(this));
         } catch (final Exception e) {
             throw new RuntimeException("could not create ProductEvent from Product ", e);

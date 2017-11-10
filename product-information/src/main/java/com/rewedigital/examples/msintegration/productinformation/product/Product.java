@@ -1,9 +1,8 @@
 package com.rewedigital.examples.msintegration.productinformation.product;
 
-import org.springframework.data.annotation.Version;
-
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Version;
 
 @Entity
 public class Product {
@@ -16,6 +15,7 @@ public class Product {
     private String description;
     private String productNumber;
     private String image;
+    
     @Version
     private Long version;
 
