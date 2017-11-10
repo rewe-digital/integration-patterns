@@ -1,16 +1,19 @@
 package com.rewedigital.examples.msintegration.productinformation.scheduling;
 
-import com.rewedigital.examples.msintegration.productinformation.product.ProductEvent;
-import com.rewedigital.examples.msintegration.productinformation.product.ProductEventPublisher;
-import com.rewedigital.examples.msintegration.productinformation.product.ProductEventRepository;
+import javax.inject.Inject;
+import javax.transaction.Transactional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
-import java.util.Optional;
+import com.rewedigital.examples.msintegration.productinformation.product.ProductEvent;
+import com.rewedigital.examples.msintegration.productinformation.product.ProductEventPublisher;
+import com.rewedigital.examples.msintegration.productinformation.product.ProductEventRepository;
+import com.rewedigital.examples.msintegration.productinformation.product.ProductLastPublishedVersion;
+import com.rewedigital.examples.msintegration.productinformation.product.ProductLastPublishedVersionRepository;
 
 @Component
 public class ProductEventProcessingTask implements ApplicationListener<ProductEvent.Message> {
@@ -19,43 +22,55 @@ public class ProductEventProcessingTask implements ApplicationListener<ProductEv
 
     final private ProductEventPublisher eventPublisher;
     final private ProductEventRepository productEventRepository;
+    final private ProductLastPublishedVersionRepository lastPublishedVersionRepository;
 
     @Inject
     public ProductEventProcessingTask(final ProductEventPublisher eventPublisher,
-        final ProductEventRepository productEventRepository) {
+        final ProductEventRepository productEventRepository,
+        final ProductLastPublishedVersionRepository lastPublishedVersionRepository) {
         this.eventPublisher = eventPublisher;
         this.productEventRepository = productEventRepository;
+        this.lastPublishedVersionRepository = lastPublishedVersionRepository;
     }
 
     @Override
+    @Transactional
     public void onApplicationEvent(final ProductEvent.Message event) {
-        try {
-            final ProductEvent productEvent = productEventRepository.getOne(event.id());
-            publishEventAndDeleteFromDB(productEvent);
-        } catch (final Exception ex) {
-            LOG.error("error publishing event with id [%s] due to %s", event.id(), ex.getMessage(), ex);
-        }
+        sendEvent(productEventRepository.findOne(event.id()));
     }
 
     @Scheduled(fixedRate = 1000)
-    public Optional<ProductEvent> processNextMessage() {
-        LOG.debug("performing next message");
-
-        return publishEventAndDeleteFromDB(productEventRepository.findFirstByOrderByTimeAsc());
+    @Transactional
+    public void processNextMessage() {
+        sendEvent(productEventRepository.findFirstByOrderByTimeAsc());
     }
 
-    private Optional<ProductEvent> publishEventAndDeleteFromDB(final ProductEvent productEvent) {
+    private void sendEvent(final ProductEvent productEvent) {
         if (productEvent == null) {
-            return Optional.empty();
+            return;
         }
 
-        eventPublisher.publish(productEvent)
-            .addCallback(sendResult -> productEventRepository.delete(productEvent),
-                ex -> logException(ex));
-        return Optional.of(productEvent);
+        final String productId = productEvent.getKey();
+        try {
+            final ProductLastPublishedVersion lastPublishedVersion = obtainLastPublishedVersion(productId);
+            if (lastPublishedVersion.getVersion() < productEvent.getVersion()) {
+                eventPublisher.publish(productEvent).get(); // need to block here so that following statements are
+                                                            // executed inside transaction
+                lastPublishedVersion.setVersion(productEvent.getVersion());
+                lastPublishedVersionRepository.save(lastPublishedVersion);
+            }
+            productEventRepository.delete(productEvent);
+        } catch (final Exception ex) {
+            LOG.error("error publishing event with id [%s] due to %s", productEvent.getId(), ex.getMessage(), ex);
+        }
     }
 
-    private void logException(final Throwable ex) {
-        LOG.error("error publishing event", ex);
+    private ProductLastPublishedVersion obtainLastPublishedVersion(final String productId) {
+        ProductLastPublishedVersion lastPublishedVersion = lastPublishedVersionRepository.findOne(productId);
+        if (lastPublishedVersion == null) {
+            lastPublishedVersion =
+                lastPublishedVersionRepository.saveAndFlush(ProductLastPublishedVersion.of(productId));
+        }
+        return lastPublishedVersion;
     }
 }

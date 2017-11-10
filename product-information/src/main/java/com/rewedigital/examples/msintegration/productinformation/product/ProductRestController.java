@@ -6,6 +6,8 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,6 +21,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @RestController
 public class ProductRestController {
 
+    private static final Logger LOG = LoggerFactory.getLogger(ProductRestController.class);
+    
     private final ProductRepository productRepository;
     private final ProductEventRepository productEventRepository;
     private final ObjectMapper objectMapper;
@@ -72,12 +76,13 @@ public class ProductRestController {
     }
 
     private Product persist(final Product product, final ProductEventType eventType) {
-        final Product persistentProduct = productRepository.save(product);
+        final Product persistentProduct = productRepository.saveAndFlush(product);
         try {
             final ProductEvent productEvent =
-                productEventRepository.save(ProductEvent.of(persistentProduct, eventType, objectMapper));
+                productEventRepository.saveAndFlush(ProductEvent.of(persistentProduct, eventType, objectMapper));
             applicationEventPublisher.publishEvent(productEvent.message(this));
         } catch (final Exception e) {
+            LOG.error("Could not send product event", e);
             throw new RuntimeException("could not create ProductEvent from Product ", e);
         }
 
