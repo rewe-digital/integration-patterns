@@ -1,12 +1,12 @@
 package com.rewedigital.examples.msintegration.productinformation.scheduling;
 
+import java.util.Optional;
+
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationListener;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.rewedigital.examples.msintegration.productinformation.product.ProductEvent;
@@ -16,16 +16,15 @@ import com.rewedigital.examples.msintegration.productinformation.product.Product
 import com.rewedigital.examples.msintegration.productinformation.product.ProductLastPublishedVersionRepository;
 
 @Component
-public class ProductEventProcessingTask implements ApplicationListener<ProductEvent.Message> {
-
-    private static final Logger LOG = LoggerFactory.getLogger(ProductEventProcessingTask.class);
+public class ProductEventProcessor {
+    private static final Logger LOG = LoggerFactory.getLogger(ProductEventProcessor.class);
 
     final private ProductEventPublisher eventPublisher;
     final private ProductEventRepository productEventRepository;
     final private ProductLastPublishedVersionRepository lastPublishedVersionRepository;
 
     @Inject
-    public ProductEventProcessingTask(final ProductEventPublisher eventPublisher,
+    public ProductEventProcessor(final ProductEventPublisher eventPublisher,
         final ProductEventRepository productEventRepository,
         final ProductLastPublishedVersionRepository lastPublishedVersionRepository) {
         this.eventPublisher = eventPublisher;
@@ -33,15 +32,13 @@ public class ProductEventProcessingTask implements ApplicationListener<ProductEv
         this.lastPublishedVersionRepository = lastPublishedVersionRepository;
     }
 
-    @Override
     @Transactional
-    public void onApplicationEvent(final ProductEvent.Message event) {
-        sendEvent(productEventRepository.findOne(event.id()));
+    public void process(final String eventId) {
+        sendEvent(productEventRepository.findOne(eventId));
     }
 
-    @Scheduled(fixedRate = 1000)
     @Transactional
-    public void processNextMessage() {
+    public void processNext() {
         sendEvent(productEventRepository.findFirstByOrderByTimeAsc());
     }
 
@@ -51,26 +48,32 @@ public class ProductEventProcessingTask implements ApplicationListener<ProductEv
         }
 
         final String productId = productEvent.getKey();
-        try {
-            final ProductLastPublishedVersion lastPublishedVersion = obtainLastPublishedVersion(productId);
-            if (lastPublishedVersion.getVersion() < productEvent.getVersion()) {
-                eventPublisher.publish(productEvent).get(); // need to block here so that following statements are
-                                                            // executed inside transaction
-                lastPublishedVersion.setVersion(productEvent.getVersion());
-                lastPublishedVersionRepository.save(lastPublishedVersion);
+        final Optional<ProductLastPublishedVersion> lastPublishedVersion = obtainLastPublishedVersion(productId);
+        lastPublishedVersion.ifPresent(v -> {
+            try {
+                if (v.getVersion() < productEvent.getVersion()) {
+                    eventPublisher.publish(productEvent).get(); // need to block here so that following statements are
+                                                                // executed inside transaction
+                    v.setVersion(productEvent.getVersion());
+                    lastPublishedVersionRepository.save(v);
+                }
+                productEventRepository.delete(productEvent);
+            } catch (final Exception ex) {
+                LOG.error("error publishing event with id [{}] due to {}", productEvent.getId(), ex.getMessage(), ex);
             }
-            productEventRepository.delete(productEvent);
-        } catch (final Exception ex) {
-            LOG.error("error publishing event with id [%s] due to %s", productEvent.getId(), ex.getMessage(), ex);
-        }
+        });
     }
 
-    private ProductLastPublishedVersion obtainLastPublishedVersion(final String productId) {
+    private Optional<ProductLastPublishedVersion> obtainLastPublishedVersion(final String productId) {
         ProductLastPublishedVersion lastPublishedVersion = lastPublishedVersionRepository.findOne(productId);
         if (lastPublishedVersion == null) {
-            lastPublishedVersion =
-                lastPublishedVersionRepository.saveAndFlush(ProductLastPublishedVersion.of(productId));
+            try {
+                lastPublishedVersion =
+                    lastPublishedVersionRepository.saveAndFlush(ProductLastPublishedVersion.of(productId));
+            } catch (final Exception ex) {
+                return Optional.empty();
+            }
         }
-        return lastPublishedVersion;
+        return Optional.of(lastPublishedVersion);
     }
 }

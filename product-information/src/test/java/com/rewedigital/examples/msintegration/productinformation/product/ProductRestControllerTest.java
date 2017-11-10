@@ -1,6 +1,9 @@
 package com.rewedigital.examples.msintegration.productinformation.product;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+
+import javax.inject.Inject;
 
 import org.junit.Test;
 import org.springframework.http.HttpStatus;
@@ -10,6 +13,9 @@ import com.rewedigital.examples.msintegration.productinformation.helper.Abstract
 
 public class ProductRestControllerTest extends AbstractIntegrationTest {
 
+    @Inject
+    private ProductLastPublishedVersionRepository lastPublishedVersionRepository;
+
     @Test
     public void testProductInsert() {
 
@@ -18,8 +24,12 @@ public class ProductRestControllerTest extends AbstractIntegrationTest {
 
         final Product response = restTemplate.postForObject("/products", product, Product.class);
 
+        // wait until event is received from kafka
+
         assertThat(response).isNotNull();
         assertThat(response.getVersion()).isNotNull();
+
+        assertThatLastPublishedVersionBecomes(response.getId(), 0L);
     }
 
     @Test
@@ -32,5 +42,24 @@ public class ProductRestControllerTest extends AbstractIntegrationTest {
 
         assertThat(response).isNotNull();
         assertThat(response.getStatusCode()).isEqualByComparingTo(HttpStatus.BAD_REQUEST);
+    }
+
+
+    private void assertThatLastPublishedVersionBecomes(final String id, final long version) {
+        ProductLastPublishedVersion result = null;
+        int tryCount = 0;
+        while (result == null && tryCount <= 5) {
+            result = lastPublishedVersionRepository.findOne(id);
+            if(result != null && result.getVersion() == version) {
+                return;
+            }
+            try {
+                Thread.sleep(100);
+            } catch (final InterruptedException e) {
+                e.printStackTrace();
+            }
+            ++tryCount;
+        }
+        fail("expected last published version of [" + id + "] to become [" + version + "]");
     }
 }
