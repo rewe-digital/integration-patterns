@@ -1,6 +1,8 @@
 package com.rewedigital.examples.msintegration.productinformation.helper;
 
 import com.rewedigital.examples.msintegration.productinformation.ProductInformationApplication;
+import com.rewedigital.examples.msintegration.productinformation.helper.kafka.KafkaServer;
+import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,5 +20,12 @@ public abstract class AbstractIntegrationTest {
     @Inject protected TestRestTemplate restTemplate;
 
     @Value("${local.server.port}") protected int port;
+    @Value("${productqueue.brokers}") private String bokers;
+
+    @BeforeClass
+    public static void initTest() {
+        KafkaServer.startKafkaServer("topic");
+    }
+
 
 }

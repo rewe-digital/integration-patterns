@@ -1,0 +1,1 @@
+productqueue.brokers = localhost:${random.int[1024,65536]}
