@@ -49,8 +49,6 @@ public class ProductRestController {
         return persist(product, ProductEventType.PRODUCT_CREATED);
     }
 
-
-
     @RequestMapping(value = "/products/{productId}", method = RequestMethod.PUT)
     @Transactional
     public Product updateProduct(@PathVariable final String productId, @RequestBody final Product product) {
