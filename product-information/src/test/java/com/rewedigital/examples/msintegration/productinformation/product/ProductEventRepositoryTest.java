@@ -1,14 +1,17 @@
 package com.rewedigital.examples.msintegration.productinformation.product;
 
-import com.rewedigital.examples.msintegration.productinformation.helper.AbstractIntegrationTest;
-import org.junit.Before;
-import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
-public class ProductEventRepositoryTest extends AbstractIntegrationTest{
+import org.junit.Before;
+import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.rewedigital.examples.msintegration.productinformation.helper.AbstractIntegrationTest;
+
+public class ProductEventRepositoryTest extends AbstractIntegrationTest {
 
     @Autowired
     ProductEventRepository productEventRepository;
@@ -25,8 +28,8 @@ public class ProductEventRepositoryTest extends AbstractIntegrationTest{
         productEventRepository.save(p2);
     }
 
-    private ProductEvent createProductEvent(String key) {
-        ProductEvent p = new ProductEvent();
+    private ProductEvent createProductEvent(final String key) {
+        final ProductEvent p = new ProductEvent();
         p.setId(UUID.randomUUID().toString());
         p.setKey(key);
         p.setPayload("{}");
@@ -38,8 +41,8 @@ public class ProductEventRepositoryTest extends AbstractIntegrationTest{
 
     @Test
     public void testFindFirstQuery() {
-        ProductEvent pFromRepo = productEventRepository.findFirstByOrderByTimeAsc();
-        assert pFromRepo.getKey().equals(p1.getKey());
+        final ProductEvent foundEvent = productEventRepository.findFirstByOrderByTimeAsc();
+        assertThat(foundEvent.getKey()).isEqualTo(p1.getKey());
     }
 
 }

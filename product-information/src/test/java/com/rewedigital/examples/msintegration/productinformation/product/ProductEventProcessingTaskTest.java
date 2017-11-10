@@ -1,12 +1,18 @@
 package com.rewedigital.examples.msintegration.productinformation.product;
 
-import com.rewedigital.examples.msintegration.productinformation.scheduling.ProductEventProcessingTask;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.concurrent.ListenableFuture;
 
-import static org.mockito.Mockito.*;
+import com.rewedigital.examples.msintegration.productinformation.scheduling.ProductEventProcessingTask;
 
 public class ProductEventProcessingTaskTest {
 
@@ -19,6 +25,7 @@ public class ProductEventProcessingTaskTest {
     private ProductEvent p1;
     private ProductEvent p2;
 
+    @SuppressWarnings("unchecked")
     @Before
     public void setup() {
         repo = mock(ProductEventRepository.class);
@@ -35,13 +42,13 @@ public class ProductEventProcessingTaskTest {
     @Test
     public void testProcessingNextSingleBatch() {
         when(repo.findFirstByOrderByTimeAsc()).thenReturn(p1);
-        assert task.processNextMessage().isPresent();
+        assertThat(task.processNextMessage()).isPresent();
 
         when(repo.findFirstByOrderByTimeAsc()).thenReturn(p2);
-        assert task.processNextMessage().isPresent();
+        assertThat(task.processNextMessage()).isPresent();
 
         when(repo.findFirstByOrderByTimeAsc()).thenReturn(null);
-        assert !task.processNextMessage().isPresent();
+        assertThat(task.processNextMessage()).isEmpty();
 
         verify(publisher, times(2)).publish(any(ProductEvent.class));
     }
