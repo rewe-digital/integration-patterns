@@ -1,9 +1,9 @@
 package com.rewedigital.examples.msintegration.productinformation.helper.kafka;
 
-import com.rewedigital.examples.msintegration.productinformation.helper.FreePortFinder;
-import kafka.admin.AdminUtils;
-import kafka.utils.ZKStringSerializer$;
-import kafka.utils.ZkUtils;
+import java.io.File;
+import java.io.IOException;
+import java.util.Properties;
+
 import org.I0Itec.zkclient.ZkClient;
 import org.I0Itec.zkclient.ZkConnection;
 import org.apache.commons.io.FileUtils;
@@ -11,9 +11,11 @@ import org.apache.kafka.common.errors.UnknownTopicOrPartitionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Properties;
+import com.rewedigital.examples.msintegration.productinformation.helper.FreePortFinder;
+
+import kafka.admin.AdminUtils;
+import kafka.utils.ZKStringSerializer$;
+import kafka.utils.ZkUtils;
 
 public class KafkaServer {
 
@@ -25,10 +27,10 @@ public class KafkaServer {
 
     /**
      * Starts a local Kafka Server (inlcudes zookeper and kafka) , if it has not been started already.
-     *
+     * FIXME: currently, application-test config assumes port 32000; if server starts on other port, tests will fail!
      * @return The port of the zookeeper server.
      */
-    public static Integer startKafkaServer(String topicName) {
+    public static Integer startKafkaServer(final String topicName) {
         if (null == kafkaLocal) {
             kafkaLocal = provideKafkaServer();
             createTopicWithThreePartitions(topicName);
@@ -48,26 +50,26 @@ public class KafkaServer {
     }
 
     public static KafkaLocal provideKafkaServer() {
-        Properties kafkaProperties = new Properties();
-        kafkaProperties.put("zookeeper.connect", (String) "localhost:" + String.valueOf(zookeeperPort));
-        kafkaProperties.put("port", (String) String.valueOf(kafkaPort));
-        kafkaProperties.put("broker.id", (String) "0");
-        kafkaProperties.put("host.name", (String) "localhost");
-        kafkaProperties.put("num.partitions", (String) "1");
-        kafkaProperties.put("default.replication.factor", (String) "1");
-        kafkaProperties.put("zookeeper.connection.timeout.ms", (String) "10000");
-        kafkaProperties.put("log.dirs", (String) "./target/data/kafka");
-        kafkaProperties.put("auto.create.topics.enable", (String) "true");
-        kafkaProperties.put("auto.commit.enable", (String) "false");
+        final Properties kafkaProperties = new Properties();
+        kafkaProperties.put("zookeeper.connect", "localhost:" + String.valueOf(zookeeperPort));
+        kafkaProperties.put("port", String.valueOf(kafkaPort));
+        kafkaProperties.put("broker.id", "0");
+        kafkaProperties.put("host.name", "localhost");
+        kafkaProperties.put("num.partitions", "1");
+        kafkaProperties.put("default.replication.factor", "1");
+        kafkaProperties.put("zookeeper.connection.timeout.ms", "10000");
+        kafkaProperties.put("log.dirs", "./target/data/kafka");
+        kafkaProperties.put("auto.create.topics.enable", "true");
+        kafkaProperties.put("auto.commit.enable", "false");
 
         try {
             FileUtils.deleteDirectory(new File((String) kafkaProperties.get("log.dirs")));
 
-            ZooKeeperLocal zooKeeperLocal = provideZooKeeperLocal();
-            KafkaLocal kafka = new KafkaLocal(kafkaProperties, zooKeeperLocal);
+            final ZooKeeperLocal zooKeeperLocal = provideZooKeeperLocal();
+            final KafkaLocal kafka = new KafkaLocal(kafkaProperties, zooKeeperLocal);
             kafka.start();
             Thread.sleep(2000);
-            return ((KafkaLocal) (kafka));
+            return ((kafka));
 
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException("KafkaServer could not start: " + e.getMessage(), e);
@@ -75,10 +77,10 @@ public class KafkaServer {
     }
 
     public static ZooKeeperLocal provideZooKeeperLocal() {
-        Properties zkProperties = new Properties();
-        zkProperties.put("clientPort", (String) String.valueOf(zookeeperPort));
-        zkProperties.put("maxClientCnxns", (String) "10");
-        zkProperties.put("dataDir", (String) "./target/data/zookeeper");
+        final Properties zkProperties = new Properties();
+        zkProperties.put("clientPort", String.valueOf(zookeeperPort));
+        zkProperties.put("maxClientCnxns", "10");
+        zkProperties.put("dataDir", "./target/data/zookeeper");
 
         try {
             FileUtils.deleteDirectory(new File((String) zkProperties.get("dataDir")));
@@ -87,26 +89,26 @@ public class KafkaServer {
             zookeeper.start();
             return zookeeper;
 
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new RuntimeException("Zookeeper Server could not start: " + e.getMessage(), e);
         }
     }
 
-    public static void createTopicWithThreePartitions(String topicName) {
-        Integer sessionTimeoutMs = 10000;
-        Integer connectionTimeoutMs = 10000;
-        ZkConnection zkConnection = new ZkConnection("localhost:" + String.valueOf(zookeeperPort), sessionTimeoutMs);
-        ZkClient zkClient = new ZkClient(zkConnection, connectionTimeoutMs, ZKStringSerializer$.MODULE$);
-        ZkUtils zkUtils = new ZkUtils(zkClient, zkConnection, false);
+    public static void createTopicWithThreePartitions(final String topicName) {
+        final Integer sessionTimeoutMs = 10000;
+        final Integer connectionTimeoutMs = 10000;
+        final ZkConnection zkConnection = new ZkConnection("localhost:" + String.valueOf(zookeeperPort), sessionTimeoutMs);
+        final ZkClient zkClient = new ZkClient(zkConnection, connectionTimeoutMs, ZKStringSerializer$.MODULE$);
+        final ZkUtils zkUtils = new ZkUtils(zkClient, zkConnection, false);
 
-        Integer numPartitions = 3;
-        Integer replicationFactor = 1;
-        Properties topicConfig = new Properties();
+        final Integer numPartitions = 3;
+        final Integer replicationFactor = 1;
+        final Properties topicConfig = new Properties();
 
         try {
             LOG.info("Deleting topic " + topicName);
             AdminUtils.deleteTopic(zkUtils, topicName);
-        } catch (UnknownTopicOrPartitionException e) {
+        } catch (final UnknownTopicOrPartitionException e) {
             LOG.info("Topic was not existing.");
         }
         LOG.info("Creating topic " + topicName);
@@ -119,7 +121,7 @@ public class KafkaServer {
         return kafkaLocal;
     }
 
-    public static void setKafkaLocal(KafkaLocal kafkaLocal) {
+    public static void setKafkaLocal(final KafkaLocal kafkaLocal) {
         KafkaServer.kafkaLocal = kafkaLocal;
     }
 
@@ -127,7 +129,7 @@ public class KafkaServer {
         return zookeeper;
     }
 
-    public static void setZookeeper(ZooKeeperLocal zookeeper) {
+    public static void setZookeeper(final ZooKeeperLocal zookeeper) {
         KafkaServer.zookeeper = zookeeper;
     }
 
@@ -135,7 +137,7 @@ public class KafkaServer {
         return kafkaPort;
     }
 
-    public static void setKafkaPort(Integer kafkaPort) {
+    public static void setKafkaPort(final Integer kafkaPort) {
         KafkaServer.kafkaPort = kafkaPort;
     }
 
@@ -143,7 +145,7 @@ public class KafkaServer {
         return zookeeperPort;
     }
 
-    public static void setZookeeperPort(Integer zookeeperPort) {
+    public static void setZookeeperPort(final Integer zookeeperPort) {
         KafkaServer.zookeeperPort = zookeeperPort;
     }
 

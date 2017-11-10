@@ -1,1 +1,1 @@
-productqueue.brokers = localhost:${random.int[1024,65536]}
+productqueue.brokers = localhost:32000
