@@ -22,21 +22,20 @@ public class KafkaServer {
     private static final Logger LOG = LoggerFactory.getLogger(KafkaServer.class);
     private static KafkaLocal kafkaLocal;
     private static ZooKeeperLocal zookeeper;
-    private static Integer kafkaPort = FreePortFinder.getFreePort(FreePortFinder.portRange(32000,32100));
-    private static Integer zookeeperPort = FreePortFinder.getFreePort(FreePortFinder.portRange(32101,32200));
+    private static Integer kafkaPort = FreePortFinder.getFreePort(32000,32100);
+    private static Integer zookeeperPort = FreePortFinder.getFreePort(32101,32200);
 
     /**
      * Starts a local Kafka Server (inlcudes zookeper and kafka) , if it has not been started already.
      * FIXME: currently, application-test config assumes port 32000; if server starts on other port, tests will fail!
-     * @return The port of the zookeeper server.
+     * @return The port of the kafka broker.
      */
     public static Integer startKafkaServer(final String topicName) {
         if (null == kafkaLocal) {
             kafkaLocal = provideKafkaServer();
-            createTopicWithThreePartitions(topicName);
+            createTopicWithPartitions(topicName, 3);
         }
-
-        return zookeeperPort;
+        return kafkaPort;
     }
 
     /**
@@ -94,14 +93,14 @@ public class KafkaServer {
         }
     }
 
-    public static void createTopicWithThreePartitions(final String topicName) {
+    public static void createTopicWithPartitions(final String topicName, final int partitions) {
         final Integer sessionTimeoutMs = 10000;
         final Integer connectionTimeoutMs = 10000;
         final ZkConnection zkConnection = new ZkConnection("localhost:" + String.valueOf(zookeeperPort), sessionTimeoutMs);
         final ZkClient zkClient = new ZkClient(zkConnection, connectionTimeoutMs, ZKStringSerializer$.MODULE$);
         final ZkUtils zkUtils = new ZkUtils(zkClient, zkConnection, false);
 
-        final Integer numPartitions = 3;
+        final Integer numPartitions = partitions;
         final Integer replicationFactor = 1;
         final Properties topicConfig = new Properties();
 
@@ -115,38 +114,6 @@ public class KafkaServer {
         AdminUtils.createTopic(zkUtils, topicName, numPartitions, replicationFactor, topicConfig, null);
 
         zkClient.close();
-    }
-
-    public static KafkaLocal getKafkaLocal() {
-        return kafkaLocal;
-    }
-
-    public static void setKafkaLocal(final KafkaLocal kafkaLocal) {
-        KafkaServer.kafkaLocal = kafkaLocal;
-    }
-
-    public static ZooKeeperLocal getZookeeper() {
-        return zookeeper;
-    }
-
-    public static void setZookeeper(final ZooKeeperLocal zookeeper) {
-        KafkaServer.zookeeper = zookeeper;
-    }
-
-    public static Integer getKafkaPort() {
-        return kafkaPort;
-    }
-
-    public static void setKafkaPort(final Integer kafkaPort) {
-        KafkaServer.kafkaPort = kafkaPort;
-    }
-
-    public static Integer getZookeeperPort() {
-        return zookeeperPort;
-    }
-
-    public static void setZookeeperPort(final Integer zookeeperPort) {
-        KafkaServer.zookeeperPort = zookeeperPort;
     }
 
 }

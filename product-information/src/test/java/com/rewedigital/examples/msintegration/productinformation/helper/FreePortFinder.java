@@ -6,12 +6,14 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.ServerSocket;
+import java.util.Objects;
 
 public class FreePortFinder {
 
     private static final Logger LOG = LoggerFactory.getLogger(FreePortFinder.class);
 
     private FreePortFinder() {
+        // Util class
     }
 
     /**
@@ -20,7 +22,7 @@ public class FreePortFinder {
      * @return The port as {@link Integer}.
      */
     public static Integer getFreePort(PortRange portRange) {
-        LOG.debug("Searching for free port ...");
+        LOG.debug("Searching for free port ..." + portRange);
         for (Integer port = portRange.getFrom(); port <= portRange.getTo(); port++) {
             ServerSocket ss = null;
             DatagramSocket ds = null;
@@ -50,15 +52,15 @@ public class FreePortFinder {
             }
 
         }
-
         throw new RuntimeException("No free port available in given Port range: " + portRange);
     }
 
-    public static PortRange portRange(Integer from, Integer to) {
-        PortRange range = new PortRange();
+    public static Integer getFreePort(Integer from, Integer to) {
+        return getFreePort(new PortRange(from, to));
+    }
 
-        range.setFrom(from);
-        range.setTo(to);
+    public static PortRange portRange(Integer from, Integer to) {
+        PortRange range = new PortRange(from, to);
         return range;
     }
 
@@ -73,7 +75,7 @@ public class FreePortFinder {
         }
 
         public void setFrom(Integer from) {
-            this.from = from;
+            this.from = Objects.requireNonNull(from);
         }
 
         public Integer getTo() {
@@ -81,7 +83,12 @@ public class FreePortFinder {
         }
 
         public void setTo(Integer to) {
-            this.to = to;
+            this.to = Objects.requireNonNull(to);
+        }
+
+        public PortRange(Integer from, Integer to) {
+            this.from = Objects.requireNonNull(from);
+            this.to = Objects.requireNonNull(to);
         }
 
         private Integer from;

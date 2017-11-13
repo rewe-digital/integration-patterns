@@ -24,6 +24,8 @@ public abstract class AbstractIntegrationTest {
 
     @BeforeClass
     public static void initTest() {
+        // TODO: Create Topics configured in application.yml and override the broker port there.
+        // startKafkaServer returns the broker port
         KafkaServer.startKafkaServer("topic");
     }
 

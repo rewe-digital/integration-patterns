@@ -2,6 +2,7 @@ package com.rewedigital.examples.msintegration.productinformation.helper.kafka;
 
 import org.apache.zookeeper.server.ServerCnxnFactory;
 import org.apache.zookeeper.server.ServerConfig;
+import org.apache.zookeeper.server.ZooKeeperServer;
 import org.apache.zookeeper.server.ZooKeeperServerMain;
 import org.apache.zookeeper.server.quorum.QuorumPeerConfig;
 import org.slf4j.Logger;
@@ -20,7 +21,7 @@ public class ZooKeeperLocal {
     private ZooKeeperServerMain zooKeeperServer;
     private Properties zkProperties;
 
-    public ZooKeeperLocal(Properties zkProperties) throws FileNotFoundException, IOException {
+    public ZooKeeperLocal(Properties zkProperties) {
         this.zkProperties = zkProperties;
     }
 
@@ -32,7 +33,7 @@ public class ZooKeeperLocal {
             @Override
             public void run() {
                 try {
-                    getZooKeeperServer().runFromConfig(configuration);
+                    zooKeeperServer.runFromConfig(configuration);
                 } catch (IOException e) {
                     LOG.debug("ZooKeeper Failed", e);
                 }
@@ -43,26 +44,37 @@ public class ZooKeeperLocal {
 
         startThread.start();
 
-
-
-        // TODO: wait
-
-        /*
-        final ZooKeeperServerMain server1 = zooKeeperServer;
-        final ServerCnxnFactory factory = (server1 == null ? null : server1.cnxnFactory);
-        final ZooKeeperServer server = (factory == null ? null : factory.zkServer);
-        while (!(server == null ? null : server.isRunning())) {
-            Thread.sleep(500);
+        boolean isRunning = false;
+        while(!isRunning) {
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException ignored) {
+                // ignored
+            }
+            ZooKeeperServer server = getZookeperServer(getServerCnxnFactory());
+            if (null != server) {
+                isRunning = server.isRunning();
+            }
         }
-        */
-
     }
 
     public void shutdown() {
-        Field cnxnFactoryField = ReflectionUtils.findField(ZooKeeperServerMain.class, "cnxnFactory");
-        ServerCnxnFactory cnxnFactory = (ServerCnxnFactory) ReflectionUtils.getField(cnxnFactoryField, zooKeeperServer);
+        getServerCnxnFactory().shutdown();
+    }
 
-        cnxnFactory.shutdown();
+    private ServerCnxnFactory getServerCnxnFactory() {
+        Field cnxnFactoryField = ReflectionUtils.findField(ZooKeeperServerMain.class, "cnxnFactory");
+        cnxnFactoryField.setAccessible(true);
+        return (ServerCnxnFactory) ReflectionUtils.getField(cnxnFactoryField, zooKeeperServer);
+    }
+
+    private ZooKeeperServer getZookeperServer(ServerCnxnFactory cnxnFactory) {
+        if (null == cnxnFactory) {
+            return null;
+        }
+        Field zkServerField = ReflectionUtils.findField(ServerCnxnFactory.class, "zkServer");
+        zkServerField.setAccessible(true);
+        return (ZooKeeperServer) ReflectionUtils.getField(zkServerField, cnxnFactory);
     }
 
     private ServerConfig getConfiguration() {
@@ -77,14 +89,5 @@ public class ZooKeeperLocal {
         configuration.readFrom(quorumConfiguration);
         return configuration;
     }
-
-    public ZooKeeperServerMain getZooKeeperServer() {
-        return zooKeeperServer;
-    }
-
-    public void setZooKeeperServer(ZooKeeperServerMain zooKeeperServer) {
-        this.zooKeeperServer = zooKeeperServer;
-    }
-
 
 }
