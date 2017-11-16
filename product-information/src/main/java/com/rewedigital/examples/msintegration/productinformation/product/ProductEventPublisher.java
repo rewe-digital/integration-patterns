@@ -31,7 +31,7 @@ public class ProductEventPublisher {
     }
 
     public ListenableFuture<SendResult<String, String>> publish(final ProductEvent productEvent) {
-        LOGGER.debug("publishing event [%s] to topic [%s]");
+        LOGGER.debug("publishing event [%s] to topic [%s]", productEvent.getId(), topic);
         return kafkaTemplate.send(topic, productEvent.getKey(), toMessage(productEvent));
     }
 
