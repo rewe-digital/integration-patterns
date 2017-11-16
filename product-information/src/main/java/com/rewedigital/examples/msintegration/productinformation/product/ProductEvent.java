@@ -1,15 +1,14 @@
 package com.rewedigital.examples.msintegration.productinformation.product;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.context.ApplicationEvent;
+
+import javax.persistence.Convert;
+import javax.persistence.Entity;
+import javax.persistence.Id;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.UUID;
-
-import javax.persistence.Entity;
-import javax.persistence.Id;
-
-import org.springframework.context.ApplicationEvent;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Entity
 public class ProductEvent {
@@ -48,6 +47,7 @@ public class ProductEvent {
 
     private String key;
 
+    @Convert(converter = ZonedDateTimeConverter.class)
     private ZonedDateTime time;
 
     private String type;
