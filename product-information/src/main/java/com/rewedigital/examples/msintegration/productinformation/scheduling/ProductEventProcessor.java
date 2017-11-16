@@ -1,19 +1,13 @@
 package com.rewedigital.examples.msintegration.productinformation.scheduling;
 
-import java.util.Optional;
-
-import javax.inject.Inject;
-import javax.transaction.Transactional;
-
+import com.rewedigital.examples.msintegration.productinformation.product.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.rewedigital.examples.msintegration.productinformation.product.ProductEvent;
-import com.rewedigital.examples.msintegration.productinformation.product.ProductEventPublisher;
-import com.rewedigital.examples.msintegration.productinformation.product.ProductEventRepository;
-import com.rewedigital.examples.msintegration.productinformation.product.ProductLastPublishedVersion;
-import com.rewedigital.examples.msintegration.productinformation.product.ProductLastPublishedVersionRepository;
+import javax.inject.Inject;
+import javax.transaction.Transactional;
+import java.util.Optional;
 
 @Component
 public class ProductEventProcessor {
@@ -39,7 +33,7 @@ public class ProductEventProcessor {
 
     @Transactional
     public void processNext() {
-        sendEvent(productEventRepository.findFirstByOrderByTimeAsc());
+        sendEvent(productEventRepository.findFirstByTimeInSmallestVersion());
     }
 
     private void sendEvent(final ProductEvent productEvent) {
