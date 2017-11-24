@@ -9,23 +9,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.ReflectionUtils;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Properties;
 
-public class ZooKeeperLocal {
+class ZooKeeperLocal {
 
     private static final Logger LOG = LoggerFactory.getLogger(ZooKeeperLocal.class);
 
     private ZooKeeperServerMain zooKeeperServer;
     private Properties zkProperties;
 
-    public ZooKeeperLocal(Properties zkProperties) {
+    ZooKeeperLocal(Properties zkProperties) {
         this.zkProperties = zkProperties;
     }
 
-    public void start() {
+    void start() {
         final ServerConfig configuration = getConfiguration();
         zooKeeperServer = new ZooKeeperServerMain();
 

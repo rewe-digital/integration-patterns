@@ -1,9 +1,9 @@
 package com.rewedigital.examples.msintegration.productinformation.helper.kafka;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Properties;
-
+import com.rewedigital.examples.msintegration.productinformation.helper.FreePortFinder;
+import kafka.admin.AdminUtils;
+import kafka.utils.ZKStringSerializer$;
+import kafka.utils.ZkUtils;
 import org.I0Itec.zkclient.ZkClient;
 import org.I0Itec.zkclient.ZkConnection;
 import org.apache.commons.io.FileUtils;
@@ -11,11 +11,9 @@ import org.apache.kafka.common.errors.UnknownTopicOrPartitionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.rewedigital.examples.msintegration.productinformation.helper.FreePortFinder;
-
-import kafka.admin.AdminUtils;
-import kafka.utils.ZKStringSerializer$;
-import kafka.utils.ZkUtils;
+import java.io.File;
+import java.io.IOException;
+import java.util.Properties;
 
 public class KafkaServer {
 
@@ -48,7 +46,7 @@ public class KafkaServer {
         zookeeper.shutdown();
     }
 
-    public static KafkaLocal provideKafkaServer() {
+    private static KafkaLocal provideKafkaServer() {
         final Properties kafkaProperties = new Properties();
         kafkaProperties.put("zookeeper.connect", "localhost:" + String.valueOf(zookeeperPort));
         kafkaProperties.put("port", String.valueOf(kafkaPort));
@@ -75,7 +73,7 @@ public class KafkaServer {
         }
     }
 
-    public static ZooKeeperLocal provideZooKeeperLocal() {
+    private static ZooKeeperLocal provideZooKeeperLocal() {
         final Properties zkProperties = new Properties();
         zkProperties.put("clientPort", String.valueOf(zookeeperPort));
         zkProperties.put("maxClientCnxns", "10");
@@ -93,7 +91,7 @@ public class KafkaServer {
         }
     }
 
-    public static void createTopicWithPartitions(final String topicName, final int partitions) {
+    private static void createTopicWithPartitions(final String topicName, final int partitions) {
         final Integer sessionTimeoutMs = 10000;
         final Integer connectionTimeoutMs = 10000;
         final ZkConnection zkConnection = new ZkConnection("localhost:" + String.valueOf(zookeeperPort), sessionTimeoutMs);
