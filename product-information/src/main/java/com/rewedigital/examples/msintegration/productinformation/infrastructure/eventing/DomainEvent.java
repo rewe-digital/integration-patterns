@@ -1,18 +1,17 @@
-package com.rewedigital.examples.msintegration.productinformation.product;
+package com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.context.ApplicationEvent;
+import java.time.ZonedDateTime;
 
 import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.util.UUID;
+
+import org.springframework.context.ApplicationEvent;
+
+import com.rewedigital.examples.msintegration.productinformation.product.ZonedDateTimeConverter;
 
 @Entity
-public class ProductEvent {
-
+public class DomainEvent {
     public static class Message extends ApplicationEvent {
         private static final long serialVersionUID = 1L;
         private final String id;
@@ -25,19 +24,6 @@ public class ProductEvent {
         public String id() {
             return id;
         }
-    }
-
-    public static ProductEvent of(final Product product, final ProductEventType eventType,
-        final ObjectMapper objectMapper)
-        throws Exception {
-        final ProductEvent result = new ProductEvent();
-        result.setId(UUID.randomUUID().toString());
-        result.setKey(product.getId());
-        result.setType(eventType.getName());
-        result.setTime(ZonedDateTime.now(ZoneOffset.UTC));
-        result.setPayload(objectMapper.writeValueAsString(product));
-        result.setVersion(product.getVersion());
-        return result;
     }
 
     @Id
@@ -53,6 +39,8 @@ public class ProductEvent {
     private String type;
 
     private String payload;
+
+    private String aggregateName;
 
     public Message message(final Object source) {
         return new Message(id, source);
@@ -104,5 +92,13 @@ public class ProductEvent {
 
     public void setPayload(final String payload) {
         this.payload = payload;
+    }
+
+    public String getAggregateName() {
+        return aggregateName;
+    }
+
+    public void setAggregateName(final String aggregateName) {
+        this.aggregateName = aggregateName;
     }
 }

@@ -10,11 +10,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import com.rewedigital.examples.msintegration.productinformation.helper.AbstractIntegrationTest;
+import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.LastPublishedVersion;
+import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.LastPublishedVersionRepository;
 
 public class ProductRestControllerTest extends AbstractIntegrationTest {
 
     @Inject
-    private ProductLastPublishedVersionRepository lastPublishedVersionRepository;
+    private LastPublishedVersionRepository lastPublishedVersionRepository;
 
     @Test
     public void testProductInsert() {
@@ -46,10 +48,10 @@ public class ProductRestControllerTest extends AbstractIntegrationTest {
 
 
     private void assertThatLastPublishedVersionBecomes(final String id, final long version) {
-        ProductLastPublishedVersion result = null;
+       LastPublishedVersion result = null;
         int tryCount = 0;
         while (result == null && tryCount <= 5) {
-            result = lastPublishedVersionRepository.findOne(id);
+            result = lastPublishedVersionRepository.findOne("product-" + id);
             if(result != null && result.getVersion() == version) {
                 return;
             }

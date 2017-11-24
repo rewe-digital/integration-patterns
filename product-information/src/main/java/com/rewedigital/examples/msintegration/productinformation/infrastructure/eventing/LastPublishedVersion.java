@@ -1,25 +1,25 @@
-package com.rewedigital.examples.msintegration.productinformation.product;
+package com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
 @Entity
-public class ProductLastPublishedVersion {
+public class LastPublishedVersion {
 
     @Id
     private String id;
     private Long version;
 
-    public static ProductLastPublishedVersion of(final String productId) {
-        return new ProductLastPublishedVersion(productId);
+    public static LastPublishedVersion of(final String id) {
+        return new LastPublishedVersion(id);
     }
 
-    public ProductLastPublishedVersion() {
+    public LastPublishedVersion() {
         this(null);
     }
 
-    private ProductLastPublishedVersion(final String productId) {
-        this.id = productId;
+    private LastPublishedVersion(final String id) {
+        this.id = id;
         this.version = -1L;
     }
 

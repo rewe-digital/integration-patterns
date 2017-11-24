@@ -1,25 +1,28 @@
 package com.rewedigital.examples.msintegration.productinformation.product;
 
-import com.rewedigital.examples.msintegration.productinformation.helper.AbstractIntegrationTest;
-import org.junit.Before;
-import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Before;
+import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.rewedigital.examples.msintegration.productinformation.helper.AbstractIntegrationTest;
+import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.DomainEvent;
+import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.DomainEventRepository;
 
 public class ProductEventRepositoryTest extends AbstractIntegrationTest {
 
     @Autowired
-    ProductEventRepository productEventRepository;
+    DomainEventRepository productEventRepository;
 
-    private ProductEvent p1;
-    private ProductEvent p2;
-    private ProductEvent p3;
-    private ProductEvent p4;
-    private ProductEvent p5;
+    private DomainEvent p1;
+    private DomainEvent p2;
+    private DomainEvent p3;
+    private DomainEvent p4;
+    private DomainEvent p5;
 
     @Before
     public void setup() {
@@ -49,8 +52,8 @@ public class ProductEventRepositoryTest extends AbstractIntegrationTest {
         productEventRepository.save(p5);
     }
 
-    private ProductEvent createProductEvent(final String key, final ZonedDateTime time, Long version) {
-        final ProductEvent p = new ProductEvent();
+    private DomainEvent createProductEvent(final String key, final ZonedDateTime time, final Long version) {
+        final DomainEvent p = new DomainEvent();
         p.setId(UUID.randomUUID().toString());
         p.setKey(key);
         p.setPayload("{}");
@@ -62,29 +65,29 @@ public class ProductEventRepositoryTest extends AbstractIntegrationTest {
 
     @Test
     public void testFindFirstQuery() {
-        final ProductEvent foundEvent = productEventRepository.findFirstByOrderByTimeAsc();
+        final DomainEvent foundEvent = productEventRepository.findFirstByOrderByTimeAsc();
         assertThat(foundEvent.getKey()).isEqualTo(p5.getKey());
     }
 
     @Test
     public void testFindFirstByTimeInSmallestVersion() {
-        final ProductEvent firstEvent = productEventRepository.findFirstByTimeInSmallestVersion();
+        final DomainEvent firstEvent = productEventRepository.findFirstByTimeInSmallestVersion();
         assertThat(firstEvent.getKey()).isEqualTo(p5.getKey());
         productEventRepository.delete(firstEvent.getId());
 
-        final ProductEvent secondEvent = productEventRepository.findFirstByTimeInSmallestVersion();
+        final DomainEvent secondEvent = productEventRepository.findFirstByTimeInSmallestVersion();
         assertThat(secondEvent.getKey()).isEqualTo(p1.getKey());
         productEventRepository.delete(secondEvent.getId());
 
-        final ProductEvent thirdEvent = productEventRepository.findFirstByTimeInSmallestVersion();
+        final DomainEvent thirdEvent = productEventRepository.findFirstByTimeInSmallestVersion();
         assertThat(thirdEvent.getKey()).isEqualTo(p2.getKey());
         productEventRepository.delete(thirdEvent.getId());
 
-        final ProductEvent fourthEvent = productEventRepository.findFirstByTimeInSmallestVersion();
+        final DomainEvent fourthEvent = productEventRepository.findFirstByTimeInSmallestVersion();
         assertThat(fourthEvent.getKey()).isEqualTo(p4.getKey());
         productEventRepository.delete(fourthEvent.getId());
 
-        final ProductEvent fifthEvent = productEventRepository.findFirstByTimeInSmallestVersion();
+        final DomainEvent fifthEvent = productEventRepository.findFirstByTimeInSmallestVersion();
         assertThat(fifthEvent.getKey()).isEqualTo(p3.getKey());
         productEventRepository.delete(fifthEvent.getId());
     }
