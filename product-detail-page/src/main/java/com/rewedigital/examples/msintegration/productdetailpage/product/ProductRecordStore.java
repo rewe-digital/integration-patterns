@@ -1,6 +1,6 @@
 package com.rewedigital.examples.msintegration.productdetailpage.product;
 
-import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.ConsumerRecordStore;
+import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.UnprocessableEventStore;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class ProductRecordStore implements ConsumerRecordStore{
+public class ProductRecordStore implements UnprocessableEventStore {
 
     private static final Logger LOG = LoggerFactory.getLogger(ProductRecordStore.class);
 

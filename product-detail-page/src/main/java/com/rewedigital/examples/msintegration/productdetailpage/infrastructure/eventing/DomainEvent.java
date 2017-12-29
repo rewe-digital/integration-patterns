@@ -10,7 +10,7 @@ import javax.validation.constraints.NotNull;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class KafkaMessage {
+public class DomainEvent {
 
     @NotNull
     private final String id;
@@ -31,9 +31,9 @@ public class KafkaMessage {
     private final String payload;
 
 
-    public KafkaMessage(@JsonProperty("id") final String id, @JsonProperty("key") final String key,
-                        @JsonProperty("time") final String time, @JsonProperty("type") final String type,
-                        @JsonProperty("payload") final String payload, @JsonProperty("version") final Long version) {
+    public DomainEvent(@JsonProperty("id") final String id, @JsonProperty("key") final String key,
+                       @JsonProperty("time") final String time, @JsonProperty("type") final String type,
+                       @JsonProperty("payload") final String payload, @JsonProperty("version") final Long version) {
         this.id = id;
         this.key = key;
         this.time = time;
@@ -77,7 +77,7 @@ public class KafkaMessage {
             return false;
         }
 
-        final KafkaMessage that = (KafkaMessage) o;
+        final DomainEvent that = (DomainEvent) o;
 
         return new EqualsBuilder()
                 .append(id, that.id)
@@ -101,7 +101,7 @@ public class KafkaMessage {
 
     @Override
     public String toString() {
-        return "KafkaMessage{" +
+        return "DomainEvent{" +
                 "id='" + id + '\'' +
                 ", key='" + key + '\'' +
                 ", time='" + time + '\'' +

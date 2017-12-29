@@ -17,43 +17,43 @@ public abstract class AbstractKafkaConsumer {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractKafkaConsumer.class);
 
     private final boolean payloadSensitive;
-    private final KafkaMessageProcessor messageProcessor;
-    private final ConsumerRecordStore consumerRecordStore;
+    private final DomainEventProcessor domainEventProcessor;
+    private final UnprocessableEventStore unprocessableEventStore;
     private final Set<Class<? extends RuntimeException>> temporaryExceptions;
 
 
-    protected AbstractKafkaConsumer(final KafkaMessageProcessor messageProcessor,
-                                    final ConsumerRecordStore consumerRecordStore,
+    protected AbstractKafkaConsumer(final DomainEventProcessor domainEventProcessor,
+                                    final UnprocessableEventStore unprocessableEventStore,
                                     final Set<Class<? extends RuntimeException>> temporaryExceptions) {
-        this.messageProcessor = requireNonNull(messageProcessor, "messageProcessor");
-        this.consumerRecordStore = requireNonNull(consumerRecordStore, "consumerRecordStore");
+        this.domainEventProcessor = requireNonNull(domainEventProcessor, "domainEventProcessor");
+        this.unprocessableEventStore = requireNonNull(unprocessableEventStore, "unprocessableEventStore");
         this.temporaryExceptions = requireNonNull(temporaryExceptions, "temporaryExceptions");
-        this.payloadSensitive = messageProcessor.getTopicConfig().isPayloadSensitive();
+        this.payloadSensitive = domainEventProcessor.getTopicConfig().isPayloadSensitive();
     }
 
     protected void handleConsumerRecord(final ConsumerRecord<String, String> consumerRecord, final Acknowledgment ack) {
         LOG.info("Received {}", ConsumerRecordLoggingHelper.toLogSafeString(consumerRecord, payloadSensitive));
-        final MessageProcessingState state = processAndMapExceptionsToState(consumerRecord);
-        if (MessageProcessingState.UNEXPECTED_ERROR == state) {
-            consumerRecordStore.save(consumerRecord);
-        } else if (MessageProcessingState.TEMPORARY_ERROR == state) {
+        final EventProcessingState state = processAndMapExceptionsToState(consumerRecord);
+        if (EventProcessingState.UNEXPECTED_ERROR == state) {
+            unprocessableEventStore.save(consumerRecord);
+        } else if (EventProcessingState.TEMPORARY_ERROR == state) {
             throw new TemporaryKafkaProcessingError("Message processing failed temporarily");
         }
         ack.acknowledge();
     }
 
-    private MessageProcessingState processAndMapExceptionsToState(final ConsumerRecord<String, String> consumerRecord) {
+    private EventProcessingState processAndMapExceptionsToState(final ConsumerRecord<String, String> consumerRecord) {
         try {
-            return messageProcessor.processConsumerRecord(consumerRecord);
+            return domainEventProcessor.processConsumerRecord(consumerRecord);
         } catch (final RuntimeException e) {
             if (temporaryExceptions.stream().anyMatch(temporaryException -> temporaryException.isInstance(e))) {
                 LOG.error("Message processing failed temporarily for {}",
                         ConsumerRecordLoggingHelper.toLogSafeString(consumerRecord), e);
-                return MessageProcessingState.TEMPORARY_ERROR;
+                return EventProcessingState.TEMPORARY_ERROR;
             }
             LOG.error("Message processing failed unexpectedly for {}",
                     ConsumerRecordLoggingHelper.toLogSafeString(consumerRecord, payloadSensitive), e);
-            return MessageProcessingState.UNEXPECTED_ERROR;
+            return EventProcessingState.UNEXPECTED_ERROR;
         }
     }
 

@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Saves un-processable messages for later processing.
  */
-public interface ConsumerRecordStore {
+public interface UnprocessableEventStore {
 
     /**
      * @param consumerRecord the {@link ConsumerRecord} to be saved for later processing.

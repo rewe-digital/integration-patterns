@@ -2,7 +2,7 @@ package com.rewedigital.examples.msintegration.productdetailpage.infrastructure.
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
-public interface KafkaMessageProcessor {
+public interface DomainEventProcessor {
 
     /**
      * will be called for each received kafka message
@@ -13,9 +13,9 @@ public interface KafkaMessageProcessor {
      * processed as long as this method returns a TEMPORARY_ERROR
      *
      * @param consumerRecord the received {@link ConsumerRecord}
-     * @return the resulting {@link MessageProcessingState}
+     * @return the resulting {@link EventProcessingState}
      */
-    MessageProcessingState processConsumerRecord(ConsumerRecord<String, String> consumerRecord);
+    EventProcessingState processConsumerRecord(ConsumerRecord<String, String> consumerRecord);
 
     /**
      * @return the {@link ConsumerTopicConfig} of the topic that should be processed by the implementing class

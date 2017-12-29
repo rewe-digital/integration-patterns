@@ -1,23 +1,23 @@
 package com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.exception;
 
-import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.MessageProcessingState;
+import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.EventProcessingState;
 
 public class MessageProcessingException extends Exception {
 
-    private final MessageProcessingState state;
+    private final EventProcessingState state;
 
-    public MessageProcessingException(final MessageProcessingState state, final String message,
+    public MessageProcessingException(final EventProcessingState state, final String message,
                                       final Exception e) {
         super(message, e);
         this.state = state;
     }
 
-    public MessageProcessingException(final MessageProcessingState state, final String message) {
+    public MessageProcessingException(final EventProcessingState state, final String message) {
         super(message);
         this.state = state;
     }
 
-    public MessageProcessingState getState() {
+    public EventProcessingState getState() {
         return state;
     }
 }

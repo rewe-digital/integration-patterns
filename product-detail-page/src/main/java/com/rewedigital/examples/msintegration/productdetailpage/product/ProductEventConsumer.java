@@ -13,10 +13,10 @@ import org.springframework.transaction.CannotCreateTransactionException;
 import javax.inject.Inject;
 
 @Component
-public class ProductMessageConsumer extends AbstractKafkaConsumer {
+public class ProductEventConsumer extends AbstractKafkaConsumer {
 
     @Inject
-    protected ProductMessageConsumer(ProductMessageProcessor messageProcessor, ProductRecordStore productRecordStore) {
+    protected ProductEventConsumer(ProductEventProcessor messageProcessor, ProductRecordStore productRecordStore) {
         super(messageProcessor, productRecordStore,
                 ImmutableSet.of(UncategorizedDataAccessException.class, TransientDataAccessException.class,
                         CannotCreateTransactionException.class));

@@ -10,22 +10,22 @@ import javax.inject.Inject;
 import java.io.IOException;
 
 @Component
-public class ProductMessageProcessor extends AbstractKafkaMessageProcessor<ProductMessage> {
+public class ProductEventProcessor extends AbstractDomainEventProcessor<ProductEvent> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractKafkaMessageProcessor.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractDomainEventProcessor.class);
 
     private final ProductService productService;
     private final ObjectMapper objectMapper;
 
     @Inject
-    public ProductMessageProcessor(ConsumerTopicConfig productTopicConfig, MessageParser messageParser, ProcessedMessageStore processedMessageStore, ProductService productService, ObjectMapper objectMapper) {
-        super(ProductMessage.class, productTopicConfig, messageParser, processedMessageStore);
+    public ProductEventProcessor(ConsumerTopicConfig productTopicConfig, EventParser eventParser, ProcessedEventStore processedEventStore, ProductService productService, ObjectMapper objectMapper) {
+        super(ProductEvent.class, productTopicConfig, eventParser, processedEventStore);
         this.productService = productService;
         this.objectMapper = objectMapper;
     }
 
     @Override
-    protected MessageProcessingState processMessage(final ProductMessage kafkaMessage) {
+    protected EventProcessingState processMessage(final ProductEvent kafkaMessage) {
         switch (kafkaMessage.getType()) {
             case "product-created":
             case "product-updated":
@@ -34,14 +34,14 @@ public class ProductMessageProcessor extends AbstractKafkaMessageProcessor<Produ
             default:
                 LOG.warn("Unexpected type: '{}' of message with key '{}'", kafkaMessage.getType(),
                         kafkaMessage.getKey());
-                return MessageProcessingState.UNEXPECTED_ERROR;
+                return EventProcessingState.UNEXPECTED_ERROR;
         }
-        return MessageProcessingState.SUCCESS;
+        return EventProcessingState.SUCCESS;
     }
 
-    private Product toProduct(ProductMessage productMessage) {
+    private Product toProduct(ProductEvent productEvent) {
         try {
-            return objectMapper.readValue(productMessage.getPayload(), Product.class);
+            return objectMapper.readValue(productEvent.getPayload(), Product.class);
         } catch (IOException e) {
             throw new RuntimeException("Could not map product", e);
         }

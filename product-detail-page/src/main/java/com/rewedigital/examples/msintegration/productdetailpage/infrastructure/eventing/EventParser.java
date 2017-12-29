@@ -21,26 +21,26 @@ import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 
 @Component
-public class MessageParser {
+public class EventParser {
 
     private final ObjectMapper objectMapper;
     private final Validator validator;
 
     @Inject
-    public MessageParser(final ObjectMapper objectMapper) {
+    public EventParser(final ObjectMapper objectMapper) {
         this.objectMapper = Objects.requireNonNull(objectMapper, "objectMapper");
         //objectMapper.enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
         this.validator = Validation.buildDefaultValidatorFactory().getValidator();
     }
 
-    <M extends KafkaMessage> M parseMessage(final String message, final Class<M> messageType)
+    <M extends DomainEvent> M parseMessage(final String message, final Class<M> messageType)
             throws MessageProcessingException {
         final M kafkaMessage = deserialize(message, messageType);
         validate(kafkaMessage);
         return kafkaMessage;
     }
 
-    private <M extends KafkaMessage> M deserialize(final String message, final Class<M> messageType)
+    private <M extends DomainEvent> M deserialize(final String message, final Class<M> messageType)
             throws MessageProcessingException {
         try {
             return objectMapper.readValue(message, messageType);
