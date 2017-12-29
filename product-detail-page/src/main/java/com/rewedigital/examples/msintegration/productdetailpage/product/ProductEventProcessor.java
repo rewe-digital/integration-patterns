@@ -2,6 +2,7 @@ package com.rewedigital.examples.msintegration.productdetailpage.product;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.*;
+import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.processed.ProcessedEventService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -18,8 +19,8 @@ public class ProductEventProcessor extends AbstractDomainEventProcessor<ProductE
     private final ObjectMapper objectMapper;
 
     @Inject
-    public ProductEventProcessor(ConsumerTopicConfig productTopicConfig, EventParser eventParser, ProcessedEventStore processedEventStore, ProductService productService, ObjectMapper objectMapper) {
-        super(ProductEvent.class, productTopicConfig, eventParser, processedEventStore);
+    public ProductEventProcessor(ConsumerTopicConfig productTopicConfig, EventParser eventParser, ProcessedEventService processedEventService, ProductService productService, ObjectMapper objectMapper) {
+        super(ProductEvent.class, productTopicConfig, eventParser, processedEventService);
         this.productService = productService;
         this.objectMapper = objectMapper;
     }

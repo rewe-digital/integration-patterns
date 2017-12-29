@@ -2,6 +2,8 @@ package com.rewedigital.examples.msintegration.productdetailpage.infrastructure.
 
 
 import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.exception.TemporaryKafkaProcessingError;
+import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.unprocessable.UnprocessableEventService;
+import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.unprocessable.UnprocessedEventEntity;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,15 +20,15 @@ public abstract class AbstractKafkaConsumer {
 
     private final boolean payloadSensitive;
     private final DomainEventProcessor domainEventProcessor;
-    private final UnprocessableEventStore unprocessableEventStore;
+    private final UnprocessableEventService unprocessableEventService;
     private final Set<Class<? extends RuntimeException>> temporaryExceptions;
 
 
     protected AbstractKafkaConsumer(final DomainEventProcessor domainEventProcessor,
-                                    final UnprocessableEventStore unprocessableEventStore,
+                                    final UnprocessableEventService unprocessableEventService,
                                     final Set<Class<? extends RuntimeException>> temporaryExceptions) {
         this.domainEventProcessor = requireNonNull(domainEventProcessor, "domainEventProcessor");
-        this.unprocessableEventStore = requireNonNull(unprocessableEventStore, "unprocessableEventStore");
+        this.unprocessableEventService = requireNonNull(unprocessableEventService, "unprocessableEventService");
         this.temporaryExceptions = requireNonNull(temporaryExceptions, "temporaryExceptions");
         this.payloadSensitive = domainEventProcessor.getTopicConfig().isPayloadSensitive();
     }
@@ -35,7 +37,7 @@ public abstract class AbstractKafkaConsumer {
         LOG.info("Received {}", ConsumerRecordLoggingHelper.toLogSafeString(consumerRecord, payloadSensitive));
         final EventProcessingState state = processAndMapExceptionsToState(consumerRecord);
         if (EventProcessingState.UNEXPECTED_ERROR == state) {
-            unprocessableEventStore.save(consumerRecord);
+            unprocessableEventService.save(new UnprocessedEventEntity(consumerRecord));
         } else if (EventProcessingState.TEMPORARY_ERROR == state) {
             throw new TemporaryKafkaProcessingError("Message processing failed temporarily");
         }

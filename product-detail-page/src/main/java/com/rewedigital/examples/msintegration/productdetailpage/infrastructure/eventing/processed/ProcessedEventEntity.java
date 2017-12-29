@@ -1,12 +1,12 @@
-package com.rewedigital.examples.msintegration.productdetailpage.product.processed;
+package com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.processed;
 
 import javax.persistence.*;
 
 @Entity
 @Table(uniqueConstraints={@UniqueConstraint(columnNames = {"key", "version", "topic"})})
-public class ProcessedProductEntity {
+public class ProcessedEventEntity {
 
-    public ProcessedProductEntity(String key, String topic, Long version) {
+    public ProcessedEventEntity(String key, String topic, Long version) {
         this.key = key;
         this.topic = topic;
         this.version = version;
@@ -50,7 +50,4 @@ public class ProcessedProductEntity {
     public void setTopic(String topic) {
         this.topic = topic;
     }
-
-
-
 }
