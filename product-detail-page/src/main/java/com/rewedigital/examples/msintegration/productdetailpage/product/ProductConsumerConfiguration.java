@@ -23,7 +23,7 @@ import java.util.Map;
 public class ProductConsumerConfiguration {
 
     @Bean
-    @ConfigurationProperties(prefix = "products++++")
+    @ConfigurationProperties(prefix = "products")
     public com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.ConsumerTopicConfig pickupMarketTopicConfig() {
         return new SimpleConsumerTopicConfig();
     }
