@@ -1,14 +1,13 @@
 package com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing;
 
-import java.time.ZonedDateTime;
+import com.rewedigital.examples.msintegration.productinformation.product.ZonedDateTimeConverter;
+import org.springframework.context.ApplicationEvent;
 
+import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-
-import org.springframework.context.ApplicationEvent;
-
-import com.rewedigital.examples.msintegration.productinformation.product.ZonedDateTimeConverter;
+import java.time.ZonedDateTime;
 
 @Entity
 public class DomainEvent {
@@ -38,6 +37,7 @@ public class DomainEvent {
 
     private String type;
 
+    @Column(length = 3000)
     private String payload;
 
     private String aggregateName;
