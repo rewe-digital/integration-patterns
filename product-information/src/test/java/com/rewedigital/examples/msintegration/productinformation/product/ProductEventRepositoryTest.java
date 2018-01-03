@@ -1,17 +1,16 @@
 package com.rewedigital.examples.msintegration.productinformation.product;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.time.ZonedDateTime;
-import java.util.UUID;
-
+import com.rewedigital.examples.msintegration.productinformation.helper.AbstractIntegrationTest;
+import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.DomainEvent;
+import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.DomainEventRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.rewedigital.examples.msintegration.productinformation.helper.AbstractIntegrationTest;
-import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.DomainEvent;
-import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.DomainEventRepository;
+import java.time.ZonedDateTime;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ProductEventRepositoryTest extends AbstractIntegrationTest {
 
@@ -52,11 +51,11 @@ public class ProductEventRepositoryTest extends AbstractIntegrationTest {
         productEventRepository.save(p5);
     }
 
-    private DomainEvent createProductEvent(final String key, final ZonedDateTime time, final Long version) {
-        final DomainEvent p = new DomainEvent();
+    private ProductEvent createProductEvent(final String key, final ZonedDateTime time, final Long version) {
+        final ProductEvent p = new ProductEvent();
         p.setId(UUID.randomUUID().toString());
         p.setKey(key);
-        p.setPayload("{}");
+        p.setPayload(new ProductPayload());
         p.setTime(time);
         p.setType("product.created");
         p.setVersion(version);

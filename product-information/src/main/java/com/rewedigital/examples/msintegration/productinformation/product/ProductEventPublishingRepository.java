@@ -1,15 +1,12 @@
 package com.rewedigital.examples.msintegration.productinformation.product;
 
-import java.util.List;
-import java.util.Objects;
-
-import javax.inject.Inject;
-
+import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.AbstractEventPublishingRepository;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
-import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.AbstractEventPublishingRepository;
-import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.DomainEventRepository;
+import javax.inject.Inject;
+import java.util.List;
+import java.util.Objects;
 
 @Component
 public class ProductEventPublishingRepository extends AbstractEventPublishingRepository<Product> {
@@ -18,7 +15,7 @@ public class ProductEventPublishingRepository extends AbstractEventPublishingRep
 
     @Inject
     public ProductEventPublishingRepository(final JpaProductRepository productRepository,
-        final DomainEventRepository eventRepository,
+        final ProductEventRepository eventRepository,
         final ApplicationEventPublisher eventPublisher) {
         super(eventRepository, eventPublisher);
         this.productRepository = Objects.requireNonNull(productRepository);
