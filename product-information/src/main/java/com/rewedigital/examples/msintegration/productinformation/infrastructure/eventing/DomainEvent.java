@@ -3,14 +3,11 @@ package com.rewedigital.examples.msintegration.productinformation.infrastructure
 import com.rewedigital.examples.msintegration.productinformation.product.ZonedDateTimeConverter;
 import org.springframework.context.ApplicationEvent;
 
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.time.ZonedDateTime;
 
-@Entity
-public class DomainEvent {
+@MappedSuperclass
+public abstract class DomainEvent <P extends EventPayload>{
     public static class Message extends ApplicationEvent {
         private static final long serialVersionUID = 1L;
         private final String id;
@@ -37,8 +34,8 @@ public class DomainEvent {
 
     private String type;
 
-    @Column(length = 3000)
-    private String payload;
+    @Embedded
+    private P payload;
 
     private String aggregateName;
 
@@ -86,11 +83,11 @@ public class DomainEvent {
         this.type = type;
     }
 
-    public String getPayload() {
+    public P getPayload() {
         return payload;
     }
 
-    public void setPayload(final String payload) {
+    public void setPayload(final P payload) {
         this.payload = payload;
     }
 

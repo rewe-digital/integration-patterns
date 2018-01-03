@@ -1,24 +1,17 @@
 package com.rewedigital.examples.msintegration.productinformation.product;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
+
+import javax.inject.Inject;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.DomainEvent;
 
 @RestController
 public class ProductRestController {
@@ -74,15 +67,15 @@ public class ProductRestController {
         return productRepository.save(product, e -> toEvent(e, eventType, objectMapper));
     }
 
-    private static DomainEvent toEvent(final Product product, final ProductEventType eventType,
-        final ObjectMapper objectMapper) {
+    private static ProductEvent toEvent(final Product product, final ProductEventType eventType,
+                                       final ObjectMapper objectMapper) {
         try {
-            final DomainEvent result = new DomainEvent();
+            final ProductEvent result = new ProductEvent();
             result.setId(UUID.randomUUID().toString());
             result.setKey(product.getId());
             result.setType(eventType.getName());
             result.setTime(ZonedDateTime.now(ZoneOffset.UTC));
-            result.setPayload(objectMapper.writeValueAsString(product));
+            result.setPayload(product.toPayload());
             result.setVersion(product.getVersion());
             result.setAggregateName("product");
             return result;

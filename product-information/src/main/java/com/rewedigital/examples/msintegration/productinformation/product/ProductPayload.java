@@ -1,29 +1,19 @@
 package com.rewedigital.examples.msintegration.productinformation.product;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Version;
+import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.EventPayload;
 
-@Entity
-public class Product {
+public class ProductPayload extends EventPayload{
 
-    @Id
-    private String id;
+    private String productId;
     private String name;
     private String vendor;
     private String price;
-
-    @Column(length=2000)
     private String description;
     private String productNumber;
     private String image;
-    
-    @Version
-    private Long version;
 
-    public void setId(final String id) {
-        this.id = id;
+    public void setProductId(final String productId) {
+        this.productId = productId;
     }
 
     public void setName(final String name) {
@@ -50,12 +40,8 @@ public class Product {
         this.image = image;
     }
 
-    public void setVersion(final Long version) {
-        this.version = version;
-    }
-
-    public String getId() {
-        return id;
+    public String getProductId() {
+        return productId;
     }
 
     public String getName() {
@@ -80,20 +66,5 @@ public class Product {
 
     public String getProductNumber() {
         return productNumber;
-    }
-
-    public Long getVersion() {
-        return version;
-    }
-
-    public ProductPayload toPayload() {
-        ProductPayload pp = new ProductPayload();
-        pp.setProductId(this.id);
-        pp.setDescription(this.description);
-        pp.setImage(this.image);
-        pp.setName(this.name);
-        pp.setPrice(this.price);
-        pp.setVendor(this.vendor);
-        return pp;
     }
 }
