@@ -3,6 +3,7 @@ package com.rewedigital.examples.msintegration.productinformation.product;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Version;
+import javax.validation.constraints.NotNull;
 
 @Entity
 public class Product {
@@ -13,6 +14,8 @@ public class Product {
     private String vendor;
     private String price;
     private String description;
+
+    @NotNull
     private String productNumber;
     private String image;
     
@@ -85,6 +88,7 @@ public class Product {
 
     public ProductPayload toPayload() {
         ProductPayload pp = new ProductPayload();
+        pp.setProductNumber(pp.getProductNumber());
         pp.setProductId(this.id);
         pp.setDescription(this.description);
         pp.setImage(this.image);

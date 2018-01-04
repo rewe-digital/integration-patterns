@@ -18,13 +18,13 @@ public class ProductRestController {
 
     private static final Logger LOG = LoggerFactory.getLogger(ProductRestController.class);
 
-    private final ProductEventPublishingRepository productRepository;
+    private final ProductEventPublishingRepository productEventPublishingRepository;
     private final ObjectMapper objectMapper;
 
     @Inject
-    public ProductRestController(final ProductEventPublishingRepository productRepository,
+    public ProductRestController(final ProductEventPublishingRepository productEventPublishingRepository,
         final ObjectMapper objectMapper) {
-        this.productRepository = Objects.requireNonNull(productRepository);
+        this.productEventPublishingRepository = Objects.requireNonNull(productEventPublishingRepository);
         this.objectMapper = Objects.requireNonNull(objectMapper);
     }
 
@@ -42,7 +42,7 @@ public class ProductRestController {
     @RequestMapping(value = "/products/{productId}", method = RequestMethod.PUT)
     @Transactional
     public Product updateProduct(@PathVariable final String productId, @RequestBody final Product product) {
-        final Product foundProduct = productRepository.findOne(productId);
+        final Product foundProduct = productEventPublishingRepository.findOne(productId);
         if (foundProduct == null) {
             throw new ProductNotFoundException("product with id %s does not exist", productId);
         }
@@ -60,11 +60,11 @@ public class ProductRestController {
 
     @RequestMapping(value = "/products", method = RequestMethod.GET)
     public List<Product> getAll() {
-        return productRepository.findAll();
+        return productEventPublishingRepository.findAll();
     }
 
     private Product persist(final Product product, final ProductEventType eventType) {
-        return productRepository.save(product, e -> toEvent(e, eventType, objectMapper));
+        return productEventPublishingRepository.save(product, e -> toEvent(e, eventType, objectMapper));
     }
 
     private static ProductEvent toEvent(final Product product, final ProductEventType eventType,
