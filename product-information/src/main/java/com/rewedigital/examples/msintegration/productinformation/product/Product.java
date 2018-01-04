@@ -91,7 +91,7 @@ public class Product {
 
     public ProductPayload toPayload() {
         ProductPayload pp = new ProductPayload();
-        pp.setProductNumber(pp.getProductNumber());
+        pp.setProductNumber(this.productNumber);
         pp.setProductId(this.id);
         pp.setDescription(this.description);
         pp.setImage(this.image);
