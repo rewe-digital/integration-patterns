@@ -10,7 +10,7 @@ import javax.validation.constraints.NotNull;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class DomainEvent {
+public class DomainEvent<P extends EventPayload> {
 
     @NotNull
     private final String id;
@@ -28,12 +28,12 @@ public class DomainEvent {
     private final Long version;
 
     @NotNull
-    private final String payload;
+    private final P payload;
 
 
     public DomainEvent(@JsonProperty("id") final String id, @JsonProperty("key") final String key,
                        @JsonProperty("time") final String time, @JsonProperty("type") final String type,
-                       @JsonProperty("payload") final String payload, @JsonProperty("version") final Long version) {
+                       @JsonProperty("payload") final P payload, @JsonProperty("version") final Long version) {
         this.id = id;
         this.key = key;
         this.time = time;
@@ -59,7 +59,7 @@ public class DomainEvent {
         return type;
     }
 
-    public String getPayload() {
+    public P getPayload() {
         return payload;
     }
 
