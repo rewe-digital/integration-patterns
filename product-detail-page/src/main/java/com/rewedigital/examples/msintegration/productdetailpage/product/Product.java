@@ -3,16 +3,21 @@ package com.rewedigital.examples.msintegration.productdetailpage.product;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Version;
+import javax.validation.constraints.NotNull;
 
 @Entity
 public class Product {
 
     @Id
     private String id;
+
+    @NotNull
     private String name;
     private String vendor;
     private String price;
     private String description;
+
+    @NotNull
     private String productNumber;
     private String image;
     
