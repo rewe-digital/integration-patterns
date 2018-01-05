@@ -18,10 +18,8 @@ public class UnprocessedEventEntity {
     @NotNull
     private String payload;
 
-    public UnprocessedEventEntity(final String key, final String payload, final String topic) {
-        this.key = key;
-        this.payload = payload;
-        this.topic=topic;
+    public UnprocessedEventEntity() {
+        super();
     }
 
     public UnprocessedEventEntity(ConsumerRecord<String, String> consumerRecord) {
