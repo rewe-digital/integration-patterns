@@ -1,5 +1,6 @@
 package com.rewedigital.examples.msintegration.productdetailpage.product;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Version;
@@ -15,6 +16,8 @@ public class Product {
     private String name;
     private String vendor;
     private String price;
+
+    @Column(length=2000)
     private String description;
 
     @NotNull
