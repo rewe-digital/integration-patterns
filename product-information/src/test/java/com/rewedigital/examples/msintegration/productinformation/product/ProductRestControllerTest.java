@@ -1,17 +1,16 @@
 package com.rewedigital.examples.msintegration.productinformation.product;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-
-import javax.inject.Inject;
-
+import com.rewedigital.examples.msintegration.productinformation.helper.AbstractIntegrationTest;
+import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.LastPublishedVersion;
+import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.LastPublishedVersionRepository;
 import org.junit.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import com.rewedigital.examples.msintegration.productinformation.helper.AbstractIntegrationTest;
-import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.LastPublishedVersion;
-import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.LastPublishedVersionRepository;
+import javax.inject.Inject;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class ProductRestControllerTest extends AbstractIntegrationTest {
 
@@ -23,6 +22,7 @@ public class ProductRestControllerTest extends AbstractIntegrationTest {
 
         final Product product = new Product();
         product.setName("Bla!");
+        product.setProductNumber("1234");
 
         final Product response = restTemplate.postForObject("/products", product, Product.class);
 

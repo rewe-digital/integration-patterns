@@ -2,13 +2,21 @@ package com.rewedigital.examples.msintegration.productinformation.product;
 
 import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.EventPayload;
 
+import javax.persistence.Column;
+import javax.validation.constraints.NotNull;
+
 public class ProductPayload extends EventPayload{
+
 
     private String productId;
     private String name;
     private String vendor;
     private String price;
+
+    @Column(length = 2000)
     private String description;
+
+    @NotNull
     private String productNumber;
     private String image;
 
