@@ -1,7 +1,7 @@
 package com.rewedigital.examples.msintegration.productdetailpage.product;
 
 import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.AbstractDomainEventProcessor;
-import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.ConsumerTopicConfig;
+import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.configuration.ConsumerTopicConfig;
 import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.EventParser;
 import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.EventProcessingState;
 import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.processed.ProcessedEventService;

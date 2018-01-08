@@ -1,6 +1,6 @@
 package com.rewedigital.examples.msintegration.productdetailpage.product;
 
-import com.rewedigital.examples.msintegration.productdetailpage.configuration.SimpleConsumerTopicConfig;
+import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.configuration.SimpleConsumerTopicConfig;
 import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.EventProcessingState;
 import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.exception.TemporaryKafkaProcessingError;
 import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.unprocessable.UnprocessableEventService;

@@ -1,5 +1,6 @@
 package com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing;
 
+import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.configuration.ConsumerTopicConfig;
 import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.exception.MessageProcessingException;
 import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.processed.ProcessedEventService;
 import org.apache.kafka.clients.consumer.ConsumerRecord;

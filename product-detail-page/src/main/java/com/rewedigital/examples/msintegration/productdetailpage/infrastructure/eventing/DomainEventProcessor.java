@@ -1,5 +1,6 @@
 package com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing;
 
+import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.configuration.ConsumerTopicConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 public interface DomainEventProcessor {

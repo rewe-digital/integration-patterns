@@ -1,6 +1,7 @@
 package com.rewedigital.examples.msintegration.productdetailpage.product;
 
-import com.rewedigital.examples.msintegration.productdetailpage.configuration.SimpleConsumerTopicConfig;
+import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.configuration.ConsumerTopicConfig;
+import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.configuration.SimpleConsumerTopicConfig;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,7 +25,7 @@ public class ProductConsumerConfiguration {
 
     @Bean
     @ConfigurationProperties(prefix = "products")
-    public com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.ConsumerTopicConfig pickupMarketTopicConfig() {
+    public ConsumerTopicConfig pickupMarketTopicConfig() {
         return new SimpleConsumerTopicConfig();
     }
 

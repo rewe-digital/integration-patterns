@@ -1,6 +1,4 @@
-package com.rewedigital.examples.msintegration.productdetailpage.configuration;
-
-import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.ConsumerTopicConfig;
+package com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.configuration;
 
 public class SimpleConsumerTopicConfig implements ConsumerTopicConfig {
 
