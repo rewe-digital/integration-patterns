@@ -1,5 +1,19 @@
 package com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing;
 
+import static java.lang.String.format;
+import static java.util.stream.Collectors.joining;
+
+import java.io.IOException;
+import java.util.Objects;
+import java.util.Set;
+
+import javax.inject.Inject;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+
+import org.springframework.stereotype.Component;
+
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -7,18 +21,6 @@ import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.e
 import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.exception.PermanentMessageProcessingException;
 import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.exception.TemporaryMessageProcessingException;
 import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.exception.UnexpectedMessageProcessingException;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import java.io.IOException;
-import java.util.Objects;
-import java.util.Set;
-
-import static java.lang.String.format;
-import static java.util.stream.Collectors.joining;
 
 @Component
 public class EventParser {
@@ -33,14 +35,14 @@ public class EventParser {
         this.validator = Validation.buildDefaultValidatorFactory().getValidator();
     }
 
-    <M extends DomainEvent> M parseMessage(final String message, final Class<M> messageType)
+    <P extends EventPayload, M extends DomainEvent<P>> M parseMessage(final String message, final Class<M> messageType)
             throws MessageProcessingException {
         final M kafkaMessage = deserialize(message, messageType);
         validate(kafkaMessage);
         return kafkaMessage;
     }
 
-    private <M extends DomainEvent> M deserialize(final String message, final Class<M> messageType)
+    private <P extends EventPayload, M extends DomainEvent<P>> M deserialize(final String message, final Class<M> messageType)
             throws MessageProcessingException {
         try {
             return objectMapper.readValue(message, messageType);

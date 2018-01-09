@@ -1,18 +1,19 @@
 package com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing;
 
-import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.configuration.ConsumerTopicConfig;
-import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.exception.MessageProcessingException;
-import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.processed.ProcessedEventService;
+import static java.util.Objects.requireNonNull;
+
+import javax.transaction.Transactional;
+
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.transaction.Transactional;
+import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.configuration.ConsumerTopicConfig;
+import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.exception.MessageProcessingException;
+import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.processed.ProcessedEventService;
 
-import static java.util.Objects.requireNonNull;
 
-
-public abstract class AbstractDomainEventProcessor<M extends DomainEvent> implements DomainEventProcessor {
+public abstract class AbstractDomainEventProcessor<P extends EventPayload, M extends DomainEvent<P>> implements DomainEventProcessor {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractDomainEventProcessor.class);
 

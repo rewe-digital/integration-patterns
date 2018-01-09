@@ -1,12 +1,13 @@
 package com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import javax.validation.constraints.NotNull;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import javax.validation.constraints.NotNull;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -77,7 +78,8 @@ public class DomainEvent<P extends EventPayload> {
             return false;
         }
 
-        final DomainEvent that = (DomainEvent) o;
+        @SuppressWarnings("unchecked")
+        final DomainEvent<P> that = (DomainEvent<P>) o;
 
         return new EqualsBuilder()
                 .append(id, that.id)
