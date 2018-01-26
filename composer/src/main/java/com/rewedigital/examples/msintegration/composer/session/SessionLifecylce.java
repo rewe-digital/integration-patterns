@@ -11,7 +11,7 @@ public interface SessionLifecylce extends Session.Serializer {
         return new SessionLifecylce() {
 
             @Override
-            public <T> Response<T> writeTo(final Response<T> response, final Map<String, String> sessionData) {
+            public <T> Response<T> writeTo(final Response<T> response, final Map<String, String> sessionData, boolean dirty) {
                 return response;
             }
 

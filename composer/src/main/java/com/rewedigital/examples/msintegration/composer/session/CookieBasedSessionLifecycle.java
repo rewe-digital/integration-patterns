@@ -48,7 +48,8 @@ public class CookieBasedSessionLifecycle implements SessionLifecylce {
     }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CookieBasedSessionLifecycle.class);
-    private static final TypeReference<HashMap<String, String>> typeRef = new TypeReference<HashMap<String, String>>() {};
+    private static final TypeReference<HashMap<String, String>> typeRef =
+        new TypeReference<HashMap<String, String>>() {};
     private static final String PAYLOAD = "payload";
     private static final Key defaultSigningKey = MacProvider.generateKey();
 
@@ -68,8 +69,9 @@ public class CookieBasedSessionLifecycle implements SessionLifecylce {
     }
 
     @Override
-    public Session buildSession(RequestContext requestContext) {
-        return Session.of(readFrom(requestContext.request()));
+    public Session buildSession(final RequestContext requestContext) {
+        final Map<String, String> sessionValues = readFrom(requestContext.request());
+        return Session.of(sessionValues);
     }
 
     private Map<String, String> readFrom(final Request request) {
@@ -79,7 +81,11 @@ public class CookieBasedSessionLifecycle implements SessionLifecylce {
     }
 
     @Override
-    public <T> Response<T> writeTo(final Response<T> response, final Map<String, String> session) {
+    public <T> Response<T> writeTo(final Response<T> response, final Map<String, String> session, final boolean dirty) {
+        if (!dirty) {
+            return response;
+        }
+
         final String value = Jwts.builder()
             .claim(PAYLOAD, writeSessionValues(session))
             .signWith(algorithm, signingKey)
@@ -101,7 +107,7 @@ public class CookieBasedSessionLifecycle implements SessionLifecylce {
     private List<HttpCookie> parseCookieHeader(final String cookieHeader) {
         try {
             return HttpCookie.parse(cookieHeader);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LOGGER.warn("erro parsing cookie headers, defaulting to empty session", e);
             return emptyList();
         }
@@ -118,7 +124,7 @@ public class CookieBasedSessionLifecycle implements SessionLifecylce {
     private String parseSessionCookie(final HttpCookie value) {
         try {
             return parser.parseClaimsJws(value.getValue()).getBody().get(PAYLOAD, String.class);
-        } catch (JwtException e) {
+        } catch (final JwtException e) {
             LOGGER.warn("error parsing session cookie, defaulting to empty session", e);
             return "{}";
         }
@@ -127,7 +133,7 @@ public class CookieBasedSessionLifecycle implements SessionLifecylce {
     private String writeSessionValues(final Map<String, String> session) {
         try {
             return objectMapper.writeValueAsString(session);
-        } catch (JsonProcessingException e) {
+        } catch (final JsonProcessingException e) {
             LOGGER.warn("error writing session payload, defaulting to empty session", e);
             return "{}";
         }
@@ -136,7 +142,7 @@ public class CookieBasedSessionLifecycle implements SessionLifecylce {
     private Map<String, String> extractSessionValues(final String session) {
         try {
             return objectMapper.readValue(session, typeRef);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             LOGGER.warn("error parsing session payload, defaulting to empty session", e);
             return emptyMap();
         }
@@ -153,7 +159,7 @@ public class CookieBasedSessionLifecycle implements SessionLifecylce {
 
     // helper method to write a set-cookie header from a HttpCookie instance
     private static String serialize(final HttpCookie cookie) {
-        StringBuilder result = new StringBuilder();
+        final StringBuilder result = new StringBuilder();
         result.append(cookie.getName());
         result.append('=');
         result.append(cookie.getValue());

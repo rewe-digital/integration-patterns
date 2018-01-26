@@ -5,7 +5,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
-import java.util.Map;
+import java.util.Optional;
 
 import org.junit.Test;
 
@@ -20,20 +20,38 @@ public class CookieBasedSessionLifecycleTest {
     @Test
     public void shouldWriteAndReadCookie() {
         final String cookieHeader =
-            sessionLifecycle.writeTo(Response.ok(), session("x-rd-key", "value")).header("Set-Cookie").get();
+            dirtySession("x-rd-key", "value").writeTo(Response.ok(), sessionLifecycle).header("Set-Cookie").get();
         final Session session =
             sessionLifecycle.buildSession(contextOf((Request.forUri("/").withHeader("Cookie", cookieHeader))));
         assertThat(session.get("key")).contains("value");
+    }
+
+    @Test
+    public void shouldCreateNewSessionIfNonePresent() {
+        final Session session = sessionLifecycle.buildSession(contextOf((Request.forUri("/"))));
+        assertThat(session).isNotNull();
+        assertThat(session.isDirty()).isTrue();
+    }
+
+    @Test
+    public void shouldNotWriteSessionCookieIfSessionIsNotDirty() {
+        final Optional<String> setCookieHeader =
+            cleanSession("x-rd-key", "value").writeTo(Response.ok(), sessionLifecycle).header("Set-Cookie");
+        assertThat(setCookieHeader).isEmpty();
     }
 
     private SessionConfiguration configuration() {
         return new SessionConfiguration(true, "sessioncookie", "HS512");
     }
 
-    private static Map<String, String> session(final String key, final String value) {
-        final HashMap<String, String> result = new HashMap<>();
-        result.put(key, value);
-        return result;
+    private static Session cleanSession(final String key, final String value) {
+        final HashMap<String, String> data = new HashMap<>();
+        data.put(key, value);
+        return Session.of(data);
+    }
+
+    private static Session dirtySession(final String key, final String value) {
+        return Session.empty().mergeWith(cleanSession(key, value));
     }
 
     private static RequestContext contextOf(final Request request) {
