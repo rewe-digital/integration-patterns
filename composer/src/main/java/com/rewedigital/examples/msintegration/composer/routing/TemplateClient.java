@@ -1,4 +1,4 @@
-package com.rewedigital.examples.msintegration.composer.proxy;
+package com.rewedigital.examples.msintegration.composer.routing;
 
 import java.util.concurrent.CompletionStage;
 

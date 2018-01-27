@@ -2,8 +2,7 @@ package com.rewedigital.examples.msintegration.composer.routing;
 
 import java.util.Objects;
 
-import com.rewedigital.examples.msintegration.composer.proxy.ComposerFactory;
-import com.rewedigital.examples.msintegration.composer.proxy.TemplateClient;
+import com.rewedigital.examples.msintegration.composer.composing.ComposerFactory;
 
 public class RouteTypes {
 

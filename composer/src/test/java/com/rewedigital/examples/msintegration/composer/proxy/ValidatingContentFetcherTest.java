@@ -18,6 +18,7 @@ import java.util.concurrent.CompletionStage;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 
+import com.rewedigital.examples.msintegration.composer.composing.ValidatingContentFetcher;
 import com.rewedigital.examples.msintegration.composer.session.Session;
 import com.spotify.apollo.Client;
 import com.spotify.apollo.Request;

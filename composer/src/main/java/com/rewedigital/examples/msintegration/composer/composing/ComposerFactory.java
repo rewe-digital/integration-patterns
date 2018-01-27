@@ -1,10 +1,7 @@
-package com.rewedigital.examples.msintegration.composer.proxy;
+package com.rewedigital.examples.msintegration.composer.composing;
 
 import java.util.Map;
 
-import com.rewedigital.examples.msintegration.composer.composing.AttoParserBasedComposer;
-import com.rewedigital.examples.msintegration.composer.composing.ComposerHtmlConfiguration;
-import com.rewedigital.examples.msintegration.composer.composing.TemplateComposer;
 import com.rewedigital.examples.msintegration.composer.session.Session;
 import com.spotify.apollo.Client;
 import com.typesafe.config.Config;

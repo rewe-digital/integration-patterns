@@ -14,10 +14,12 @@ import java.util.concurrent.CompletionStage;
 
 import org.junit.Test;
 
+import com.rewedigital.examples.msintegration.composer.composing.ComposerFactory;
 import com.rewedigital.examples.msintegration.composer.configuration.DefaultConfiguration;
 import com.rewedigital.examples.msintegration.composer.routing.BackendRouting;
 import com.rewedigital.examples.msintegration.composer.routing.RouteTypes;
 import com.rewedigital.examples.msintegration.composer.routing.StaticBackendRoutes;
+import com.rewedigital.examples.msintegration.composer.routing.TemplateClient;
 import com.rewedigital.examples.msintegration.composer.routing.StaticBackendRoutes.Match;
 import com.rewedigital.examples.msintegration.composer.session.ResponseWithSession;
 import com.rewedigital.examples.msintegration.composer.session.Session;

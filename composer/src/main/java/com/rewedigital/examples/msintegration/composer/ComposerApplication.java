@@ -4,12 +4,12 @@ import static com.rewedigital.examples.msintegration.composer.configuration.Defa
 
 import com.rewedigital.examples.msintegration.composer.client.ClientDecoratingModule;
 import com.rewedigital.examples.msintegration.composer.client.ErrorClientDecorator;
-import com.rewedigital.examples.msintegration.composer.proxy.ComposerFactory;
+import com.rewedigital.examples.msintegration.composer.composing.ComposerFactory;
 import com.rewedigital.examples.msintegration.composer.proxy.ComposingRequestHandler;
-import com.rewedigital.examples.msintegration.composer.proxy.TemplateClient;
 import com.rewedigital.examples.msintegration.composer.routing.BackendRouting;
 import com.rewedigital.examples.msintegration.composer.routing.RouteTypes;
 import com.rewedigital.examples.msintegration.composer.routing.StaticBackendRoutes;
+import com.rewedigital.examples.msintegration.composer.routing.TemplateClient;
 import com.rewedigital.examples.msintegration.composer.session.CookieBasedSessionLifecycle;
 import com.spotify.apollo.Environment;
 import com.spotify.apollo.core.Service;
