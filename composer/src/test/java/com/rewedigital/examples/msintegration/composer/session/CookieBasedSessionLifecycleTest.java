@@ -1,8 +1,6 @@
 package com.rewedigital.examples.msintegration.composer.session;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Optional;
@@ -10,7 +8,6 @@ import java.util.Optional;
 import org.junit.Test;
 
 import com.spotify.apollo.Request;
-import com.spotify.apollo.RequestContext;
 import com.spotify.apollo.Response;
 
 public class CookieBasedSessionLifecycleTest {
@@ -22,13 +19,13 @@ public class CookieBasedSessionLifecycleTest {
         final String cookieHeader =
             dirtySession("x-rd-key", "value").writeTo(Response.ok(), sessionLifecycle).header("Set-Cookie").get();
         final Session session =
-            sessionLifecycle.buildSession(contextOf((Request.forUri("/").withHeader("Cookie", cookieHeader))));
+            sessionLifecycle.buildSession(Request.forUri("/").withHeader("Cookie", cookieHeader));
         assertThat(session.get("key")).contains("value");
     }
 
     @Test
     public void shouldCreateNewSessionIfNonePresent() {
-        final Session session = sessionLifecycle.buildSession(contextOf((Request.forUri("/"))));
+        final Session session = sessionLifecycle.buildSession(Request.forUri("/"));
         assertThat(session).isNotNull();
         assertThat(session.isDirty()).isTrue();
     }
@@ -53,11 +50,4 @@ public class CookieBasedSessionLifecycleTest {
     private static Session dirtySession(final String key, final String value) {
         return Session.empty().mergeWith(cleanSession(key, value));
     }
-
-    private static RequestContext contextOf(final Request request) {
-        final RequestContext result = mock(RequestContext.class);
-        when(result.request()).thenReturn(request);
-        return result;
-    }
-
 }

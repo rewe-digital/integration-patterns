@@ -18,7 +18,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.spotify.apollo.Request;
-import com.spotify.apollo.RequestContext;
 import com.spotify.apollo.Response;
 import com.typesafe.config.Config;
 
@@ -69,8 +68,8 @@ public class CookieBasedSessionLifecycle implements SessionLifecylce {
     }
 
     @Override
-    public Session buildSession(final RequestContext requestContext) {
-        final Map<String, String> sessionValues = readFrom(requestContext.request());
+    public Session buildSession(final Request request) {
+        final Map<String, String> sessionValues = readFrom(request);
         return Session.of(sessionValues);
     }
 

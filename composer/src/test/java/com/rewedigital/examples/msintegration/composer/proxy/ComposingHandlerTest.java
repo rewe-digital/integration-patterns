@@ -107,7 +107,7 @@ public class ComposingHandlerTest {
         public static TemplateClient returning(final Status status, final String responseBody) {
             return new TemplateClient() {
                 @Override
-                public CompletionStage<ResponseWithSession<ByteString>> getTemplate(final RouteMatch match,
+                public CompletionStage<ResponseWithSession<ByteString>> fetch(final RouteMatch match,
                     final RequestContext context, final Session session) {
                     return CompletableFuture.completedFuture(
                         new ResponseWithSession<>(Response.of(status, ByteString.encodeUtf8(responseBody)), session));

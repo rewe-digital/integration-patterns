@@ -13,7 +13,7 @@ import okio.ByteString;
 
 public class TemplateClient {
 
-    public CompletionStage<ResponseWithSession<ByteString>> getTemplate(final RouteMatch match,
+    public CompletionStage<ResponseWithSession<ByteString>> fetch(final RouteMatch match,
         final RequestContext context,
         final Session session) {
         return context.requestScopedClient()
