@@ -1,6 +1,6 @@
 package com.rewedigital.examples.msintegration.composer.routing;
 
-import static com.rewedigital.examples.msintegration.composer.routing.StaticBackendRoutes.RouteType.PROXY;
+import static com.rewedigital.examples.msintegration.composer.routing.StaticBackendRoutes.RouteTypeName.PROXY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;

@@ -1,10 +1,5 @@
 package com.rewedigital.examples.msintegration.composer.proxy;
 
-import static java.util.stream.Collectors.toMap;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -15,7 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import com.rewedigital.examples.msintegration.composer.routing.BackendRouting;
 import com.rewedigital.examples.msintegration.composer.routing.BackendRouting.RouteMatch;
-import com.rewedigital.examples.msintegration.composer.session.ResponseWithSession;
+import com.rewedigital.examples.msintegration.composer.routing.RouteTypes;
 import com.rewedigital.examples.msintegration.composer.session.Session;
 import com.rewedigital.examples.msintegration.composer.session.SessionLifecycleFactory;
 import com.rewedigital.examples.msintegration.composer.session.SessionLifecylce;
@@ -34,16 +29,14 @@ public class ComposingRequestHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(ComposingRequestHandler.class);
 
     private final BackendRouting routing;
-    private final TemplateClient templateClient;
-    private final ComposerFactory composerFactory;
+    private final RouteTypes routeTypes;
     private final SessionLifecycleFactory sessionLifecycleFactory;
 
-    public ComposingRequestHandler(final BackendRouting routing, final TemplateClient templateClient,
-        final ComposerFactory composerFactory, final SessionLifecycleFactory sessionLifecycleFactory) {
+    public ComposingRequestHandler(final BackendRouting routing, final RouteTypes routeTypes,
+        final SessionLifecycleFactory sessionLifecycleFactory) {
         this.routing = Objects.requireNonNull(routing);
-        this.templateClient = Objects.requireNonNull(templateClient);
-        this.composerFactory = Objects.requireNonNull(composerFactory);
-        this.sessionLifecycleFactory = sessionLifecycleFactory;
+        this.routeTypes = Objects.requireNonNull(routeTypes);
+        this.sessionLifecycleFactory = Objects.requireNonNull(sessionLifecycleFactory);
     }
 
     public CompletionStage<Response<ByteString>> execute(final RequestContext context) {
@@ -53,44 +46,9 @@ public class ComposingRequestHandler {
         final Optional<RouteMatch> match = routing.matches(request, session);
         return match.map(rm -> {
             LOGGER.debug("The request {} matched the backend route {}.", request, match);
-            
-            return templateClient.fetch(rm, context, session)
-                .thenCompose(templateResponse -> process(context, rm, templateResponse, sessionLifecylce));
+            return rm.routeType(routeTypes).execute(rm, context, session)
+                .thenApply(r -> r.writeSessionToResponse(sessionLifecylce));
         }).orElse(defaultResponse());
-    }
-
-    private CompletionStage<Response<ByteString>> process(final RequestContext context, final RouteMatch match,
-        final ResponseWithSession<ByteString> responseWithSession, final SessionLifecylce sessionLifecylce) {
-        final Response<ByteString> response = responseWithSession.response();
-        if (match.shouldProxy()) {
-            return CompletableFuture.completedFuture(response);
-        }
-
-        if (isError(response)) {
-            // Do whatever suits your environment, retrieve the data from a cache,
-            // re-execute the request or just fail.
-            return defaultResponse();
-        }
-
-        return composerFactory
-            .build(context.requestScopedClient(), match.parsedPathArguments(), responseWithSession.session())
-            .composeTemplate(response.withPayload(response.payload().get().utf8()))
-            .thenApply(r -> r.writeSessionToResponse(sessionLifecylce))
-            .thenApply(r -> toByteString(r)
-                .withHeaders(transformHeaders(response.headerEntries())));
-    }
-
-    private boolean isError(final Response<ByteString> response) {
-        return response.status().code() != Status.OK.code() || !response.payload().isPresent();
-    }
-
-    private Response<ByteString> toByteString(final Response<String> response) {
-        return response.withPayload(response.payload().map(ByteString::encodeUtf8).orElse(ByteString.EMPTY));
-    }
-
-    private Map<String, String> transformHeaders(final List<Entry<String, String>> headerEntries) {
-        return headerEntries.stream().filter(h -> "content-type".equalsIgnoreCase(h.getKey()))
-            .collect(toMap(Entry::getKey, Entry::getValue, (a, b) -> a));
     }
 
     private static CompletableFuture<Response<ByteString>> defaultResponse() {

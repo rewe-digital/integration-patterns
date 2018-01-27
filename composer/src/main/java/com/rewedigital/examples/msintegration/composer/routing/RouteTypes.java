@@ -1,0 +1,26 @@
+package com.rewedigital.examples.msintegration.composer.routing;
+
+import java.util.Objects;
+
+import com.rewedigital.examples.msintegration.composer.proxy.ComposerFactory;
+import com.rewedigital.examples.msintegration.composer.proxy.TemplateClient;
+
+public class RouteTypes {
+
+    private final ComposerFactory composerFactory;
+    private final TemplateClient templateClient;
+
+    public RouteTypes(final ComposerFactory composerFactory, final TemplateClient templateClient) {
+        this.templateClient = Objects.requireNonNull(templateClient);
+        this.composerFactory = Objects.requireNonNull(composerFactory);
+    }
+
+    public ProxyRoute proxy() {
+        return new ProxyRoute(templateClient);
+    }
+
+    public TemplateRoute template() {
+        return new TemplateRoute(templateClient, composerFactory);
+    }
+
+}

@@ -1,7 +1,7 @@
 package com.rewedigital.examples.msintegration.composer.routing;
 
-import static com.rewedigital.examples.msintegration.composer.routing.StaticBackendRoutes.RouteType.PROXY;
-import static com.rewedigital.examples.msintegration.composer.routing.StaticBackendRoutes.RouteType.TEMPLATE;
+import static com.rewedigital.examples.msintegration.composer.routing.StaticBackendRoutes.RouteTypeName.PROXY;
+import static com.rewedigital.examples.msintegration.composer.routing.StaticBackendRoutes.RouteTypeName.TEMPLATE;
 
 import com.google.common.collect.ImmutableList;
 import com.spotify.apollo.route.Rule;
@@ -26,21 +26,34 @@ public class StaticBackendRoutes {
         return RuleRouter.of(ImmutableList.of(home, homeAssets, pdp, pdpAssets, footerAssets));
     }
 
-    public enum RouteType {
-        PROXY, TEMPLATE;
+    public enum RouteTypeName {
+        PROXY {
+            @Override
+            public RouteType from(final RouteTypes routeTypes) {
+                return routeTypes.proxy();
+            }
+        },
+        TEMPLATE {
+            @Override
+            public RouteType from(final RouteTypes routeTypes) {
+                return routeTypes.template();
+            }
+        };
+
+        public abstract RouteType from(RouteTypes routeTypes);
     }
 
     public static class Match {
 
         private final String backend;
-        private final RouteType routeType;
+        private final RouteTypeName routeType;
 
-        private Match(final String backend, final RouteType routeType) {
+        private Match(final String backend, final RouteTypeName routeType) {
             this.backend = backend;
             this.routeType = routeType;
         }
 
-        public static Match of(final String backend, final RouteType routeType) {
+        public static Match of(final String backend, final RouteTypeName routeType) {
             return new Match(backend, routeType);
         }
 
@@ -48,8 +61,12 @@ public class StaticBackendRoutes {
             return backend;
         }
 
+        public RouteType routeType(final RouteTypes routeTypes) {
+            return routeType.from(routeTypes);
+        }
+
         public boolean shouldProxy() {
-            return RouteType.PROXY == routeType;
+            return RouteTypeName.PROXY == routeType;
         }
 
     }
