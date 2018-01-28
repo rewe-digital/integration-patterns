@@ -52,10 +52,6 @@ public class BackendRouting {
             return backend.routeType(routeTypes);
         }
 
-        public boolean shouldProxy() {
-            return backend.shouldProxy();
-        }
-
         public Map<String, Object> parsedPathArguments() {
             return parsedPathArguments;
         }

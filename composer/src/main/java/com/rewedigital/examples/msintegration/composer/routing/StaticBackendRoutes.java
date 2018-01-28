@@ -64,11 +64,5 @@ public class StaticBackendRoutes {
         public RouteType routeType(final RouteTypes routeTypes) {
             return routeType.from(routeTypes);
         }
-
-        public boolean shouldProxy() {
-            return RouteTypeName.PROXY == routeType;
-        }
-
     }
-
 }

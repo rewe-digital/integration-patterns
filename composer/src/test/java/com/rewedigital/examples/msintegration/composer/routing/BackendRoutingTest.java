@@ -25,10 +25,9 @@ public class BackendRoutingTest {
         final RuleRouter<Match> ruleRouter = RuleRouter.of(ImmutableList.of(simpleRule));
         final BackendRouting backendRouting = new BackendRouting(ruleRouter);
 
-        Optional<RouteMatch> matchResult = backendRouting.matches(requestFor("GET", "/"), Session.empty());
+        final Optional<RouteMatch> matchResult = backendRouting.matches(requestFor("GET", "/"), Session.empty());
         assertThat(matchResult).isPresent();
         assertThat(matchResult.get().backend()).isEqualTo("http://test.com/");
-        assertThat(matchResult.get().shouldProxy()).isTrue();
     }
 
     @Test
@@ -38,7 +37,7 @@ public class BackendRoutingTest {
         final RuleRouter<Match> ruleRouter = RuleRouter.of(ImmutableList.of(ruleWithPath));
         final BackendRouting backendRouting = new BackendRouting(ruleRouter);
 
-        Optional<RouteMatch> matchResult = backendRouting.matches(requestFor("GET", "/123"), Session.empty());
+        final Optional<RouteMatch> matchResult = backendRouting.matches(requestFor("GET", "/123"), Session.empty());
         assertThat(matchResult).isPresent();
         assertThat(matchResult.get().backend()).isEqualTo("http://test.com/{someValue}");
         assertThat(matchResult.get().parsedPathArguments()).containsEntry("someValue", "123");
@@ -50,7 +49,7 @@ public class BackendRoutingTest {
         final RuleRouter<Match> ruleRouter = RuleRouter.of(ImmutableList.of(simpleRule));
         final BackendRouting backendRouting = new BackendRouting(ruleRouter);
 
-        Optional<RouteMatch> matchResult = backendRouting.matches(requestFor("PUT", "/"), Session.empty());
+        final Optional<RouteMatch> matchResult = backendRouting.matches(requestFor("PUT", "/"), Session.empty());
         assertThat(matchResult).isNotPresent();
     }
 
