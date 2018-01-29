@@ -53,14 +53,14 @@ public class SessionTest {
         assertThat(request.header("x-rd-some-key")).contains("value");
         assertThat(request.header("x-rd-other-key")).contains("other-value");
     }
-    
+
     @Test
     public void isInitiallyNotDirty() {
         final Session session = Session.of(Response.forStatus(Status.OK).withHeader("x-rd-some-key", "value")
             .withHeader("x-rd-other-key", "other-value"));
         assertThat(session.isDirty()).isFalse();
     }
-    
+
     @Test
     public void isDirtyIfNewAttributesAreMerged() {
         final Session firstSession =
@@ -71,7 +71,7 @@ public class SessionTest {
         final Session result = firstSession.mergeWith(secondSession);
         assertThat(result.isDirty()).isTrue();
     }
-    
+
     @Test
     public void isNotDirtyIfSameAttributeAndValueIsMerged() {
         final Session firstSession =
@@ -82,7 +82,7 @@ public class SessionTest {
         final Session result = firstSession.mergeWith(secondSession);
         assertThat(result.isDirty()).isFalse();
     }
-    
+
     @Test
     public void isDirtyAfterChangingAttributeValue() {
         final Session firstSession =
@@ -94,5 +94,4 @@ public class SessionTest {
         assertThat(result.isDirty()).isTrue();
         assertThat(result.get("first-key")).contains("second-value");
     }
-
 }

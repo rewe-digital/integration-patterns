@@ -18,24 +18,26 @@ public class Session {
         <T> Response<T> writeTo(final Response<T> response, final Map<String, String> sessionData, boolean dirty);
     }
 
-    private static final Session EMPTY = new Session(new LinkedList<>(), false);
+
+    private static final Session emptySession = new Session(new LinkedList<>(), false);
+    private static final String sessionIdKey = "sessionId";
     private static final String sessionPrefix = "x-rd-";
 
     private final List<Map.Entry<String, String>> data;
     private final boolean dirty;
 
-    
+
     private Session(final List<Map.Entry<String, String>> data, final boolean dirty) {
         this.data = data;
         this.dirty = dirty;
     }
 
     public static Session empty() {
-        return EMPTY;
+        return emptySession;
     }
 
     public static Session of(final Map<String, String> data) {
-        return new Session(new LinkedList<>(data.entrySet()), data.isEmpty());
+        return new Session(new LinkedList<>(data.entrySet()), false);
     }
 
     public static <T> Session of(final Response<T> response) {
@@ -46,26 +48,22 @@ public class Session {
         return new Session(data, false);
     }
 
-    private static boolean isSessionEntry(final Entry<String, String> entry) {
-        return entry.getKey().toLowerCase().startsWith(sessionPrefix);
-    }
-
     public Request enrich(final Request request) {
         return request.withHeaders(asHeaders());
     }
 
-    private Map<String, String> asHeaders() {
-        return toMap(data);
-    }
-
     public Optional<String> get(final String key) {
-        final String lookupKey = sessionPrefix + key;
+        final String lookupKey = prefixed(key);
         for (final Map.Entry<String, String> entry : data) {
             if (entry.getKey().equalsIgnoreCase(lookupKey)) {
                 return Optional.ofNullable(entry.getValue());
             }
         }
         return Optional.empty();
+    }
+
+    public Optional<String> getId() {
+        return get(sessionIdKey);
     }
 
     public <T> Response<T> writeTo(final Response<T> response, final Serializer serializer) {
@@ -80,8 +78,27 @@ public class Session {
         return new Session(new LinkedList<>(newData.entrySet()), newDirty || dirty);
     }
 
+    public Session withId(final String sessionId) {
+        final Map<String, String> sessionData = toMap(data);
+        sessionData.put(prefixed(sessionIdKey), sessionId);
+        return new Session(new LinkedList<>(sessionData.entrySet()), true);
+    }
+
     public boolean isDirty() {
         return dirty;
+    }
+
+    private Map<String, String> asHeaders() {
+        final Map<String, String> result = toMap(data);
+        return result;
+    }
+
+    private static String prefixed(final String key) {
+        return sessionPrefix + key;
+    }
+
+    private static boolean isSessionEntry(final Entry<String, String> entry) {
+        return entry.getKey().toLowerCase().startsWith(sessionPrefix);
     }
 
     private static Map<String, String> toMap(final List<Map.Entry<String, String>> entries) {

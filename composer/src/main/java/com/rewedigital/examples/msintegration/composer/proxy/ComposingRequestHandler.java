@@ -42,6 +42,7 @@ public class ComposingRequestHandler {
     public CompletionStage<Response<ByteString>> execute(final RequestContext context) {
         final Request request = context.request();
         final SessionLifecylce sessionLifecylce = sessionLifecycleFactory.build();
+        
         final Session session = sessionLifecylce.buildSession(request);
         final Optional<RouteMatch> match = routing.matches(request, session);
         return match.map(rm -> {

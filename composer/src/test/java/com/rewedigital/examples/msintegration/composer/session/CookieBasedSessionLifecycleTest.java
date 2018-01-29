@@ -28,6 +28,7 @@ public class CookieBasedSessionLifecycleTest {
         final Session session = sessionLifecycle.buildSession(Request.forUri("/"));
         assertThat(session).isNotNull();
         assertThat(session.isDirty()).isTrue();
+        assertThat(session.getId()).isPresent();
     }
 
     @Test
@@ -36,7 +37,7 @@ public class CookieBasedSessionLifecycleTest {
             cleanSession("x-rd-key", "value").writeTo(Response.ok(), sessionLifecycle).header("Set-Cookie");
         assertThat(setCookieHeader).isEmpty();
     }
-
+    
     private SessionConfiguration configuration() {
         return new SessionConfiguration(true, "sessioncookie", "HS512");
     }
@@ -48,6 +49,6 @@ public class CookieBasedSessionLifecycleTest {
     }
 
     private static Session dirtySession(final String key, final String value) {
-        return Session.empty().mergeWith(cleanSession(key, value));
+        return cleanSession(key, value).withId("someId");
     }
 }

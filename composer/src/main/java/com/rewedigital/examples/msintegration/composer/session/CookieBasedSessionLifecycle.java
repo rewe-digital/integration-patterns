@@ -10,6 +10,7 @@ import java.security.Key;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,13 +71,18 @@ public class CookieBasedSessionLifecycle implements SessionLifecylce {
     @Override
     public Session buildSession(final Request request) {
         final Map<String, String> sessionValues = readFrom(request);
-        return Session.of(sessionValues);
+        final Session session = Session.of(sessionValues);
+        return session.getId().map(id -> session).orElse(session.withId(newSessionId()));
     }
 
     private Map<String, String> readFrom(final Request request) {
         return request.header("Cookie")
             .map(this::readFromHeader)
             .orElse(emptyMap());
+    }
+
+    private String newSessionId() {
+        return UUID.randomUUID().toString();
     }
 
     @Override
