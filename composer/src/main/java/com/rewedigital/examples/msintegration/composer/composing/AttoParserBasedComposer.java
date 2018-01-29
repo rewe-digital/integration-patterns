@@ -30,10 +30,10 @@ public class AttoParserBasedComposer implements ContentComposer, TemplateCompose
     }
 
     @Override
-    public CompletableFuture<Composition> composeContent(final Response<String> templateResponse) {
-        return parse(bodyOf(templateResponse), ContentRange.empty())
+    public CompletableFuture<Composition> composeContent(final Response<String> contentResponse) {
+        return parse(bodyOf(contentResponse), ContentRange.empty())
             .composeIncludes(contentFetcher, this)
-            .thenApply(c -> c.withSession(Session.of(templateResponse)));
+            .thenApply(c -> c.withSession(Session.of(contentResponse)));
     }
 
     private IncludeProcessor parse(final String template, final ContentRange defaultContentRange) {

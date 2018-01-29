@@ -35,7 +35,7 @@ class Composition {
         this.session = session;
     }
 
-    public Composition forRange(int startOffset, int endOffset) {
+    public Composition forRange(final int startOffset, final int endOffset) {
         return new Composition(startOffset, endOffset, template, contentRange, assetLinks, Session.empty(), children);
     }
 
@@ -62,11 +62,13 @@ class Composition {
     }
 
     private Session mergedSession() {
-        return children.stream()
-            .reduce(session, (s, c) -> s.mergeWith(c.mergedSession()), (a, b) -> a);
+        return session.mergeWith(children.stream()
+            .reduce(Session.empty(),
+                (s, c) -> s.mergeWith(c.mergedSession()),
+                (a, b) -> a.mergeWith(b)));
     }
 
-    private String withAssetLinks(String body) {
+    private String withAssetLinks(final String body) {
         final String assets = assetLinks.stream()
             .distinct()
             .collect(Collectors.joining("\n"));

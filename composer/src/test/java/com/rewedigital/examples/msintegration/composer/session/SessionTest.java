@@ -2,6 +2,8 @@ package com.rewedigital.examples.msintegration.composer.session;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Collections;
+
 import org.junit.Test;
 
 import com.spotify.apollo.Request;
@@ -93,5 +95,16 @@ public class SessionTest {
         final Session result = firstSession.mergeWith(secondSession);
         assertThat(result.isDirty()).isTrue();
         assertThat(result.get("first-key")).contains("second-value");
+    }
+
+    @Test
+    public void doesNotOverwriteSessionId() {
+        final Session initialSession = Session.of(Collections.emptyMap()).withId("initialSessionId");
+        final Session sessionWithOtherId =
+            Session.of(Response.forStatus(Status.OK).withHeader("x-rd-session-id", "otherSessionId"));
+
+        final Session mergedSession = initialSession.mergeWith(sessionWithOtherId);
+        assertThat(mergedSession.getId()).contains("initialSessionId");
+
     }
 }

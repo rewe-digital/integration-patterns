@@ -3,7 +3,6 @@ package com.rewedigital.examples.msintegration.composer.session;
 import static java.util.stream.Collectors.toList;
 
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -18,16 +17,15 @@ public class Session {
         <T> Response<T> writeTo(final Response<T> response, final Map<String, String> sessionData, boolean dirty);
     }
 
-
-    private static final Session emptySession = new Session(new LinkedList<>(), false);
-    private static final String sessionIdKey = "sessionId";
+    private static final Session emptySession = new Session(new HashMap<>(), false);
+    private static final String sessionIdKey = "session-id";
     private static final String sessionPrefix = "x-rd-";
 
-    private final List<Map.Entry<String, String>> data;
+    private final Map<String, String> data;
     private final boolean dirty;
 
 
-    private Session(final List<Map.Entry<String, String>> data, final boolean dirty) {
+    private Session(final Map<String, String> data, final boolean dirty) {
         this.data = data;
         this.dirty = dirty;
     }
@@ -37,7 +35,7 @@ public class Session {
     }
 
     public static Session of(final Map<String, String> data) {
-        return new Session(new LinkedList<>(data.entrySet()), false);
+        return new Session(new HashMap<>(data), false);
     }
 
     public static <T> Session of(final Response<T> response) {
@@ -45,7 +43,7 @@ public class Session {
             .stream()
             .filter(Session::isSessionEntry)
             .collect(toList());
-        return new Session(data, false);
+        return new Session(toMap(data), false);
     }
 
     public Request enrich(final Request request) {
@@ -54,7 +52,8 @@ public class Session {
 
     public Optional<String> get(final String key) {
         final String lookupKey = prefixed(key);
-        for (final Map.Entry<String, String> entry : data) {
+        // not using Map.get here due to equalsIgnoreCase
+        for (final Map.Entry<String, String> entry : data.entrySet()) {
             if (entry.getKey().equalsIgnoreCase(lookupKey)) {
                 return Optional.ofNullable(entry.getValue());
             }
@@ -71,17 +70,18 @@ public class Session {
     }
 
     public Session mergeWith(final Session other) {
-        final Map<String, String> dataAsMap = toMap(data);
-        final Map<String, String> newData = new HashMap<String, String>(dataAsMap);
-        newData.putAll(toMap(other.data));
-        final boolean newDirty = !dataAsMap.equals(newData);
-        return new Session(new LinkedList<>(newData.entrySet()), newDirty || dirty);
+        final Map<String, String> newData = new HashMap<String, String>(data);
+        newData.putAll(other.data);
+        // retain original session id if present
+        getId().ifPresent(i -> newData.put(prefixed(sessionIdKey), i));
+        final boolean newDirty = !data.equals(newData);
+        return new Session(newData, newDirty || dirty);
     }
 
     public Session withId(final String sessionId) {
-        final Map<String, String> sessionData = toMap(data);
+        final Map<String, String> sessionData = new HashMap<>(data);
         sessionData.put(prefixed(sessionIdKey), sessionId);
-        return new Session(new LinkedList<>(sessionData.entrySet()), true);
+        return new Session(sessionData, true);
     }
 
     public boolean isDirty() {
@@ -89,8 +89,7 @@ public class Session {
     }
 
     private Map<String, String> asHeaders() {
-        final Map<String, String> result = toMap(data);
-        return result;
+        return new HashMap<>(data);
     }
 
     private static String prefixed(final String key) {
