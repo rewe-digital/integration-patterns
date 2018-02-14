@@ -1,25 +1,26 @@
 package com.rewedigital.examples.msintegration.productdetailpage.product;
 
-import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.AbstractDomainEventProcessor;
-import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.configuration.ConsumerTopicConfig;
-import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.EventParser;
-import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.EventProcessingState;
-import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.processed.ProcessedEventService;
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
+import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.AbstractDomainEventProcessor;
+import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.EventParser;
+import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.EventProcessingState;
+import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.configuration.ConsumerTopicConfig;
+import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.processed.ProcessedEventService;
 
 @Component
-public class ProductEventProcessor extends AbstractDomainEventProcessor<ProductEvent> {
+public class ProductEventProcessor extends AbstractDomainEventProcessor<ProductPayload, ProductEvent> {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractDomainEventProcessor.class);
 
     private final ProductService productService;
 
     @Inject
-    public ProductEventProcessor(ConsumerTopicConfig productTopicConfig, EventParser eventParser, ProcessedEventService processedEventService, ProductService productService) {
+    public ProductEventProcessor(final ConsumerTopicConfig productTopicConfig, final EventParser eventParser, final ProcessedEventService processedEventService, final ProductService productService) {
         super(ProductEvent.class, productTopicConfig, eventParser, processedEventService);
         this.productService = productService;
     }
@@ -39,8 +40,8 @@ public class ProductEventProcessor extends AbstractDomainEventProcessor<ProductE
         return EventProcessingState.SUCCESS;
     }
 
-    private Product toProduct(ProductEvent productEvent) {
-        Product product = new Product();
+    private Product toProduct(final ProductEvent productEvent) {
+        final Product product = new Product();
         product.setId(productEvent.getPayload().getProductId());
         product.setDescription(productEvent.getPayload().getDescription());
         product.setImage(productEvent.getPayload().getImage());
