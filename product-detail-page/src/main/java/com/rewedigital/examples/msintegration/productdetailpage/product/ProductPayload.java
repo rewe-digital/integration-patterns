@@ -1,32 +1,26 @@
-package com.rewedigital.examples.msintegration.productinformation.product;
+package com.rewedigital.examples.msintegration.productdetailpage.product;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Version;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.EventPayload;
+
 import javax.validation.constraints.NotNull;
 
-@Entity
-public class Product {
-
-    @Id
-    private String id;
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class ProductPayload extends EventPayload{
+    
+    private String productId;
     private String name;
     private String vendor;
     private String price;
-
-    @Column(length=2000)
     private String description;
-
     @NotNull
     private String productNumber;
     private String image;
-    
-    @Version
-    private Long version;
 
-    public void setId(final String id) {
-        this.id = id;
+    public void setProductId(final String productId) {
+        this.productId = productId;
     }
 
     public void setName(final String name) {
@@ -53,12 +47,8 @@ public class Product {
         this.image = image;
     }
 
-    public void setVersion(final Long version) {
-        this.version = version;
-    }
-
-    public String getId() {
-        return id;
+    public String getProductId() {
+        return productId;
     }
 
     public String getName() {
@@ -83,21 +73,5 @@ public class Product {
 
     public String getProductNumber() {
         return productNumber;
-    }
-
-    public Long getVersion() {
-        return version;
-    }
-
-    public ProductPayload toPayload() {
-        ProductPayload pp = new ProductPayload();
-        pp.setProductNumber(this.productNumber);
-        pp.setProductId(this.id);
-        pp.setDescription(this.description);
-        pp.setImage(this.image);
-        pp.setName(this.name);
-        pp.setPrice(this.price);
-        pp.setVendor(this.vendor);
-        return pp;
     }
 }
