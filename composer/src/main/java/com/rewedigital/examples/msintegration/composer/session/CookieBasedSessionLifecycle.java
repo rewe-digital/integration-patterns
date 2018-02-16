@@ -10,7 +10,6 @@ import java.security.Key;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,22 +27,24 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.crypto.MacProvider;
 
-public class CookieBasedSessionLifecycle implements SessionLifecylce {
+public class CookieBasedSessionLifecycle extends SessionLifecycle {
 
     public static class Factory implements SessionLifecycleFactory {
 
         private final SessionConfiguration configuration;
+        private final List<Interceptor> interceptors;
 
-        public Factory(final Config configuration) {
+        public Factory(final Config configuration, final List<SessionLifecycle.Interceptor> interceptors) {
+            this.interceptors = interceptors;
             this.configuration = SessionConfiguration.fromConfig(configuration);
         }
 
         @Override
-        public SessionLifecylce build() {
+        public SessionLifecycle build() {
             if (!configuration.sessionEnabled()) {
-                return SessionLifecylce.noSession();
+                return SessionLifecycle.noSession();
             }
-            return new CookieBasedSessionLifecycle(configuration);
+            return new CookieBasedSessionLifecycle(configuration, interceptors);
         }
     }
 
@@ -61,7 +62,8 @@ public class CookieBasedSessionLifecycle implements SessionLifecylce {
     private final Key signingKey;
 
 
-    public CookieBasedSessionLifecycle(final SessionConfiguration configuration) {
+    public CookieBasedSessionLifecycle(final SessionConfiguration configuration, final List<SessionLifecycle.Interceptor> interceptors) {
+        super(interceptors);
         this.configuration = requireNonNull(configuration);
         this.algorithm = SignatureAlgorithm.forName(configuration.signingAlgorithm());
         this.signingKey = defaultSigningKey;// FIXME TV read from config
@@ -69,20 +71,14 @@ public class CookieBasedSessionLifecycle implements SessionLifecylce {
     }
 
     @Override
-    public Session buildSession(final Request request) {
-        final Map<String, String> sessionValues = readFrom(request);
-        final Session session = Session.of(sessionValues);
-        return session.getId().map(id -> session).orElse(session.withId(newSessionId()));
+    protected Session createSession(final Request request) {
+        return Session.of(readFrom(request));
     }
 
     private Map<String, String> readFrom(final Request request) {
         return request.header("Cookie")
             .map(this::readFromHeader)
             .orElse(emptyMap());
-    }
-
-    private String newSessionId() {
-        return UUID.randomUUID().toString();
     }
 
     @Override

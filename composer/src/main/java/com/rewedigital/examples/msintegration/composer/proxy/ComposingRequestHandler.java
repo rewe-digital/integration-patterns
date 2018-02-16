@@ -13,7 +13,7 @@ import com.rewedigital.examples.msintegration.composer.routing.BackendRouting.Ro
 import com.rewedigital.examples.msintegration.composer.routing.RouteTypes;
 import com.rewedigital.examples.msintegration.composer.session.Session;
 import com.rewedigital.examples.msintegration.composer.session.SessionLifecycleFactory;
-import com.rewedigital.examples.msintegration.composer.session.SessionLifecylce;
+import com.rewedigital.examples.msintegration.composer.session.SessionLifecycle;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.RequestContext;
 import com.spotify.apollo.Response;
@@ -41,9 +41,9 @@ public class ComposingRequestHandler {
 
     public CompletionStage<Response<ByteString>> execute(final RequestContext context) {
         final Request request = context.request();
-        final SessionLifecylce sessionLifecylce = sessionLifecycleFactory.build();
+        final SessionLifecycle sessionLifecylce = sessionLifecycleFactory.build();
         
-        final Session session = sessionLifecylce.buildSession(request);
+        final Session session = sessionLifecylce.obtainSession(request);
         final Optional<RouteMatch> match = routing.matches(request, session);
         return match.map(rm -> {
             LOGGER.debug("The request {} matched the backend route {}.", request, match);

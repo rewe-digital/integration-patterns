@@ -24,7 +24,7 @@ import com.rewedigital.examples.msintegration.composer.routing.StaticBackendRout
 import com.rewedigital.examples.msintegration.composer.session.ResponseWithSession;
 import com.rewedigital.examples.msintegration.composer.session.Session;
 import com.rewedigital.examples.msintegration.composer.session.SessionLifecycleFactory;
-import com.rewedigital.examples.msintegration.composer.session.SessionLifecylce;
+import com.rewedigital.examples.msintegration.composer.session.SessionLifecycle;
 import com.spotify.apollo.Client;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.RequestContext;
@@ -96,8 +96,8 @@ public class ComposingHandlerTest {
         return new SessionLifecycleFactory() {
 
             @Override
-            public SessionLifecylce build() {
-                return SessionLifecylce.noSession();
+            public SessionLifecycle build() {
+                return SessionLifecycle.noSession();
             }
         };
     }

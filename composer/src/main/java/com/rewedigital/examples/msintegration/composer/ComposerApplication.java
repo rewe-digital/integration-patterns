@@ -2,6 +2,8 @@ package com.rewedigital.examples.msintegration.composer;
 
 import static com.rewedigital.examples.msintegration.composer.configuration.DefaultConfiguration.withDefaults;
 
+import java.util.Collections;
+
 import com.rewedigital.examples.msintegration.composer.client.ClientDecoratingModule;
 import com.rewedigital.examples.msintegration.composer.client.ErrorClientDecorator;
 import com.rewedigital.examples.msintegration.composer.composing.ComposerFactory;
@@ -42,9 +44,10 @@ public class ComposerApplication {
                 new ComposingRequestHandler(
                     new BackendRouting(StaticBackendRoutes.routes()),
                     new RouteTypes(
-                    new ComposerFactory(configuration.getConfig("composer.html")),
-                    new TemplateClient()),
-                    new CookieBasedSessionLifecycle.Factory(configuration.getConfig("composer.session")));
+                        new ComposerFactory(configuration.getConfig("composer.html")),
+                        new TemplateClient()),
+                    new CookieBasedSessionLifecycle.Factory(configuration.getConfig("composer.session"),
+                        Collections.emptyList()));
 
             environment.routingEngine()
                 .registerAutoRoute(Route.async("GET", "/", rc -> handler.execute(rc)))

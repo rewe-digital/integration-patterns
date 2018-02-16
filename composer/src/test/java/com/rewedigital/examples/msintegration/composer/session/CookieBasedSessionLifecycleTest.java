@@ -2,6 +2,7 @@ package com.rewedigital.examples.msintegration.composer.session;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Optional;
 
@@ -12,20 +13,18 @@ import com.spotify.apollo.Response;
 
 public class CookieBasedSessionLifecycleTest {
 
-    private final CookieBasedSessionLifecycle sessionLifecycle = new CookieBasedSessionLifecycle(configuration());
-
     @Test
     public void shouldWriteAndReadCookie() {
         final String cookieHeader =
-            dirtySession("x-rd-key", "value").writeTo(Response.ok(), sessionLifecycle).header("Set-Cookie").get();
+            dirtySession("x-rd-key", "value").writeTo(Response.ok(), sessionLifecycle()).header("Set-Cookie").get();
         final Session session =
-            sessionLifecycle.buildSession(Request.forUri("/").withHeader("Cookie", cookieHeader));
+            sessionLifecycle().obtainSession(Request.forUri("/").withHeader("Cookie", cookieHeader));
         assertThat(session.get("key")).contains("value");
     }
 
     @Test
     public void shouldCreateNewSessionIfNonePresent() {
-        final Session session = sessionLifecycle.buildSession(Request.forUri("/"));
+        final Session session = sessionLifecycle().obtainSession(Request.forUri("/"));
         assertThat(session).isNotNull();
         assertThat(session.isDirty()).isTrue();
         assertThat(session.getId()).isPresent();
@@ -34,7 +33,7 @@ public class CookieBasedSessionLifecycleTest {
     @Test
     public void shouldNotWriteSessionCookieIfSessionIsNotDirty() {
         final Optional<String> setCookieHeader =
-            cleanSession("x-rd-key", "value").writeTo(Response.ok(), sessionLifecycle).header("Set-Cookie");
+            cleanSession("x-rd-key", "value").writeTo(Response.ok(), sessionLifecycle()).header("Set-Cookie");
         assertThat(setCookieHeader).isEmpty();
     }
     
@@ -50,5 +49,9 @@ public class CookieBasedSessionLifecycleTest {
 
     private static Session dirtySession(final String key, final String value) {
         return cleanSession(key, value).withId("someId");
+    }
+
+    private CookieBasedSessionLifecycle sessionLifecycle() {
+        return new CookieBasedSessionLifecycle(configuration(), Collections.emptyList());
     }
 }
