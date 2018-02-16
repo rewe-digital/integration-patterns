@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.net.HttpCookie;
 import java.security.Key;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -35,8 +36,10 @@ public class CookieBasedSessionLifecycle extends SessionLifecycle {
         private final List<Interceptor> interceptors;
 
         public Factory(final Config configuration, final List<SessionLifecycle.Interceptor> interceptors) {
-            this.interceptors = interceptors;
+            this.interceptors = new LinkedList<>(interceptors);
             this.configuration = SessionConfiguration.fromConfig(configuration);
+            
+            this.interceptors.add(0, new SessionIdInterceptor());
         }
 
         @Override
@@ -62,7 +65,8 @@ public class CookieBasedSessionLifecycle extends SessionLifecycle {
     private final Key signingKey;
 
 
-    public CookieBasedSessionLifecycle(final SessionConfiguration configuration, final List<SessionLifecycle.Interceptor> interceptors) {
+    public CookieBasedSessionLifecycle(final SessionConfiguration configuration,
+        final List<SessionLifecycle.Interceptor> interceptors) {
         super(interceptors);
         this.configuration = requireNonNull(configuration);
         this.algorithm = SignatureAlgorithm.forName(configuration.signingAlgorithm());

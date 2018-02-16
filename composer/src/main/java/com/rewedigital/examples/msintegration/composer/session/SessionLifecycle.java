@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import com.spotify.apollo.Request;
 import com.spotify.apollo.Response;
@@ -46,16 +45,10 @@ public abstract class SessionLifecycle implements Session.Serializer {
 
     public Session obtainSession(final Request request) {
         final Session session = createSession(request);
-        final Session result = session.getId().map(id -> session).orElse(session.withId(newSessionId()));
-        return runInterceptors(result);
+        return runInterceptors(session);
     }
 
     private Session runInterceptors(final Session session) {
         return interceptors.stream().reduce(session, (s, i) -> i.afterCreation(s), (s, t) -> s.mergeWith(t));
     }
-
-    private String newSessionId() {
-        return UUID.randomUUID().toString();
-    }
-
 }

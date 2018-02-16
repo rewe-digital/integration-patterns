@@ -2,7 +2,7 @@ package com.rewedigital.examples.msintegration.composer.session;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Optional;
 
@@ -52,6 +52,6 @@ public class CookieBasedSessionLifecycleTest {
     }
 
     private CookieBasedSessionLifecycle sessionLifecycle() {
-        return new CookieBasedSessionLifecycle(configuration(), Collections.emptyList());
+        return new CookieBasedSessionLifecycle(configuration(), Arrays.asList(new SessionIdInterceptor()));
     }
 }
