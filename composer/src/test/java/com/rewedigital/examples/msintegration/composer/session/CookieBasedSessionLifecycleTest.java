@@ -38,7 +38,7 @@ public class CookieBasedSessionLifecycleTest {
     }
     
     private SessionConfiguration configuration() {
-        return new SessionConfiguration(true, "sessioncookie", "HS512");
+        return new SessionConfiguration(true, "sessioncookie", "HS512", Arrays.asList(new SessionIdInterceptor()));
     }
 
     private static Session cleanSession(final String key, final String value) {
@@ -52,6 +52,6 @@ public class CookieBasedSessionLifecycleTest {
     }
 
     private CookieBasedSessionLifecycle sessionLifecycle() {
-        return new CookieBasedSessionLifecycle(configuration(), Arrays.asList(new SessionIdInterceptor()));
+        return new CookieBasedSessionLifecycle(configuration());
     }
 }

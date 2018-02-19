@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.net.HttpCookie;
 import java.security.Key;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -33,13 +32,9 @@ public class CookieBasedSessionLifecycle extends SessionLifecycle {
     public static class Factory implements SessionLifecycleFactory {
 
         private final SessionConfiguration configuration;
-        private final List<Interceptor> interceptors;
 
-        public Factory(final Config configuration, final List<SessionLifecycle.Interceptor> interceptors) {
-            this.interceptors = new LinkedList<>(interceptors);
+        public Factory(final Config configuration) {
             this.configuration = SessionConfiguration.fromConfig(configuration);
-            
-            this.interceptors.add(0, new SessionIdInterceptor());
         }
 
         @Override
@@ -47,7 +42,7 @@ public class CookieBasedSessionLifecycle extends SessionLifecycle {
             if (!configuration.sessionEnabled()) {
                 return SessionLifecycle.noSession();
             }
-            return new CookieBasedSessionLifecycle(configuration, interceptors);
+            return new CookieBasedSessionLifecycle(configuration);
         }
     }
 
@@ -65,9 +60,8 @@ public class CookieBasedSessionLifecycle extends SessionLifecycle {
     private final Key signingKey;
 
 
-    public CookieBasedSessionLifecycle(final SessionConfiguration configuration,
-        final List<SessionLifecycle.Interceptor> interceptors) {
-        super(interceptors);
+    public CookieBasedSessionLifecycle(final SessionConfiguration configuration) {
+        super(configuration.interceptors());
         this.configuration = requireNonNull(configuration);
         this.algorithm = SignatureAlgorithm.forName(configuration.signingAlgorithm());
         this.signingKey = defaultSigningKey;// FIXME TV read from config
