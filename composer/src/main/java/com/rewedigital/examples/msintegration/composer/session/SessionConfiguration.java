@@ -1,13 +1,14 @@
 package com.rewedigital.examples.msintegration.composer.session;
 
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.rewedigital.examples.msintegration.composer.session.SessionLifecycle.Interceptor;
 import com.typesafe.config.Config;
+import com.typesafe.config.ConfigException;
 import com.typesafe.config.ConfigList;
 import com.typesafe.config.ConfigValue;
 
@@ -24,26 +25,25 @@ public class SessionConfiguration {
     }
 
     private static List<SessionLifecycle.Interceptor> buildInterceptors(final ConfigList configList) {
-        final List<SessionLifecycle.Interceptor> interceptors = new LinkedList<>();
-        configList
-            .forEach(c -> buildInterceptor(c)
-                .ifPresent(i -> interceptors.add(i)));
-        return interceptors;
+        return configList.stream()
+            .flatMap(SessionConfiguration::buildInterceptor)
+            .collect(Collectors.toList());
     }
 
-    private static Optional<Interceptor> buildInterceptor(final ConfigValue configValue) {
-        
+    private static Stream<Interceptor> buildInterceptor(final ConfigValue configValue) {
+
         @SuppressWarnings("unchecked")
         final Map<String, Object> data = (Map<String, Object>) configValue.unwrapped();
         final String type = (String) data.get("type");
-        if(type == null) {
-            throw new ConfigurationException("Required configuration property 'type' for session interceptor is missing");
+        if (type == null) {
+            throw new ConfigException.Missing("interceptor.type");
         }
         switch (type) {
             case "SessionIdInterceptor":
-                return Optional.of(new SessionIdInterceptor());
+                return Stream.of(new SessionIdInterceptor());
+
         }
-        return Optional.empty();
+        return Stream.empty();
     }
 
     SessionConfiguration(final boolean sessionEnabled, final String cookieName, final String signingAlgorithm,

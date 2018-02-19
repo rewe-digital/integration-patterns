@@ -34,7 +34,7 @@ public class SessionConfigurationTest {
         assertThat(sessionConfiguration.interceptors().get(0)).isInstanceOf(SessionIdInterceptor.class);
     }
 
-    @Test(expected = ConfigurationException.class)
+    @Test(expected = ConfigException.Missing.class)
     public void failsOnMissingTypeInInterceptorsConfiguration() {
         final Config config = configWithInterceptors(new HashMap<>());
         SessionConfiguration.fromConfig(config);
