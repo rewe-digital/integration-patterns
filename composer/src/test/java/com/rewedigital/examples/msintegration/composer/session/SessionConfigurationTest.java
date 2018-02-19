@@ -46,9 +46,19 @@ public class SessionConfigurationTest {
         SessionConfiguration.fromConfig(config);
     }
 
+    @Test(expected = ConfigException.Generic.class)
+    public void failsIfInterceptorCannotBeInstantiated() {
+        final Config config = configWithInterceptors(interceptorConfig("doesnotexist"));
+        SessionConfiguration.fromConfig(config);
+    }
+
     private static Map<String, Object> sessionIdInterceptorConfig() {
+        return interceptorConfig("com.rewedigital.examples.msintegration.composer.session.SessionIdInterceptor");
+    }
+
+    private static Map<String, Object> interceptorConfig(final String type) {
         final Map<String, Object> interceptorConfig = new HashMap<>();
-        interceptorConfig.put("type", "SessionIdInterceptor");
+        interceptorConfig.put("type", type);
         return interceptorConfig;
     }
 

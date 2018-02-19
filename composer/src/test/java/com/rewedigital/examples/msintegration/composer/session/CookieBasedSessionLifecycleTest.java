@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import com.spotify.apollo.Request;
 import com.spotify.apollo.Response;
+import com.typesafe.config.ConfigFactory;
 
 public class CookieBasedSessionLifecycleTest {
 
@@ -36,9 +37,10 @@ public class CookieBasedSessionLifecycleTest {
             cleanSession("x-rd-key", "value").writeTo(Response.ok(), sessionLifecycle()).header("Set-Cookie");
         assertThat(setCookieHeader).isEmpty();
     }
-    
+
     private SessionConfiguration configuration() {
-        return new SessionConfiguration(true, "sessioncookie", "HS512", Arrays.asList(new SessionIdInterceptor()));
+        return new SessionConfiguration(true, "sessioncookie", "HS512",
+            Arrays.asList(new SessionIdInterceptor(ConfigFactory.empty())));
     }
 
     private static Session cleanSession(final String key, final String value) {
