@@ -8,6 +8,7 @@ import java.util.Map;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.Response;
 
+// FIXME better name: SessionScope?
 public abstract class SessionLifecycle implements Session.Serializer {
 
     public interface Interceptor {
@@ -49,6 +50,10 @@ public abstract class SessionLifecycle implements Session.Serializer {
     }
 
     private Session runInterceptors(final Session session) {
-        return interceptors.stream().reduce(session, (s, i) -> i.afterCreation(s), (s, t) -> s.mergeWith(t));
+        Session result = session;
+        for (final Interceptor interceptor : interceptors) {
+            result = interceptor.afterCreation(result);
+        }
+        return result;
     }
 }

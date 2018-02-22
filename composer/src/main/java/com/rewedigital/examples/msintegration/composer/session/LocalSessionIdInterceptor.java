@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import com.typesafe.config.Config;
 
+// TODO handle ttl here
 public class LocalSessionIdInterceptor implements SessionLifecycle.Interceptor {
     
     public LocalSessionIdInterceptor(final Config args) {

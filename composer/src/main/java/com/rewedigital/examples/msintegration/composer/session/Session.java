@@ -24,7 +24,6 @@ public class Session {
     private final Map<String, String> data;
     private final boolean dirty;
 
-
     private Session(final Map<String, String> data, final boolean dirty) {
         this.data = data;
         this.dirty = dirty;
@@ -69,7 +68,8 @@ public class Session {
         return serializer.writeTo(response, asHeaders(), dirty);
     }
 
-    public Session mergeWith(final Session other) {
+    // FIXME: prune null values
+    public Session withValuesMergedFrom(final Session other) {
         final Map<String, String> newData = new HashMap<String, String>(data);
         newData.putAll(other.data);
         // retain original session id if present
@@ -88,7 +88,7 @@ public class Session {
         return dirty;
     }
 
-    private Map<String, String> asHeaders() {
+    Map<String, String> asHeaders() {
         return new HashMap<>(data);
     }
 

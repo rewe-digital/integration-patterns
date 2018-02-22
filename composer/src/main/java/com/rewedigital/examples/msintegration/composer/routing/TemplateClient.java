@@ -16,6 +16,6 @@ public class TemplateClient {
         final Session session) {
         return context.requestScopedClient()
             .send(session.enrich(Request.forUri(path, context.request().method())))
-            .thenApply(r -> new ResponseWithSession<>(r, session.mergeWith(Session.of(r))));
+            .thenApply(r -> new ResponseWithSession<>(r, session.withValuesMergedFrom(Session.of(r))));
     }
 }

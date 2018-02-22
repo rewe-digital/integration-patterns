@@ -62,10 +62,10 @@ class Composition {
     }
 
     private Session mergedSession() {
-        return session.mergeWith(children.stream()
+        return session.withValuesMergedFrom(children.stream()
             .reduce(Session.empty(),
-                (s, c) -> s.mergeWith(c.mergedSession()),
-                (a, b) -> a.mergeWith(b)));
+                (s, c) -> s.withValuesMergedFrom(c.mergedSession()),
+                (a, b) -> a.withValuesMergedFrom(b)));
     }
 
     private String withAssetLinks(final String body) {

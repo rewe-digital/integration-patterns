@@ -38,11 +38,6 @@ public class CookieBasedSessionLifecycleTest {
         assertThat(setCookieHeader).isEmpty();
     }
 
-    private SessionConfiguration configuration() {
-        return new SessionConfiguration(true, "sessioncookie", "HS512",
-            Arrays.asList(new LocalSessionIdInterceptor(ConfigFactory.empty())));
-    }
-
     private static Session cleanSession(final String key, final String value) {
         final HashMap<String, String> data = new HashMap<>();
         data.put(key, value);
@@ -55,5 +50,10 @@ public class CookieBasedSessionLifecycleTest {
 
     private CookieBasedSessionLifecycle sessionLifecycle() {
         return new CookieBasedSessionLifecycle(configuration());
+    }
+
+    private SessionConfiguration configuration() {
+        return new SessionConfiguration(true, "sessioncookie", "HS512",
+            Arrays.asList(new LocalSessionIdInterceptor(ConfigFactory.empty())));
     }
 }

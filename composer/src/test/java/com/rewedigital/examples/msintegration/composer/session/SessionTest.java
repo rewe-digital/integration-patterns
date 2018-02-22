@@ -39,7 +39,7 @@ public class SessionTest {
         final Session secondSession =
             Session.of(Response.forStatus(Status.OK).withHeader("x-rd-second-key", "second-value"));
 
-        final Session result = firstSession.mergeWith(secondSession);
+        final Session result = firstSession.withValuesMergedFrom(secondSession);
 
         assertThat(result.get("first-key")).contains("first-value");
         assertThat(result.get("second-key")).contains("second-value");
@@ -70,7 +70,7 @@ public class SessionTest {
         final Session secondSession =
             Session.of(Response.forStatus(Status.OK).withHeader("x-rd-second-key", "second-value"));
 
-        final Session result = firstSession.mergeWith(secondSession);
+        final Session result = firstSession.withValuesMergedFrom(secondSession);
         assertThat(result.isDirty()).isTrue();
     }
 
@@ -81,7 +81,7 @@ public class SessionTest {
         final Session secondSession =
             Session.of(Response.forStatus(Status.OK).withHeader("x-rd-first-key", "first-value"));
 
-        final Session result = firstSession.mergeWith(secondSession);
+        final Session result = firstSession.withValuesMergedFrom(secondSession);
         assertThat(result.isDirty()).isFalse();
     }
 
@@ -92,7 +92,7 @@ public class SessionTest {
         final Session secondSession =
             Session.of(Response.forStatus(Status.OK).withHeader("x-rd-first-key", "second-value"));
 
-        final Session result = firstSession.mergeWith(secondSession);
+        final Session result = firstSession.withValuesMergedFrom(secondSession);
         assertThat(result.isDirty()).isTrue();
         assertThat(result.get("first-key")).contains("second-value");
     }
@@ -103,7 +103,7 @@ public class SessionTest {
         final Session sessionWithOtherId =
             Session.of(Response.forStatus(Status.OK).withHeader("x-rd-session-id", "otherSessionId"));
 
-        final Session mergedSession = initialSession.mergeWith(sessionWithOtherId);
+        final Session mergedSession = initialSession.withValuesMergedFrom(sessionWithOtherId);
         assertThat(mergedSession.getId()).contains("initialSessionId");
 
     }

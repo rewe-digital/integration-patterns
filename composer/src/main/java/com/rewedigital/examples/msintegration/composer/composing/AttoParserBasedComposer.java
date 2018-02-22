@@ -25,7 +25,7 @@ public class AttoParserBasedComposer implements ContentComposer, TemplateCompose
     public CompletableFuture<ResponseWithSession<String>> composeTemplate(final Response<String> templateResponse) {
         return parse(bodyOf(templateResponse), ContentRange.allOf(bodyOf(templateResponse)))
             .composeIncludes(contentFetcher, this)
-            .thenApply(c -> c.withSession(session.mergeWith(Session.of(templateResponse))))
+            .thenApply(c -> c.withSession(session.withValuesMergedFrom(Session.of(templateResponse))))
             .thenApply(c -> c.toResponse());
     }
 
