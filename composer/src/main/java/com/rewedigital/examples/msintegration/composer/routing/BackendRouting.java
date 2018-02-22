@@ -13,6 +13,7 @@ import com.rewedigital.examples.msintegration.composer.routing.StaticBackendRout
 import com.rewedigital.examples.msintegration.composer.session.Session;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.route.InvalidUriException;
+import com.spotify.apollo.route.RuleMatch;
 import com.spotify.apollo.route.RuleRouter;
 
 public class BackendRouting {
@@ -26,12 +27,18 @@ public class BackendRouting {
 
     public Optional<RouteMatch> matches(final Request incommingRequest, final Session session) {
         try {
-            return ruleRouter.match(incommingRequest)
+            return findMatch(incommingRequest)
                 .map(m -> new RouteMatch(m.getRule().getTarget(), m.parsedPathArguments()));
         } catch (final InvalidUriException e) {
             LOGGER.warn("Could not match the incomming route as the route was not parsable.", e);
             return Optional.empty();
         }
+    }
+
+    private Optional<RuleMatch<Match>> findMatch(final Request incommingRequest) throws InvalidUriException {
+        final Optional<RuleMatch<Match>> match = ruleRouter.match(incommingRequest);
+        match.ifPresent(m -> LOGGER.debug("The request {} matched the backend route {}.", incommingRequest, m));
+        return match;
     }
 
     public static class RouteMatch {
@@ -47,7 +54,7 @@ public class BackendRouting {
         public String backend() {
             return backend.backend();
         }
-        
+
         public RouteType routeType(final RouteTypes routeTypes) {
             return backend.routeType(routeTypes);
         }

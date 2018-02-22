@@ -43,15 +43,15 @@ public class TemplateRoute implements RouteType {
 
         if (isError(response)) {
             return CompletableFuture
-                .completedFuture(responseWithSession.transformPayload(
+                .completedFuture(responseWithSession.transform(
                     r -> Response.of(Status.INTERNAL_SERVER_ERROR, ByteString.encodeUtf8("Ohh.. noose!"))));
         }
 
         return composerFactory
             .build(client, pathArguments, responseWithSession.session())
             .composeTemplate(response.withPayload(response.payload().get().utf8()))
-            .thenApply(r -> r.transformPayload(this::toByteString))
-            .thenApply(r -> r.transformPayload(p -> p.withHeaders(contentTypeOf(response))));
+            .thenApply(r -> r.transform(this::toByteString))
+            .thenApply(r -> r.transform(p -> p.withHeaders(contentTypeOf(response))));
     }
 
     private Response<ByteString> toByteString(final Response<String> response) {

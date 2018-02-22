@@ -48,6 +48,10 @@ public abstract class SessionLifecycle implements Session.Serializer {
         final Session session = createSession(request);
         return runInterceptors(session);
     }
+    
+    public <T> Response<T> finalizeSession(final ResponseWithSession<T> response) {
+        return response.writeSessionToResponse(this);
+    }
 
     private Session runInterceptors(final Session session) {
         Session result = session;

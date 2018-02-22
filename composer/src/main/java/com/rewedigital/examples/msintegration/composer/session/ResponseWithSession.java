@@ -23,8 +23,8 @@ public class ResponseWithSession<T> {
         return session;
     }
     
-    public <S> ResponseWithSession<S> transformPayload(final Function<Response<T>, Response<S>> fn) {
-        return new ResponseWithSession<S>(fn.apply(response), session);
+    public <S> ResponseWithSession<S> transform(final Function<Response<T>, Response<S>> transformation) {
+        return new ResponseWithSession<S>(transformation.apply(response), session);
     }
 
     public Response<T> writeSessionToResponse(final Session.Serializer serializer) {
