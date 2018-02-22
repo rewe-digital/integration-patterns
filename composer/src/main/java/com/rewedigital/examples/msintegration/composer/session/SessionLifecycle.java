@@ -15,25 +15,28 @@ public abstract class SessionLifecycle implements Session.Serializer {
         Session afterCreation(Session session);
     }
 
+    private static final SessionLifecycle NOOP_SESSION_LIFECYCLE = new SessionLifecycle(Collections.emptyList()) {
+
+        @Override
+        public <T> Response<T> writeTo(final Response<T> response, final Map<String, String> sessionData,
+            final boolean dirty) {
+            return response;
+        }
+
+        @Override
+        protected Session createSession(final Request request) {
+            return Session.empty();
+        }
+
+        @Override
+        public Session obtainSession(final Request request) {
+            return createSession(request);
+        }
+    };
+
+
     public static SessionLifecycle noSession() {
-        return new SessionLifecycle(Collections.emptyList()) {
-
-            @Override
-            public <T> Response<T> writeTo(final Response<T> response, final Map<String, String> sessionData,
-                final boolean dirty) {
-                return response;
-            }
-
-            @Override
-            protected Session createSession(final Request request) {
-                return Session.empty();
-            }
-
-            @Override
-            public Session obtainSession(final Request request) {
-                return createSession(request);
-            }
-        };
+        return NOOP_SESSION_LIFECYCLE;
     }
 
     private final List<Interceptor> interceptors;
@@ -48,7 +51,7 @@ public abstract class SessionLifecycle implements Session.Serializer {
         final Session session = createSession(request);
         return runInterceptors(session);
     }
-    
+
     public <T> Response<T> finalizeSession(final ResponseWithSession<T> response) {
         return response.writeSessionToResponse(this);
     }
