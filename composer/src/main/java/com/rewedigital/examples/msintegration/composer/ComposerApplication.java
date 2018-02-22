@@ -10,7 +10,7 @@ import com.rewedigital.examples.msintegration.composer.routing.BackendRouting;
 import com.rewedigital.examples.msintegration.composer.routing.RouteTypes;
 import com.rewedigital.examples.msintegration.composer.routing.StaticBackendRoutes;
 import com.rewedigital.examples.msintegration.composer.routing.TemplateClient;
-import com.rewedigital.examples.msintegration.composer.session.CookieBasedSessionLifecycle;
+import com.rewedigital.examples.msintegration.composer.session.CookieBasedSessionHandler;
 import com.spotify.apollo.Environment;
 import com.spotify.apollo.core.Service;
 import com.spotify.apollo.http.client.HttpClientModule;
@@ -44,7 +44,7 @@ public class ComposerApplication {
                     new RouteTypes(
                         new ComposerFactory(configuration.getConfig("composer.html")),
                         new TemplateClient()),
-                    new CookieBasedSessionLifecycle.Factory(configuration.getConfig("composer.session")));
+                    new CookieBasedSessionHandler.Factory(configuration.getConfig("composer.session")));
 
             environment.routingEngine()
                 .registerAutoRoute(Route.async("GET", "/", rc -> handler.execute(rc)))

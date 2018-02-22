@@ -9,28 +9,28 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import com.rewedigital.examples.msintegration.composer.session.SessionLifecycle.Interceptor;
+import com.rewedigital.examples.msintegration.composer.session.SessionHandler.Interceptor;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.Response;
 
-public class SessionLifecycleTest {
+public class SessionHandlerTest {
 
     @Test
     public void shouldAllowInterceptorToAddSessionAttribute() {
         final Interceptor interceptor = interceptorAdding("x-rd-some-key", "some-value");
-        final SessionLifecycle lifecycle = new SimpleSessionLifecycle(asList(interceptor), Session.empty());
+        final SessionHandler lifecycle = new SimpleSessionLifecycle(asList(interceptor), Session.empty());
 
-        final Session session = lifecycle.obtainSession(mock(Request.class));
+        final Session session = lifecycle.initialize(mock(Request.class));
         assertThat(session.get("some-key")).contains("some-value");
     }
 
     @Test
     public void shouldAllowInterceptorToOverwriteSessionId() {
         final Interceptor interceptor = interceptorAdding("x-rd-session-id", "some-value");
-        final SessionLifecycle lifecycle =
+        final SessionHandler lifecycle =
             new SimpleSessionLifecycle(asList(new LocalSessionIdInterceptor(null), interceptor), Session.empty());
 
-        final Session session = lifecycle.obtainSession(mock(Request.class));
+        final Session session = lifecycle.initialize(mock(Request.class));
         assertThat(session.getId()).contains("some-value");
     }
 
@@ -46,7 +46,7 @@ public class SessionLifecycleTest {
         };
     }
 
-    private static class SimpleSessionLifecycle extends SessionLifecycle {
+    private static class SimpleSessionLifecycle extends SessionHandler {
 
         private Session initial;
 
@@ -62,7 +62,7 @@ public class SessionLifecycleTest {
         }
 
         @Override
-        protected Session createSession(final Request request) {
+        protected Session obtainSession(final Request request) {
             return initial;
         }
 

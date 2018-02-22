@@ -8,8 +8,8 @@ import com.rewedigital.examples.msintegration.composer.routing.BackendRouting;
 import com.rewedigital.examples.msintegration.composer.routing.RouteTypes;
 import com.rewedigital.examples.msintegration.composer.session.ResponseWithSession;
 import com.rewedigital.examples.msintegration.composer.session.Session;
-import com.rewedigital.examples.msintegration.composer.session.SessionLifecycle;
-import com.rewedigital.examples.msintegration.composer.session.SessionLifecycleFactory;
+import com.rewedigital.examples.msintegration.composer.session.SessionHandler;
+import com.rewedigital.examples.msintegration.composer.session.SessionHandlerFactory;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.RequestContext;
 import com.spotify.apollo.Response;
@@ -21,26 +21,24 @@ public class ComposingRequestHandler {
 
     private final BackendRouting routing;
     private final RouteTypes routeTypes;
-    private final SessionLifecycleFactory sessionLifecycleFactory;
+    private final SessionHandler sessionHandler;
 
     public ComposingRequestHandler(final BackendRouting routing, final RouteTypes routeTypes,
-        final SessionLifecycleFactory sessionLifecycleFactory) {
+        final SessionHandlerFactory sessionHandlerFactory) {
         this.routing = Objects.requireNonNull(routing);
         this.routeTypes = Objects.requireNonNull(routeTypes);
-        this.sessionLifecycleFactory = Objects.requireNonNull(sessionLifecycleFactory);
+        this.sessionHandler = sessionHandlerFactory.build();
     }
 
     public CompletionStage<Response<ByteString>> execute(final RequestContext context) {
-        final SessionLifecycle sessionLifecycle = sessionLifecycleFactory.build();
-
         final Request request = context.request();
-        final Session session = sessionLifecycle.obtainSession(request);
-        
+        final Session session = sessionHandler.initialize(request);
+
         return routing.matches(request, session).map(
             rm -> rm.routeType(routeTypes)
                 .execute(rm, context, session))
             .orElse(defaultResponse(session))
-            .thenApply(sessionLifecycle::finalizeSession);
+            .thenApply(sessionHandler::store);
     }
 
     private static CompletableFuture<ResponseWithSession<ByteString>> defaultResponse(final Session session) {

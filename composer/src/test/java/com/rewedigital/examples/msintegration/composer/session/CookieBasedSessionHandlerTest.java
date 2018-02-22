@@ -15,20 +15,20 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigValueFactory;
 
-public class CookieBasedSessionLifecycleTest {
+public class CookieBasedSessionHandlerTest {
 
     @Test
     public void shouldWriteAndReadCookie() {
         final String cookieHeader =
-            dirtySession("x-rd-key", "value").writeTo(Response.ok(), sessionLifecycle()).header("Set-Cookie").get();
+            dirtySession("x-rd-key", "value").writeTo(Response.ok(), sessionHandler()).header("Set-Cookie").get();
         final Session session =
-            sessionLifecycle().obtainSession(Request.forUri("/").withHeader("Cookie", cookieHeader));
+            sessionHandler().initialize(Request.forUri("/").withHeader("Cookie", cookieHeader));
         assertThat(session.get("key")).contains("value");
     }
 
     @Test
     public void shouldCreateNewSessionIfNonePresent() {
-        final Session session = sessionLifecycle().obtainSession(Request.forUri("/"));
+        final Session session = sessionHandler().initialize(Request.forUri("/"));
         assertThat(session).isNotNull();
         assertThat(session.isDirty()).isTrue();
         assertThat(session.getId()).isPresent();
@@ -37,20 +37,20 @@ public class CookieBasedSessionLifecycleTest {
     @Test
     public void shouldNotWriteSessionCookieIfSessionIsNotDirty() {
         final Optional<String> setCookieHeader =
-            cleanSession("x-rd-key", "value").writeTo(Response.ok(), sessionLifecycle()).header("Set-Cookie");
+            cleanSession("x-rd-key", "value").writeTo(Response.ok(), sessionHandler()).header("Set-Cookie");
         assertThat(setCookieHeader).isEmpty();
     }
 
     @Test
     public void shouldBeConstructedWithFactory() {
-        final SessionLifecycle result = new CookieBasedSessionLifecycle.Factory(enabledConfig()).build();
-        assertThat(result).isInstanceOf(CookieBasedSessionLifecycle.class);
+        final SessionHandler result = new CookieBasedSessionHandler.Factory(enabledConfig()).build();
+        assertThat(result).isInstanceOf(CookieBasedSessionHandler.class);
     }
 
     @Test
     public void shouldConstructNoopInstanceIfSessionHandlingIsDisabled() {
-        final SessionLifecycle result = new CookieBasedSessionLifecycle.Factory(disabledConfig()).build();
-        assertThat(result).isEqualTo(SessionLifecycle.noSession());
+        final SessionHandler result = new CookieBasedSessionHandler.Factory(disabledConfig()).build();
+        assertThat(result).isEqualTo(SessionHandler.noSession());
     }
 
     private static Session cleanSession(final String key, final String value) {
@@ -63,8 +63,8 @@ public class CookieBasedSessionLifecycleTest {
         return cleanSession(key, value).withId("someId");
     }
 
-    private CookieBasedSessionLifecycle sessionLifecycle() {
-        return new CookieBasedSessionLifecycle(configuration());
+    private CookieBasedSessionHandler sessionHandler() {
+        return new CookieBasedSessionHandler(configuration());
     }
 
     private SessionConfiguration configuration() {

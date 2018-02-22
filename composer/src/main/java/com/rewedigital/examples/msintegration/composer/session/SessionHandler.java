@@ -8,14 +8,13 @@ import java.util.Map;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.Response;
 
-// FIXME better name: SessionScope? SessionBracket?
-public abstract class SessionLifecycle implements Session.Serializer {
+public abstract class SessionHandler implements Session.Serializer {
 
     public interface Interceptor {
         Session afterCreation(Session session);
     }
 
-    private static final SessionLifecycle NOOP_SESSION_LIFECYCLE = new SessionLifecycle(Collections.emptyList()) {
+    private static final SessionHandler NOOP_HANDLER = new SessionHandler(Collections.emptyList()) {
 
         @Override
         public <T> Response<T> writeTo(final Response<T> response, final Map<String, String> sessionData,
@@ -24,37 +23,38 @@ public abstract class SessionLifecycle implements Session.Serializer {
         }
 
         @Override
-        protected Session createSession(final Request request) {
+        protected Session obtainSession(final Request request) {
             return Session.empty();
         }
 
         @Override
-        public Session obtainSession(final Request request) {
-            return createSession(request);
+        public Session initialize(final Request request) {
+            return obtainSession(request);
         }
     };
 
 
-    public static SessionLifecycle noSession() {
-        return NOOP_SESSION_LIFECYCLE;
+    public static SessionHandler noSession() {
+        return NOOP_HANDLER;
     }
 
     private final List<Interceptor> interceptors;
 
-    protected SessionLifecycle(final List<Interceptor> interceptors) {
+    protected SessionHandler(final List<Interceptor> interceptors) {
         this.interceptors = new LinkedList<>(interceptors);
     }
 
-    protected abstract Session createSession(Request request);
-
-    public Session obtainSession(final Request request) {
-        final Session session = createSession(request);
+    public Session initialize(final Request request) {
+        final Session session = obtainSession(request);
         return runInterceptors(session);
     }
 
-    public <T> Response<T> finalizeSession(final ResponseWithSession<T> response) {
+    public <T> Response<T> store(final ResponseWithSession<T> response) {
         return response.writeSessionToResponse(this);
     }
+
+    protected abstract Session obtainSession(Request request);
+
 
     private Session runInterceptors(final Session session) {
         Session result = session;

@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.rewedigital.examples.msintegration.composer.session.SessionLifecycle.Interceptor;
+import com.rewedigital.examples.msintegration.composer.session.SessionHandler.Interceptor;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigException;
 import com.typesafe.config.ConfigFactory;
@@ -22,14 +22,14 @@ public class SessionConfiguration {
     private final boolean sessionEnabled;
     private final String cookieName;
     private final String signingAlgorithm;
-    private final List<SessionLifecycle.Interceptor> interceptors;
+    private final List<SessionHandler.Interceptor> interceptors;
 
     public static SessionConfiguration fromConfig(final Config config) {
         return new SessionConfiguration(config.getBoolean("enabled"), config.getString("cookie"),
             config.getString("signing-algorithm"), buildInterceptors(config.getList("interceptors")));
     }
 
-    private static List<SessionLifecycle.Interceptor> buildInterceptors(final ConfigList configList) {
+    private static List<SessionHandler.Interceptor> buildInterceptors(final ConfigList configList) {
         return configList.stream()
             .flatMap(SessionConfiguration::buildInterceptor)
             .collect(Collectors.toList());
@@ -51,7 +51,7 @@ public class SessionConfiguration {
     }
 
     SessionConfiguration(final boolean sessionEnabled, final String cookieName, final String signingAlgorithm,
-        final List<SessionLifecycle.Interceptor> interceptors) {
+        final List<SessionHandler.Interceptor> interceptors) {
         this.sessionEnabled = sessionEnabled;
         this.interceptors = Objects.requireNonNull(interceptors);
         this.cookieName = Objects.requireNonNull(cookieName);

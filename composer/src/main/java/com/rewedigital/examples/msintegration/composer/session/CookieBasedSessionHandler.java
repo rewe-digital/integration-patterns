@@ -27,9 +27,9 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.crypto.MacProvider;
 
-public class CookieBasedSessionLifecycle extends SessionLifecycle {
+public class CookieBasedSessionHandler extends SessionHandler {
 
-    public static class Factory implements SessionLifecycleFactory {
+    public static class Factory implements SessionHandlerFactory {
 
         private final SessionConfiguration configuration;
 
@@ -38,15 +38,15 @@ public class CookieBasedSessionLifecycle extends SessionLifecycle {
         }
 
         @Override
-        public SessionLifecycle build() {
+        public SessionHandler build() {
             if (!configuration.sessionEnabled()) {
-                return SessionLifecycle.noSession();
+                return SessionHandler.noSession();
             }
-            return new CookieBasedSessionLifecycle(configuration);
+            return new CookieBasedSessionHandler(configuration);
         }
     }
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CookieBasedSessionLifecycle.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CookieBasedSessionHandler.class);
     private static final TypeReference<HashMap<String, String>> typeRef =
         new TypeReference<HashMap<String, String>>() {};
     private static final String PAYLOAD = "payload";
@@ -60,7 +60,7 @@ public class CookieBasedSessionLifecycle extends SessionLifecycle {
     private final Key signingKey;
 
 
-    public CookieBasedSessionLifecycle(final SessionConfiguration configuration) {
+    public CookieBasedSessionHandler(final SessionConfiguration configuration) {
         super(configuration.interceptors());
         this.configuration = requireNonNull(configuration);
         this.algorithm = SignatureAlgorithm.forName(configuration.signingAlgorithm());
@@ -69,7 +69,7 @@ public class CookieBasedSessionLifecycle extends SessionLifecycle {
     }
 
     @Override
-    protected Session createSession(final Request request) {
+    protected Session obtainSession(final Request request) {
         return Session.of(readFrom(request));
     }
 

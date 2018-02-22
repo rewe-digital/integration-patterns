@@ -23,8 +23,8 @@ import com.rewedigital.examples.msintegration.composer.routing.TemplateClient;
 import com.rewedigital.examples.msintegration.composer.routing.StaticBackendRoutes.Match;
 import com.rewedigital.examples.msintegration.composer.session.ResponseWithSession;
 import com.rewedigital.examples.msintegration.composer.session.Session;
-import com.rewedigital.examples.msintegration.composer.session.SessionLifecycleFactory;
-import com.rewedigital.examples.msintegration.composer.session.SessionLifecycle;
+import com.rewedigital.examples.msintegration.composer.session.SessionHandlerFactory;
+import com.rewedigital.examples.msintegration.composer.session.SessionHandler;
 import com.spotify.apollo.Client;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.RequestContext;
@@ -92,12 +92,12 @@ public class ComposingHandlerTest {
         return context;
     }
 
-    private SessionLifecycleFactory sessionSerializer() {
-        return new SessionLifecycleFactory() {
+    private SessionHandlerFactory sessionSerializer() {
+        return new SessionHandlerFactory() {
 
             @Override
-            public SessionLifecycle build() {
-                return SessionLifecycle.noSession();
+            public SessionHandler build() {
+                return SessionHandler.noSession();
             }
         };
     }
