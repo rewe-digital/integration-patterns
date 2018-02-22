@@ -31,7 +31,7 @@ public class SessionConfigurationTest {
         final Config config = configWithInterceptors(sessionIdInterceptorConfig());
         final SessionConfiguration sessionConfiguration = SessionConfiguration.fromConfig(config);
         assertThat(sessionConfiguration.interceptors()).hasSize(1);
-        assertThat(sessionConfiguration.interceptors().get(0)).isInstanceOf(SessionIdInterceptor.class);
+        assertThat(sessionConfiguration.interceptors().get(0)).isInstanceOf(LocalSessionIdInterceptor.class);
     }
 
     @Test(expected = ConfigException.Missing.class)
@@ -53,7 +53,7 @@ public class SessionConfigurationTest {
     }
 
     private static Map<String, Object> sessionIdInterceptorConfig() {
-        return interceptorConfig("com.rewedigital.examples.msintegration.composer.session.SessionIdInterceptor");
+        return interceptorConfig("com.rewedigital.examples.msintegration.composer.session.LocalSessionIdInterceptor");
     }
 
     private static Map<String, Object> interceptorConfig(final String type) {

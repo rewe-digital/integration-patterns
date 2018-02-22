@@ -4,9 +4,9 @@ import java.util.UUID;
 
 import com.typesafe.config.Config;
 
-public class SessionIdInterceptor implements SessionLifecycle.Interceptor {
+public class LocalSessionIdInterceptor implements SessionLifecycle.Interceptor {
     
-    public SessionIdInterceptor(final Config args) {
+    public LocalSessionIdInterceptor(final Config args) {
     }
 
     @Override

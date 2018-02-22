@@ -40,7 +40,7 @@ public class CookieBasedSessionLifecycleTest {
 
     private SessionConfiguration configuration() {
         return new SessionConfiguration(true, "sessioncookie", "HS512",
-            Arrays.asList(new SessionIdInterceptor(ConfigFactory.empty())));
+            Arrays.asList(new LocalSessionIdInterceptor(ConfigFactory.empty())));
     }
 
     private static Session cleanSession(final String key, final String value) {
