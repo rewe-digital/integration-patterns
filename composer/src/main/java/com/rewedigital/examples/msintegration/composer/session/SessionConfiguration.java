@@ -40,7 +40,7 @@ public class SessionConfiguration {
         final String type = config.getString("type");
 
         try {
-            final Config args = config.withFallback(ConfigFactory.empty().atKey("args"));
+            final Config args = config.withFallback(ConfigFactory.empty().atKey("args")).getConfig("args");
             final Interceptor result = (Interceptor) Class.forName(type).getConstructor(Config.class).newInstance(args);
             LOGGER.info("registered Configuration Interceptor of type {}", type);
             return Stream.of(result);

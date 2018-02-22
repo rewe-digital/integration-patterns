@@ -1,8 +1,10 @@
 package com.rewedigital.examples.msintegration.composer.session;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Optional;
 
@@ -10,9 +12,9 @@ import org.junit.Test;
 
 import com.rewedigital.examples.msintegration.composer.configuration.DefaultConfiguration;
 import com.spotify.apollo.Request;
+import com.spotify.apollo.RequestContext;
 import com.spotify.apollo.Response;
 import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigValueFactory;
 
 public class CookieBasedSessionHandlerTest {
@@ -22,16 +24,14 @@ public class CookieBasedSessionHandlerTest {
         final String cookieHeader =
             dirtySession("x-rd-key", "value").writeTo(Response.ok(), sessionHandler()).header("Set-Cookie").get();
         final Session session =
-            sessionHandler().initialize(Request.forUri("/").withHeader("Cookie", cookieHeader));
+            sessionHandler().initialize(contextFor(Request.forUri("/").withHeader("Cookie", cookieHeader)));
         assertThat(session.get("key")).contains("value");
     }
 
     @Test
     public void shouldCreateNewSessionIfNonePresent() {
-        final Session session = sessionHandler().initialize(Request.forUri("/"));
+        final Session session = sessionHandler().initialize(contextFor(Request.forUri("/")));
         assertThat(session).isNotNull();
-        assertThat(session.isDirty()).isTrue();
-        assertThat(session.getId()).isPresent();
     }
 
     @Test
@@ -67,9 +67,14 @@ public class CookieBasedSessionHandlerTest {
         return new CookieBasedSessionHandler(configuration());
     }
 
+    private RequestContext contextFor(final Request request) {
+        final RequestContext context = mock(RequestContext.class);
+        when(context.request()).thenReturn(request);
+        return context;
+    }
+
     private SessionConfiguration configuration() {
-        return new SessionConfiguration(true, "sessioncookie", "HS512",
-            Arrays.asList(new LocalSessionIdInterceptor(ConfigFactory.empty())));
+        return new SessionConfiguration(true, "sessioncookie", "HS512", Collections.emptyList());
     }
 
     private Config enabledConfig() {

@@ -31,9 +31,9 @@ public class ComposingRequestHandler {
     }
 
     public CompletionStage<Response<ByteString>> execute(final RequestContext context) {
-        final Request request = context.request();
-        final Session session = sessionHandler.initialize(request);
+        final Session session = sessionHandler.initialize(context);
 
+        final Request request = context.request();
         return routing.matches(request, session).map(
             rm -> rm.routeType(routeTypes)
                 .execute(rm, context, session))

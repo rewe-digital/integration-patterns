@@ -19,9 +19,10 @@ public class Session {
         <T> Response<T> writeTo(final Response<T> response, final Map<String, String> sessionData, boolean dirty);
     }
 
-    private static final Session emptySession = new Session(new HashMap<>(), false);
     private static final String sessionIdKey = "session-id";
     private static final String sessionPrefix = "x-rd-";
+
+    private static final Session emptySession = new Session(new HashMap<>(), false);
 
     private final Map<String, String> data;
     private final boolean dirty;
@@ -88,15 +89,21 @@ public class Session {
         return dirty;
     }
 
-    Map<String, String> asHeaders() {
+    public Map<String, String> rawData() {
         return new HashMap<>(data);
+    }
+
+    private Map<String, String> asHeaders() {
+        return data.entrySet().stream()
+            .filter(Session::isSessionEntry)
+            .collect(entryCollector());
     }
 
     private static String prefixed(final String key) {
         return sessionPrefix + key;
     }
 
-    private static boolean isSessionEntry(final Entry<String, String> entry) {
+    private static boolean isSessionEntry(final Map.Entry<String, String> entry) {
         return entry.getKey().toLowerCase().startsWith(sessionPrefix);
     }
 

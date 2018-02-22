@@ -3,6 +3,7 @@ package com.rewedigital.examples.msintegration.composer.session;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,17 +49,21 @@ public class SessionConfigurationTest {
 
     @Test(expected = ConfigException.Generic.class)
     public void failsIfInterceptorCannotBeInstantiated() {
-        final Config config = configWithInterceptors(interceptorConfig("doesnotexist"));
+        final Config config = configWithInterceptors(interceptorConfig("doesnotexist", Collections.emptyMap()));
         SessionConfiguration.fromConfig(config);
     }
 
     private static Map<String, Object> sessionIdInterceptorConfig() {
-        return interceptorConfig("com.rewedigital.examples.msintegration.composer.session.LocalSessionIdInterceptor");
+        final Map<String, Object> args = new HashMap<>();
+        args.put("ttl", 0);
+        return interceptorConfig("com.rewedigital.examples.msintegration.composer.session.LocalSessionIdInterceptor",
+            args);
     }
 
-    private static Map<String, Object> interceptorConfig(final String type) {
+    private static Map<String, Object> interceptorConfig(final String type, final Map<String, Object> args) {
         final Map<String, Object> interceptorConfig = new HashMap<>();
         interceptorConfig.put("type", type);
+        interceptorConfig.put("args", args);
         return interceptorConfig;
     }
 
