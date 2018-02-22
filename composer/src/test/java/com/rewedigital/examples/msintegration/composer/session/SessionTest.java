@@ -105,6 +105,16 @@ public class SessionTest {
 
         final Session mergedSession = initialSession.withValuesMergedFrom(sessionWithOtherId);
         assertThat(mergedSession.getId()).contains("initialSessionId");
-
+    }
+    
+    @Test
+    public void allowsRemovalOfSessionAttributes() {
+        final Session firstSession =
+            Session.of(Response.forStatus(Status.OK).withHeader("x-rd-first-key", "first-value"));
+        final Session secondSession =
+            Session.of(Response.forStatus(Status.OK).withHeader("x-rd-first-key", ""));
+        
+        final Session mergedSession = firstSession.withValuesMergedFrom(secondSession);
+        assertThat(mergedSession.get("first-key")).isEmpty();
     }
 }

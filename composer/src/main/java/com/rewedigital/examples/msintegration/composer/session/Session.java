@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import com.spotify.apollo.Request;
 import com.spotify.apollo.Response;
@@ -68,14 +70,12 @@ public class Session {
         return serializer.writeTo(response, asHeaders(), dirty);
     }
 
-    // FIXME: prune null values
     public Session withValuesMergedFrom(final Session other) {
-        final Map<String, String> newData = new HashMap<String, String>(data);
-        newData.putAll(other.data);
+        final Map<String, String> mergedData = merge(this.data, other.data);
         // retain original session id if present
-        getId().ifPresent(i -> newData.put(prefixed(sessionIdKey), i));
-        final boolean newDirty = !data.equals(newData);
-        return new Session(newData, newDirty || dirty);
+        getId().ifPresent(i -> mergedData.put(prefixed(sessionIdKey), i));
+        final boolean newDirty = !data.equals(mergedData);
+        return new Session(mergedData, newDirty || dirty);
     }
 
     public Session withId(final String sessionId) {
@@ -107,5 +107,22 @@ public class Session {
             result.put(entry.getKey(), entry.getValue());
         }
         return result;
+    }
+
+    private static Map<String, String> merge(final Map<String, String> first, final Map<String, String> second) {
+        final Map<String, String> newData = new HashMap<String, String>(first);
+        newData.putAll(second);
+        // prune empty values
+        return newData.entrySet().stream()
+            .filter(Session::nonEmptyValue)
+            .collect(entryCollector());
+    }
+
+    private static boolean nonEmptyValue(final Map.Entry<String, String> entry) {
+        return entry.getValue() != null && !"".equals(entry.getValue().trim());
+    }
+
+    private static Collector<Entry<String, String>, ?, Map<String, String>> entryCollector() {
+        return Collectors.toMap(e -> e.getKey(), e -> e.getValue());
     }
 }
