@@ -8,7 +8,7 @@ import java.util.Map;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.Response;
 
-// FIXME better name: SessionScope?
+// FIXME better name: SessionScope? SessionBracket?
 public abstract class SessionLifecycle implements Session.Serializer {
 
     public interface Interceptor {
