@@ -19,7 +19,7 @@ import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 
 import com.rewedigital.examples.msintegration.composer.composing.ValidatingContentFetcher;
-import com.rewedigital.examples.msintegration.composer.session.Session;
+import com.rewedigital.examples.msintegration.composer.session.SessionRoot;
 import com.spotify.apollo.Client;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.Response;
@@ -27,11 +27,13 @@ import com.spotify.apollo.Response;
 import okio.ByteString;
 
 public class ValidatingContentFetcherTest {
+    
+    private final SessionRoot emptySession = SessionRoot.empty();
 
     @Test
     public void fetchesEmptyContentForMissingPath() throws Exception {
         final Response<String> result =
-            new ValidatingContentFetcher(mock(Client.class), emptyMap(), Session.empty()).fetch(null, null).get();
+            new ValidatingContentFetcher(mock(Client.class), emptyMap(), emptySession).fetch(null, null).get();
         assertThat(result.payload()).contains("");
     }
 
@@ -40,7 +42,7 @@ public class ValidatingContentFetcherTest {
         final Client client = mock(Client.class);
         when(client.send(aRequestWithPath("/some/path"))).thenReturn(aResponse("ok"));
         final Response<String> result =
-            new ValidatingContentFetcher(client, emptyMap(), Session.empty()).fetch("/some/path", "fallback").get();
+            new ValidatingContentFetcher(client, emptyMap(), emptySession).fetch("/some/path", "fallback").get();
         assertThat(result.payload()).contains("ok");
     }
 
@@ -49,7 +51,7 @@ public class ValidatingContentFetcherTest {
         final Client client = mock(Client.class);
         when(client.send(aRequestWithPath("/some/path/val"))).thenReturn(aResponse("ok"));
         final Response<String> result =
-            new ValidatingContentFetcher(client, params("var", "val"), Session.empty())
+            new ValidatingContentFetcher(client, params("var", "val"), emptySession)
                 .fetch("/some/path/{var}", "fallback").get();
         assertThat(result.payload()).contains("ok");
     }
@@ -59,7 +61,7 @@ public class ValidatingContentFetcherTest {
         final Client client = mock(Client.class);
         when(client.send(aRequestWithPath("/some/path"))).thenReturn(aResponse("ok", "text/json"));
         final Response<String> result =
-            new ValidatingContentFetcher(client, emptyMap(), Session.empty()).fetch("/some/path", "").get();
+            new ValidatingContentFetcher(client, emptyMap(), emptySession).fetch("/some/path", "").get();
         assertThat(result.payload()).contains("");
     }
 
@@ -67,7 +69,7 @@ public class ValidatingContentFetcherTest {
     public void forwardsSession() throws Exception {
         final Client client = mock(Client.class);
         when(client.send(any())).thenReturn(aResponse(""));
-        final Session session = session("x-rd-key", "value");
+        final SessionRoot session = session("x-rd-key", "value");
         new ValidatingContentFetcher(client, emptyMap(), session).fetch("/some/path", "").get();
         verify(client).send(aRequestWithSession("x-rd-key", "value"));
     }
@@ -103,8 +105,8 @@ public class ValidatingContentFetcherTest {
             Response.forPayload(encodeUtf8(payload)).withHeader("Content-Type", contentType));
     }
 
-    private static Session session(final String key, final String value) {
-        return Session.of(params(key, value));
+    private static SessionRoot session(final String key, final String value) {
+        return SessionRoot.of(params(key, value));
     }
 
     private static <T> Map<String, T> params(final String name, final T value) {

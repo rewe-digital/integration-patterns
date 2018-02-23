@@ -23,14 +23,14 @@ public class CookieBasedSessionHandlerTest {
     public void shouldWriteAndReadCookie() {
         final String cookieHeader =
             dirtySession("x-rd-key", "value").writeTo(Response.ok(), sessionHandler()).header("Set-Cookie").get();
-        final Session session =
+        final SessionRoot session =
             sessionHandler().initialize(contextFor(Request.forUri("/").withHeader("Cookie", cookieHeader)));
         assertThat(session.get("key")).contains("value");
     }
 
     @Test
     public void shouldCreateNewSessionIfNonePresent() {
-        final Session session = sessionHandler().initialize(contextFor(Request.forUri("/")));
+        final SessionRoot session = sessionHandler().initialize(contextFor(Request.forUri("/")));
         assertThat(session).isNotNull();
     }
 
@@ -53,18 +53,18 @@ public class CookieBasedSessionHandlerTest {
         assertThat(result).isEqualTo(SessionHandler.noSession());
     }
 
-    private static Session cleanSession(final String key, final String value) {
+    private static SessionRoot cleanSession(final String key, final String value) {
         return session(key, value, false);
     }
 
-    private static Session dirtySession(final String key, final String value) {
+    private static SessionRoot dirtySession(final String key, final String value) {
         return session(key, value, true);
     }
     
-    private static Session session(final String key, final String value, final boolean dirty) {
+    private static SessionRoot session(final String key, final String value, final boolean dirty) {
         final HashMap<String, String> data = new HashMap<>();
         data.put(key, value);
-        return Session.of(data, dirty);
+        return SessionRoot.of(data, dirty);
     }
 
     private CookieBasedSessionHandler sessionHandler() {

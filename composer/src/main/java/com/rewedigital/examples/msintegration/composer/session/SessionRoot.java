@@ -14,7 +14,7 @@ import com.spotify.apollo.Request;
 import com.spotify.apollo.Response;
 
 // TODO evaluate idea: split into SessionRoot and SessionFragment?
-public class Session {
+public class SessionRoot {
 
     public interface Serializer {
         <T> Response<T> writeTo(final Response<T> response, final Map<String, String> sessionData, boolean dirty);
@@ -22,34 +22,35 @@ public class Session {
 
     private static final String sessionIdKey = "session-id";
     private static final String sessionPrefix = "x-rd-";
-    private static final Session emptySession = new Session(new HashMap<>(), false);
+
+    private static final SessionRoot emptySession = new SessionRoot(new HashMap<>(), false);
 
     private final Map<String, String> data;
     private final boolean dirty;
 
-    private Session(final Map<String, String> data, final boolean dirty) {
+    private SessionRoot(final Map<String, String> data, final boolean dirty) {
         this.data = data;
         this.dirty = dirty;
     }
 
-    public static Session empty() {
+    public static SessionRoot empty() {
         return emptySession;
     }
 
-    public static Session of(final Map<String, String> data) {
+    public static SessionRoot of(final Map<String, String> data) {
         return of(data, false);
     }
     
-    public static Session of(final Map<String, String> data, final boolean dirty) {
-        return new Session(new HashMap<>(data), dirty);
+    public static SessionRoot of(final Map<String, String> data, final boolean dirty) {
+        return new SessionRoot(new HashMap<>(data), dirty);
     }
 
-    public static <T> Session of(final Response<T> response) {
+    public static <T> SessionRoot of(final Response<T> response) {
         final List<Map.Entry<String, String>> data = response.headerEntries()
             .stream()
-            .filter(Session::isSessionEntry)
+            .filter(SessionRoot::isSessionEntry)
             .collect(toList());
-        return new Session(toMap(data), false);
+        return new SessionRoot(toMap(data), false);
     }
 
     public Request enrich(final Request request) {
@@ -75,18 +76,18 @@ public class Session {
         return serializer.writeTo(response, asHeaders(), dirty);
     }
 
-    public Session withValuesMergedFrom(final Session other) {
-        final Map<String, String> mergedData = merge(this.data, other.data);
+    public SessionRoot withValuesMergedFrom(final Session other) {
+        final Map<String, String> mergedData = merge(this.data, other.rawData());
         // retain original session id if present
         getId().ifPresent(i -> mergedData.put(prefixed(sessionIdKey), i));
         final boolean newDirty = !data.equals(mergedData);
-        return new Session(mergedData, newDirty || dirty);
+        return new SessionRoot(mergedData, newDirty || dirty);
     }
 
-    public Session withId(final String sessionId) {
+    public SessionRoot withId(final String sessionId) {
         final Map<String, String> sessionData = new HashMap<>(data);
         sessionData.put(prefixed(sessionIdKey), sessionId);
-        return new Session(sessionData, true);
+        return new SessionRoot(sessionData, true);
     }
 
     public boolean isDirty() {
@@ -99,7 +100,7 @@ public class Session {
 
     private Map<String, String> asHeaders() {
         return data.entrySet().stream()
-            .filter(Session::isSessionEntry)
+            .filter(SessionRoot::isSessionEntry)
             .collect(entryCollector());
     }
 
@@ -125,7 +126,7 @@ public class Session {
         newData.putAll(second);
         // prune empty values
         return newData.entrySet().stream()
-            .filter(Session::nonEmptyValue)
+            .filter(SessionRoot::nonEmptyValue)
             .collect(entryCollector());
     }
 

@@ -2,11 +2,11 @@ package com.rewedigital.examples.msintegration.composer.composing;
 
 import java.io.StringWriter;
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import com.rewedigital.examples.msintegration.composer.session.ResponseWithSession;
 import com.rewedigital.examples.msintegration.composer.session.Session;
-import com.spotify.apollo.Response;
 
 class Composition {
 
@@ -57,8 +57,10 @@ class Composition {
         return writer.toString();
     }
 
-    public ResponseWithSession<String> toResponse() {
-        return new ResponseWithSession<>(Response.forPayload(withAssetLinks(body())), mergedSession());
+    public ResponseWithSession<String> toResponse(
+        final BiFunction<String, Session, ResponseWithSession<String>> responseBuilder) {
+        return responseBuilder.apply(withAssetLinks(body()), mergedSession());
+
     }
 
     private Session mergedSession() {

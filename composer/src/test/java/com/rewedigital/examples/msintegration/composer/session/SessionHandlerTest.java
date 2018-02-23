@@ -19,9 +19,9 @@ public class SessionHandlerTest {
     @Test
     public void shouldAllowInterceptorToAddSessionAttribute() {
         final Interceptor interceptor = interceptorAdding("x-rd-some-key", "some-value");
-        final SessionHandler sessionHandler = new SimpleSessionHandler(asList(interceptor), Session.empty());
+        final SessionHandler sessionHandler = new SimpleSessionHandler(asList(interceptor), SessionRoot.empty());
 
-        final Session session = sessionHandler.initialize(mock(RequestContext.class));
+        final SessionRoot session = sessionHandler.initialize(mock(RequestContext.class));
         assertThat(session.get("some-key")).contains("some-value");
     }
 
@@ -30,9 +30,9 @@ public class SessionHandlerTest {
         final Interceptor firstInterceptor = interceptorAdding("x-rd-first", "some-value");
         final Interceptor secondInterceptor = interceptorAdding("x-rd-second", "other-value");
         final SessionHandler sessionHandler =
-            new SimpleSessionHandler(asList(firstInterceptor, secondInterceptor), Session.empty());
+            new SimpleSessionHandler(asList(firstInterceptor, secondInterceptor), SessionRoot.empty());
 
-        final Session session = sessionHandler.initialize(mock(RequestContext.class));
+        final SessionRoot session = sessionHandler.initialize(mock(RequestContext.class));
         assertThat(session.get("first")).contains("some-value");
         assertThat(session.get("second")).contains("other-value");
     }
@@ -41,19 +41,19 @@ public class SessionHandlerTest {
         return new Interceptor() {
 
             @Override
-            public Session afterCreation(final Session session, final RequestContext context) {
+            public SessionRoot afterCreation(final SessionRoot session, final RequestContext context) {
                 final Map<String, String> data = session.rawData();
                 data.put(key, value);
-                return Session.of(data);
+                return SessionRoot.of(data);
             }
         };
     }
 
     private static class SimpleSessionHandler extends SessionHandler {
 
-        private Session initial;
+        private SessionRoot initial;
 
-        protected SimpleSessionHandler(final List<Interceptor> interceptors, final Session initial) {
+        protected SimpleSessionHandler(final List<Interceptor> interceptors, final SessionRoot initial) {
             super(interceptors);
             this.initial = initial;
         }
@@ -65,7 +65,7 @@ public class SessionHandlerTest {
         }
 
         @Override
-        protected Session obtainSession(final Request request) {
+        protected SessionRoot obtainSession(final Request request) {
             return initial;
         }
 

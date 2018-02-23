@@ -7,9 +7,9 @@ import java.util.concurrent.CompletionStage;
 import com.rewedigital.examples.msintegration.composer.routing.BackendRouting;
 import com.rewedigital.examples.msintegration.composer.routing.RouteTypes;
 import com.rewedigital.examples.msintegration.composer.session.ResponseWithSession;
-import com.rewedigital.examples.msintegration.composer.session.Session;
 import com.rewedigital.examples.msintegration.composer.session.SessionHandler;
 import com.rewedigital.examples.msintegration.composer.session.SessionHandlerFactory;
+import com.rewedigital.examples.msintegration.composer.session.SessionRoot;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.RequestContext;
 import com.spotify.apollo.Response;
@@ -31,7 +31,7 @@ public class ComposingRequestHandler {
     }
 
     public CompletionStage<Response<ByteString>> execute(final RequestContext context) {
-        final Session session = sessionHandler.initialize(context);
+        final SessionRoot session = sessionHandler.initialize(context);
 
         final Request request = context.request();
         return routing.matches(request, session).map(
@@ -41,7 +41,7 @@ public class ComposingRequestHandler {
             .thenApply(sessionHandler::store);
     }
 
-    private static CompletableFuture<ResponseWithSession<ByteString>> defaultResponse(final Session session) {
+    private static CompletableFuture<ResponseWithSession<ByteString>> defaultResponse(final SessionRoot session) {
         final Response<ByteString> response =
             Response.of(Status.INTERNAL_SERVER_ERROR, ByteString.encodeUtf8("Ohh.. noose!"));
         return CompletableFuture

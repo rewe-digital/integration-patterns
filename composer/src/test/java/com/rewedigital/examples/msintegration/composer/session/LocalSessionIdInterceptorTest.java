@@ -29,39 +29,39 @@ public class LocalSessionIdInterceptorTest {
     @Test
     public void createsSessionIdForNewSession() {
         final LocalSessionIdInterceptor interceptor = new LocalSessionIdInterceptor(config());
-        final Session session = interceptor.afterCreation(Session.empty(), context());
+        final SessionRoot session = interceptor.afterCreation(SessionRoot.empty(), context());
         assertThat(session.getId()).isPresent();
     }
 
     @Test
     public void retainsExistingSessionId() {
-        final Session sessionWithId = Session.empty().withId("the session id");
+        final SessionRoot sessionWithId = SessionRoot.empty().withId("the session id");
         final LocalSessionIdInterceptor interceptor = new LocalSessionIdInterceptor(config());
-        final Session session = interceptor.afterCreation(sessionWithId, context());
+        final SessionRoot session = interceptor.afterCreation(sessionWithId, context());
         assertThat(session.getId()).contains("the session id");
     }
 
     @Test
     public void addsExpirationWithTTLFromConfig() {
         final LocalSessionIdInterceptor interceptor = new LocalSessionIdInterceptor(config(ttl));
-        final Session session = interceptor.afterCreation(Session.empty(), contextForArrivalTime(now));
+        final SessionRoot session = interceptor.afterCreation(SessionRoot.empty(), contextForArrivalTime(now));
         assertThat(session.rawData().get("expires-at")).isEqualTo(Long.toString(now + ttl));
     }
 
     @Test
     public void createsNewSessionIfExpired() {
-        final Session expiredSession = sessionExpiringAt(expireAt, "x-rd-key", "value");
+        final SessionRoot expiredSession = sessionExpiringAt(expireAt, "x-rd-key", "value");
         final LocalSessionIdInterceptor interceptor = new LocalSessionIdInterceptor(config(ttl));
-        final Session session = interceptor.afterCreation(expiredSession, contextForArrivalTime(afterExpiration));
+        final SessionRoot session = interceptor.afterCreation(expiredSession, contextForArrivalTime(afterExpiration));
         assertThat(session.get("key")).isNotPresent();
         assertThat(session.isDirty());
     }
 
     @Test
     public void updatesExpiration() {
-        final Session initialSession = sessionExpiringAt(expireAt, "x-rd-key", "value");
+        final SessionRoot initialSession = sessionExpiringAt(expireAt, "x-rd-key", "value");
         final LocalSessionIdInterceptor interceptor = new LocalSessionIdInterceptor(config(ttl));
-        final Session session = interceptor.afterCreation(initialSession, contextForArrivalTime(beforeExpiration));
+        final SessionRoot session = interceptor.afterCreation(initialSession, contextForArrivalTime(beforeExpiration));
         assertThat(session.get("key")).contains("value");
         assertThat(session.rawData().get("expires-at")).isEqualTo(Long.toString(beforeExpiration + ttl));
         assertThat(session.isDirty()).isTrue();
@@ -69,21 +69,21 @@ public class LocalSessionIdInterceptorTest {
 
     @Test
     public void doesNotUpdateExpirationTimeBeforeGracePeriod() {
-        final Session initialSession = sessionExpiringAt(expireAt, "x-rd-key", "value");
+        final SessionRoot initialSession = sessionExpiringAt(expireAt, "x-rd-key", "value");
         final LocalSessionIdInterceptor interceptor = new LocalSessionIdInterceptor(config(ttl, renewAfter));
-        final Session session =
+        final SessionRoot session =
             interceptor.afterCreation(initialSession, contextForArrivalTime(beforeRenewalRequired));
         assertThat(session.get("key")).contains("value");
         assertThat(session.rawData().get("expires-at")).isEqualTo(Long.toString(expireAt));
         assertThat(session.isDirty()).isFalse();
     }
 
-    private Session sessionExpiringAt(final long epochSeconds, final String key, final String value) {
+    private SessionRoot sessionExpiringAt(final long epochSeconds, final String key, final String value) {
         final Map<String, String> data = new HashMap<>();
         data.put("x-rd-session-id", "1234");
         data.put("expires-at", Long.toString(epochSeconds));
         data.put(key, value);
-        return Session.of(data);
+        return SessionRoot.of(data);
     }
 
     private RequestContext context() {

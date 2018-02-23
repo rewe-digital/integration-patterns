@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 import org.junit.Test;
 
-import com.rewedigital.examples.msintegration.composer.session.Session;
+import com.rewedigital.examples.msintegration.composer.session.SessionRoot;
 import com.spotify.apollo.Client;
 import com.spotify.apollo.Response;
 import com.spotify.apollo.Status;
@@ -86,8 +86,9 @@ public class TemplateComposerTest {
 
 
     private TemplateComposer makeComposer(final Client client) {
+        final SessionRoot session = SessionRoot.empty();
         return new AttoParserBasedComposer(
-            new ValidatingContentFetcher(client, Collections.emptyMap(), Session.empty()), Session.empty(),
+            new ValidatingContentFetcher(client, Collections.emptyMap(), session), session,
             new ComposerHtmlConfiguration("rewe-digital-include", "rewe-digital-content", "data-rd-options"));
     }
 

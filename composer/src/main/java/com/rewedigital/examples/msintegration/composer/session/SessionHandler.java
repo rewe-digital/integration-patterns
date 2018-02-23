@@ -9,10 +9,10 @@ import com.spotify.apollo.Request;
 import com.spotify.apollo.RequestContext;
 import com.spotify.apollo.Response;
 
-public abstract class SessionHandler implements Session.Serializer {
+public abstract class SessionHandler implements SessionRoot.Serializer {
 
     public interface Interceptor {
-        Session afterCreation(Session session, RequestContext context);
+        SessionRoot afterCreation(SessionRoot session, RequestContext context);
     }
 
     private static final SessionHandler NOOP_HANDLER = new SessionHandler(Collections.emptyList()) {
@@ -24,12 +24,12 @@ public abstract class SessionHandler implements Session.Serializer {
         }
 
         @Override
-        protected Session obtainSession(final Request request) {
-            return Session.empty();
+        protected SessionRoot obtainSession(final Request request) {
+            return SessionRoot.empty();
         }
 
         @Override
-        public Session initialize(final RequestContext context) {
+        public SessionRoot initialize(final RequestContext context) {
             return obtainSession(context.request());
         }
     };
@@ -45,8 +45,8 @@ public abstract class SessionHandler implements Session.Serializer {
         this.interceptors = new LinkedList<>(interceptors);
     }
 
-    public Session initialize(final RequestContext context) {
-        final Session session = obtainSession(context.request());
+    public SessionRoot initialize(final RequestContext context) {
+        final SessionRoot session = obtainSession(context.request());
         return runInterceptors(session, context);
     }
 
@@ -54,11 +54,11 @@ public abstract class SessionHandler implements Session.Serializer {
         return response.writeSessionToResponse(this);
     }
 
-    protected abstract Session obtainSession(Request request);
+    protected abstract SessionRoot obtainSession(Request request);
 
 
-    private Session runInterceptors(final Session session, final RequestContext context) {
-        Session result = session;
+    private SessionRoot runInterceptors(final SessionRoot session, final RequestContext context) {
+        SessionRoot result = session;
         for (final Interceptor interceptor : interceptors) {
             result = interceptor.afterCreation(result, context);
         }

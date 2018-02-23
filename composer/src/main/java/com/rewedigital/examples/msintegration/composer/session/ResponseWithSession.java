@@ -8,9 +8,9 @@ import com.spotify.apollo.Response;
 public class ResponseWithSession<T> {
 
     private final Response<T> response;
-    private final Session session;
+    private final SessionRoot session;
 
-    public ResponseWithSession(final Response<T> response, final Session session) {
+    public ResponseWithSession(final Response<T> response, final SessionRoot session) {
         this.response = Objects.requireNonNull(response);
         this.session = Objects.requireNonNull(session);
     }
@@ -19,7 +19,7 @@ public class ResponseWithSession<T> {
         return response;
     }
 
-    public Session session() {
+    public SessionRoot session() {
         return session;
     }
     
@@ -27,7 +27,7 @@ public class ResponseWithSession<T> {
         return new ResponseWithSession<S>(transformation.apply(response), session);
     }
 
-    public Response<T> writeSessionToResponse(final Session.Serializer serializer) {
+    public Response<T> writeSessionToResponse(final SessionRoot.Serializer serializer) {
         return session.writeTo(response, serializer);
     }
 }

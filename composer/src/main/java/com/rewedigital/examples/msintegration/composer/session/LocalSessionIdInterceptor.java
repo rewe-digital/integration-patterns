@@ -24,11 +24,11 @@ public class LocalSessionIdInterceptor implements SessionHandler.Interceptor {
     }
 
     @Override
-    public Session afterCreation(final Session session, final RequestContext context) {
+    public SessionRoot afterCreation(final SessionRoot session, final RequestContext context) {
         return withId(withExpiration(session, context));
     }
 
-    private Session withId(final Session session) {
+    private SessionRoot withId(final SessionRoot session) {
         return session.getId()
             .map(id -> session)
             .orElse(session.withId(newSessionId()));
@@ -38,7 +38,7 @@ public class LocalSessionIdInterceptor implements SessionHandler.Interceptor {
         return UUID.randomUUID().toString();
     }
 
-    private Session withExpiration(final Session session, final RequestContext context) {
+    private SessionRoot withExpiration(final SessionRoot session, final RequestContext context) {
         Map<String, String> data = session.rawData();
         final Optional<Long> expiresAt = Optional.ofNullable(data.get("expires-at")).map(this::parseExpiresAt);
 
@@ -49,7 +49,7 @@ public class LocalSessionIdInterceptor implements SessionHandler.Interceptor {
         final long newExpiresAt = expiration(expiresAt, context);
         data.put("expires-at", Long.toString(newExpiresAt));
         final boolean dirty = expiresAt.map(e -> e != newExpiresAt).orElse(true);
-        return Session.of(data, dirty);
+        return SessionRoot.of(data, dirty);
     }
 
     private boolean isExpired(final Optional<Long> expiresAt, final RequestContext context) {

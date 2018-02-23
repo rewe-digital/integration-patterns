@@ -19,12 +19,12 @@ import com.rewedigital.examples.msintegration.composer.configuration.DefaultConf
 import com.rewedigital.examples.msintegration.composer.routing.BackendRouting;
 import com.rewedigital.examples.msintegration.composer.routing.RouteTypes;
 import com.rewedigital.examples.msintegration.composer.routing.StaticBackendRoutes;
-import com.rewedigital.examples.msintegration.composer.routing.TemplateClient;
 import com.rewedigital.examples.msintegration.composer.routing.StaticBackendRoutes.Match;
+import com.rewedigital.examples.msintegration.composer.routing.TemplateClient;
 import com.rewedigital.examples.msintegration.composer.session.ResponseWithSession;
-import com.rewedigital.examples.msintegration.composer.session.Session;
-import com.rewedigital.examples.msintegration.composer.session.SessionHandlerFactory;
 import com.rewedigital.examples.msintegration.composer.session.SessionHandler;
+import com.rewedigital.examples.msintegration.composer.session.SessionHandlerFactory;
+import com.rewedigital.examples.msintegration.composer.session.SessionRoot;
 import com.spotify.apollo.Client;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.RequestContext;
@@ -108,7 +108,7 @@ public class ComposingHandlerTest {
             return new RouteTypes(composerFactory(), new TemplateClient() {
                 @Override
                 public CompletionStage<ResponseWithSession<ByteString>> fetch(final String path,
-                    final RequestContext context, final Session session) {
+                    final RequestContext context, final SessionRoot session) {
                     return CompletableFuture.completedFuture(
                         new ResponseWithSession<>(Response.of(status, ByteString.encodeUtf8(responseBody)), session));
                 }
