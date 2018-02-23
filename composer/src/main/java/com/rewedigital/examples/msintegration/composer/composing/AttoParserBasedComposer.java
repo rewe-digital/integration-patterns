@@ -5,7 +5,7 @@ import static java.util.Objects.requireNonNull;
 import java.util.concurrent.CompletableFuture;
 
 import com.rewedigital.examples.msintegration.composer.session.ResponseWithSession;
-import com.rewedigital.examples.msintegration.composer.session.Session;
+import com.rewedigital.examples.msintegration.composer.session.SessionFragment;
 import com.rewedigital.examples.msintegration.composer.session.SessionRoot;
 import com.spotify.apollo.Response;
 
@@ -27,7 +27,7 @@ public class AttoParserBasedComposer implements ContentComposer, TemplateCompose
         return parse(bodyOf(templateResponse), ContentRange.allOf(bodyOf(templateResponse)))
             .composeIncludes(contentFetcher, this)
             .thenApply(c -> c.toResponse((p, s) -> new ResponseWithSession<String>(Response.forPayload(p),
-                session.withValuesMergedFrom(Session.of(templateResponse).withValuesMergedFrom(s)))));
+                session.withValuesMergedFrom(SessionFragment.of(templateResponse).withValuesMergedFrom(s)))));
 
         // .thenApply(c -> c.withSession(session.withValuesMergedFrom(Session.of(templateResponse))))
         // .thenApply(c -> c.toResponse());
@@ -37,7 +37,7 @@ public class AttoParserBasedComposer implements ContentComposer, TemplateCompose
     public CompletableFuture<Composition> composeContent(final Response<String> contentResponse) {
         return parse(bodyOf(contentResponse), ContentRange.empty())
             .composeIncludes(contentFetcher, this)
-            .thenApply(c -> c.withSession(Session.of(contentResponse)));
+            .thenApply(c -> c.withSession(SessionFragment.of(contentResponse)));
     }
 
     private IncludeProcessor parse(final String template, final ContentRange defaultContentRange) {

@@ -3,7 +3,7 @@ package com.rewedigital.examples.msintegration.composer.routing;
 import java.util.concurrent.CompletionStage;
 
 import com.rewedigital.examples.msintegration.composer.session.ResponseWithSession;
-import com.rewedigital.examples.msintegration.composer.session.Session;
+import com.rewedigital.examples.msintegration.composer.session.SessionFragment;
 import com.rewedigital.examples.msintegration.composer.session.SessionRoot;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.RequestContext;
@@ -17,6 +17,6 @@ public class TemplateClient {
         final SessionRoot session) {
         return context.requestScopedClient()
             .send(session.enrich(Request.forUri(path, context.request().method())))
-            .thenApply(r -> new ResponseWithSession<>(r, session.withValuesMergedFrom(Session.of(r))));
+            .thenApply(r -> new ResponseWithSession<>(r, session.withValuesMergedFrom(SessionFragment.of(r))));
     }
 }

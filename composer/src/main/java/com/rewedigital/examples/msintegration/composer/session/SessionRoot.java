@@ -57,7 +57,7 @@ public class SessionRoot {
         return serializer.writeTo(response, asHeaders(), dirty);
     }
 
-    public SessionRoot withValuesMergedFrom(final Session other) {
+    public SessionRoot withValuesMergedFrom(final SessionFragment other) {
         final SessionData mergedData = data.mergedWith(other.data);
         final SessionData newData = getId().map(id -> mergedData.with(sessionIdKey, id)).orElse(mergedData);
         final boolean newDirty = !data.equals(newData);

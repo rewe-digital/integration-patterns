@@ -6,7 +6,7 @@ import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import com.rewedigital.examples.msintegration.composer.session.ResponseWithSession;
-import com.rewedigital.examples.msintegration.composer.session.Session;
+import com.rewedigital.examples.msintegration.composer.session.SessionFragment;
 
 class Composition {
 
@@ -16,15 +16,15 @@ class Composition {
     private final int endOffset;
     private final String template;
     private final ContentRange contentRange;
-    private final Session session;
+    private final SessionFragment session;
 
     public Composition(final String template, final ContentRange contentRange, final List<String> assetLinks,
         final List<Composition> children) {
-        this(0, template.length(), template, contentRange, assetLinks, Session.empty(), children);
+        this(0, template.length(), template, contentRange, assetLinks, SessionFragment.empty(), children);
     }
 
     private Composition(final int startOffset, final int endOffset, final String template,
-        final ContentRange contentRange, final List<String> assetLinks, final Session session,
+        final ContentRange contentRange, final List<String> assetLinks, final SessionFragment session,
         final List<Composition> children) {
         this.startOffset = startOffset;
         this.endOffset = endOffset;
@@ -36,10 +36,10 @@ class Composition {
     }
 
     public Composition forRange(final int startOffset, final int endOffset) {
-        return new Composition(startOffset, endOffset, template, contentRange, assetLinks, Session.empty(), children);
+        return new Composition(startOffset, endOffset, template, contentRange, assetLinks, SessionFragment.empty(), children);
     }
 
-    public Composition withSession(final Session session) {
+    public Composition withSession(final SessionFragment session) {
         return new Composition(startOffset, endOffset, template, contentRange, assetLinks, session, children);
     }
 
@@ -58,14 +58,14 @@ class Composition {
     }
 
     public ResponseWithSession<String> toResponse(
-        final BiFunction<String, Session, ResponseWithSession<String>> responseBuilder) {
+        final BiFunction<String, SessionFragment, ResponseWithSession<String>> responseBuilder) {
         return responseBuilder.apply(withAssetLinks(body()), mergedSession());
 
     }
 
-    private Session mergedSession() {
+    private SessionFragment mergedSession() {
         return session.withValuesMergedFrom(children.stream()
-            .reduce(Session.empty(),
+            .reduce(SessionFragment.empty(),
                 (s, c) -> s.withValuesMergedFrom(c.mergedSession()),
                 (a, b) -> a.withValuesMergedFrom(b)));
     }

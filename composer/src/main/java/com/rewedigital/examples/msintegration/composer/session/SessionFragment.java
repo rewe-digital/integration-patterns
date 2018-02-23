@@ -9,43 +9,42 @@ import java.util.Optional;
 
 import com.spotify.apollo.Response;
 
-// TODO evaluate idea: split into SessionRoot and SessionFragment?
-public class Session {
+public class SessionFragment {
 
     public interface Serializer {
         <T> Response<T> writeTo(final Response<T> response, final Map<String, String> sessionData, boolean dirty);
     }
 
-    private static final Session emptySession = new Session(new HashMap<>());
+    private static final SessionFragment emptySession = new SessionFragment(new HashMap<>());
 
     final SessionData data;
 
-    private Session(final Map<String, String> data) {
+    private SessionFragment(final Map<String, String> data) {
         this(new SessionData(data));
     }
 
-    private Session(final SessionData data) {
+    private SessionFragment(final SessionData data) {
         this.data = data;
     }
 
-    public static Session empty() {
+    public static SessionFragment empty() {
         return emptySession;
     }
 
-    public static <T> Session of(final Response<T> response) {
+    public static <T> SessionFragment of(final Response<T> response) {
         final List<Map.Entry<String, String>> data = response.headerEntries()
             .stream()
             .filter(SessionData::isSessionEntry)
             .collect(toList());
-        return new Session(toMap(data));
+        return new SessionFragment(toMap(data));
     }
 
     public Optional<String> get(final String key) {
         return data.get(key);
     }
 
-    public Session withValuesMergedFrom(final Session other) {
-        return new Session(data.mergedWith(other.data));
+    public SessionFragment withValuesMergedFrom(final SessionFragment other) {
+        return new SessionFragment(data.mergedWith(other.data));
     }
 
     private static Map<String, String> toMap(final List<Map.Entry<String, String>> entries) {
