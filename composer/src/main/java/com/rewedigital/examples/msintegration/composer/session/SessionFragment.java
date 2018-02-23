@@ -11,10 +11,6 @@ import com.spotify.apollo.Response;
 
 public class SessionFragment {
 
-    public interface Serializer {
-        <T> Response<T> writeTo(final Response<T> response, final Map<String, String> sessionData, boolean dirty);
-    }
-
     private static final SessionFragment emptySession = new SessionFragment(new HashMap<>());
 
     final SessionData data;
