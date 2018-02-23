@@ -5,15 +5,22 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.spotify.apollo.RequestContext;
 import com.typesafe.config.Config;
 
-// TODO add grace time so we do not need to update expires-at on every request
 public class LocalSessionIdInterceptor implements SessionHandler.Interceptor {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(LocalSessionIdInterceptor.class);
+
     private final long ttl;
+    private final long renewAfter;
 
     public LocalSessionIdInterceptor(final Config args) {
         this.ttl = args.getLong("ttl");
+        this.renewAfter = args.getLong("renew-after");
     }
 
     @Override
@@ -27,35 +34,42 @@ public class LocalSessionIdInterceptor implements SessionHandler.Interceptor {
             .orElse(session.withId(newSessionId()));
     }
 
-    private Session withExpiration(final Session session, final RequestContext context) {
-        Map<String, String> data = session.rawData();
-        final Optional<Long> expiresAt = Optional.ofNullable(data.get("expires-at")).map(this::parseExpiresAt);
-        if (expiresAt.isPresent() && isExpired(expiresAt.get(), context)) {
-            data = new HashMap<>();
-        }
-        data.put("expires-at", expiration(context));
-        return Session.of(data);
-    }
-
-    private boolean isExpired(final Long expiresAt, final RequestContext context) {
-        return context.metadata().arrivalTime().getEpochSecond() > expiresAt;
-    }
-
     private String newSessionId() {
         return UUID.randomUUID().toString();
     }
 
-    private String expiration(final RequestContext context) {
-        return Long.toString(context.metadata().arrivalTime().getEpochSecond() + ttl);
+    private Session withExpiration(final Session session, final RequestContext context) {
+        Map<String, String> data = session.rawData();
+        final Optional<Long> expiresAt = Optional.ofNullable(data.get("expires-at")).map(this::parseExpiresAt);
+
+        if (isExpired(expiresAt, context)) {
+            data = new HashMap<>();
+        }
+
+        final long newExpiresAt = expiration(expiresAt, context);
+        data.put("expires-at", Long.toString(newExpiresAt));
+        final boolean dirty = expiresAt.map(e -> e != newExpiresAt).orElse(true);
+        return Session.of(data, dirty);
+    }
+
+    private boolean isExpired(final Optional<Long> expiresAt, final RequestContext context) {
+        return expiresAt.map(exp -> context.metadata().arrivalTime().getEpochSecond() > exp).orElse(false);
+    }
+
+
+    private long expiration(final Optional<Long> expiresAt, final RequestContext context) {
+        final long arrivalTime = context.metadata().arrivalTime().getEpochSecond();
+        return expiresAt
+            .filter(exp -> exp - arrivalTime > renewAfter)
+            .orElse(arrivalTime + ttl);
     }
 
     private long parseExpiresAt(final String s) {
         try {
             return Long.parseLong(s);
         } catch (final Exception ex) {
-            // FIXME log
+            LOGGER.error("maleformatted expires-at: {} - expireing session", s);
             return -1;
         }
     }
-
 }

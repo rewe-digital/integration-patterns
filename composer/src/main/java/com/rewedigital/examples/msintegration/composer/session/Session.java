@@ -37,7 +37,11 @@ public class Session {
     }
 
     public static Session of(final Map<String, String> data) {
-        return new Session(new HashMap<>(data), false);
+        return of(data, false);
+    }
+    
+    public static Session of(final Map<String, String> data, final boolean dirty) {
+        return new Session(new HashMap<>(data), dirty);
     }
 
     public static <T> Session of(final Response<T> response) {

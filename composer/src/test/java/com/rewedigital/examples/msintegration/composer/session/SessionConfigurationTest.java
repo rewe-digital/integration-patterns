@@ -56,6 +56,7 @@ public class SessionConfigurationTest {
     private static Map<String, Object> sessionIdInterceptorConfig() {
         final Map<String, Object> args = new HashMap<>();
         args.put("ttl", 0);
+        args.put("renew-after", 0);
         return interceptorConfig("com.rewedigital.examples.msintegration.composer.session.LocalSessionIdInterceptor",
             args);
     }

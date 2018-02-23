@@ -42,10 +42,10 @@ public class SessionConfiguration {
         try {
             final Config args = config.withFallback(ConfigFactory.empty().atKey("args")).getConfig("args");
             final Interceptor result = (Interceptor) Class.forName(type).getConstructor(Config.class).newInstance(args);
-            LOGGER.info("registered Configuration Interceptor of type {}", type);
+            LOGGER.info("registered Session Interceptor of type {}", type);
             return Stream.of(result);
         } catch (final Exception e) {
-            throw new ConfigException.Generic("Unable to instantiate Configuration Intercetor of type [" + type + "]",
+            throw new ConfigException.Generic("Unable to instantiate Session Intercetor of type [" + type + "]",
                 e);
         }
     }
