@@ -1,9 +1,6 @@
 package com.rewedigital.examples.msintegration.composer.session;
 
-import static java.util.stream.Collectors.toList;
-
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -40,17 +37,9 @@ public class SessionRoot {
     public static SessionRoot of(final Map<String, String> data) {
         return of(data, false);
     }
-    
+
     public static SessionRoot of(final Map<String, String> data, final boolean dirty) {
         return new SessionRoot(new HashMap<>(data), dirty);
-    }
-
-    public static <T> SessionRoot of(final Response<T> response) {
-        final List<Map.Entry<String, String>> data = response.headerEntries()
-            .stream()
-            .filter(SessionRoot::isSessionEntry)
-            .collect(toList());
-        return new SessionRoot(toMap(data), false);
     }
 
     public Request enrich(final Request request) {
@@ -110,15 +99,6 @@ public class SessionRoot {
 
     private static boolean isSessionEntry(final Map.Entry<String, String> entry) {
         return entry.getKey().toLowerCase().startsWith(sessionPrefix);
-    }
-
-    private static Map<String, String> toMap(final List<Map.Entry<String, String>> entries) {
-        final Map<String, String> result = new HashMap<String, String>();
-        // not using Collectors.toMap here due to IllegalStateException if duplicate key
-        for (final Map.Entry<String, String> entry : entries) {
-            result.put(entry.getKey(), entry.getValue());
-        }
-        return result;
     }
 
     private static Map<String, String> merge(final Map<String, String> first, final Map<String, String> second) {

@@ -3,6 +3,8 @@ package com.rewedigital.examples.msintegration.composer.session;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Test;
 
@@ -47,9 +49,8 @@ public class SessionTest {
 
     @Test
     public void enrichesRequestWithSessionHeaders() {
-        final SessionRoot session = SessionRoot.of(Response.forStatus(Status.OK).withHeader("x-rd-some-key", "value")
-            .withHeader("x-rd-other-key", "other-value"));
-
+        final SessionRoot session = SessionRoot.of(data("x-rd-some-key", "value")).withValuesMergedFrom(
+            Session.of(Response.forStatus(Status.OK).withHeader("x-rd-other-key", "other-value")));
         final Request request = session.enrich(Request.forUri("/some/path"));
 
         assertThat(request.header("x-rd-some-key")).contains("value");
@@ -57,16 +58,8 @@ public class SessionTest {
     }
 
     @Test
-    public void isInitiallyNotDirty() {
-        final SessionRoot session = SessionRoot.of(Response.forStatus(Status.OK).withHeader("x-rd-some-key", "value")
-            .withHeader("x-rd-other-key", "other-value"));
-        assertThat(session.isDirty()).isFalse();
-    }
-
-    @Test
     public void isDirtyIfNewAttributesAreMerged() {
-        final SessionRoot firstSession =
-            SessionRoot.of(Response.forStatus(Status.OK).withHeader("x-rd-first-key", "first-value"));
+        final SessionRoot firstSession = SessionRoot.of(data("x-rd-first-key", "first-value"));
         final Session secondSession =
             Session.of(Response.forStatus(Status.OK).withHeader("x-rd-second-key", "second-value"));
 
@@ -76,19 +69,17 @@ public class SessionTest {
 
     @Test
     public void isNotDirtyIfSameAttributeAndValueIsMerged() {
-        final SessionRoot firstSession =
-            SessionRoot.of(Response.forStatus(Status.OK).withHeader("x-rd-first-key", "first-value"));
+        final SessionRoot sessionRoot = SessionRoot.of(data("x-rd-first-key", "first-value"), false);
         final Session secondSession =
             Session.of(Response.forStatus(Status.OK).withHeader("x-rd-first-key", "first-value"));
 
-        final SessionRoot result = firstSession.withValuesMergedFrom(secondSession);
+        final SessionRoot result = sessionRoot.withValuesMergedFrom(secondSession);
         assertThat(result.isDirty()).isFalse();
     }
 
     @Test
     public void isDirtyAfterChangingAttributeValue() {
-        final SessionRoot firstSession =
-            SessionRoot.of(Response.forStatus(Status.OK).withHeader("x-rd-first-key", "first-value"));
+        final SessionRoot firstSession = SessionRoot.of(data("x-rd-first-key", "first-value"));
         final Session secondSession =
             Session.of(Response.forStatus(Status.OK).withHeader("x-rd-first-key", "second-value"));
 
@@ -109,9 +100,7 @@ public class SessionTest {
 
     @Test
     public void allowsRemovalOfSessionAttributes() {
-        final SessionRoot firstSession = SessionRoot.of(
-            Response.forStatus(Status.OK)
-                .withHeader("x-rd-key", "value"));
+        final SessionRoot firstSession = SessionRoot.of(data("x-rd-key", "value"));
         final Session secondSession = Session.of(
             Response.forStatus(Status.OK)
                 .withHeader("x-rd-key", ""));
@@ -119,5 +108,11 @@ public class SessionTest {
         final SessionRoot mergedSession = firstSession.withValuesMergedFrom(secondSession);
         assertThat(mergedSession.get("first-key")).isEmpty();
         assertThat(mergedSession.get("second-key")).isEmpty();
+    }
+
+    private Map<String, String> data(final String key, final String value) {
+        final Map<String, String> data = new HashMap<>();
+        data.put(key, value);
+        return data;
     }
 }
