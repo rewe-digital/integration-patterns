@@ -84,6 +84,21 @@ public class TemplateComposerTest {
         assertThat(result.payload().get()).contains("template content <div>default content</div>");
     }
 
+    @Test
+    public void composesSessionAlongWithTemplates() throws Exception {
+        final TemplateComposer composer =
+            makeComposer(aClientWithSimpleContent("content", "x-rd-session-key-content", "session-val-content"));
+
+        final SessionRoot result = composer
+            .composeTemplate(r(
+                "template content <rewe-digital-include path=\"http://mock/\"></rewe-digital-include> more content")
+                    .withHeader("x-rd-session-key-template", "session-val-template"))
+            .get().session();
+
+        assertThat(result.get("session-key-template")).contains("session-val-template");
+        assertThat(result.get("session-key-content")).contains("session-val-content");
+        assertThat(result.isDirty()).isTrue();
+    }
 
     private TemplateComposer makeComposer(final Client client) {
         final SessionRoot session = SessionRoot.empty();
@@ -96,9 +111,16 @@ public class TemplateComposerTest {
         return aClientWithSimpleContent(content, "");
     }
 
-    private Client aClientWithSimpleContent(final String content, final String head) {
-        final Response<ByteString> response = contentResponse(content, head);
 
+    private Client aClientWithSimpleContent(final String content, final String sessionKey, final String sessionValue) {
+        return aClientReturning(contentResponse(content, "").withHeader(sessionKey, sessionValue));
+    }
+
+    private Client aClientWithSimpleContent(final String content, final String head) {
+        return aClientReturning(contentResponse(content, head));
+    }
+
+    private Client aClientReturning(final Response<ByteString> response) {
         final Client client = mock(Client.class);
         when(client.send(any()))
             .thenReturn(completedFuture(response));

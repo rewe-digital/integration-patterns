@@ -43,7 +43,7 @@ public class SessionFragment {
         return data.get(key);
     }
 
-    public SessionFragment withValuesMergedFrom(final SessionFragment other) {
+    public SessionFragment mergedWith(final SessionFragment other) {
         return new SessionFragment(data.mergedWith(other.data));
     }
 

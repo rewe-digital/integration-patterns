@@ -3,6 +3,7 @@ package com.rewedigital.examples.msintegration.composer.composing;
 import static java.util.Objects.requireNonNull;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.function.BiFunction;
 
 import com.rewedigital.examples.msintegration.composer.session.ResponseWithSession;
 import com.rewedigital.examples.msintegration.composer.session.SessionFragment;
@@ -24,13 +25,17 @@ public class AttoParserBasedComposer implements ContentComposer, TemplateCompose
 
     @Override
     public CompletableFuture<ResponseWithSession<String>> composeTemplate(final Response<String> templateResponse) {
+        final SessionFragment templateSession = SessionFragment.of(templateResponse);
+
         return parse(bodyOf(templateResponse), ContentRange.allOf(bodyOf(templateResponse)))
             .composeIncludes(contentFetcher, this)
-            .thenApply(c -> c.toResponse((p, s) -> new ResponseWithSession<String>(Response.forPayload(p),
-                session.withValuesMergedFrom(SessionFragment.of(templateResponse).withValuesMergedFrom(s)))));
+            .thenApply(c -> c.withSession(templateSession))
+            .thenApply(c -> c.map(toResponse()));
+    }
 
-        // .thenApply(c -> c.withSession(session.withValuesMergedFrom(Session.of(templateResponse))))
-        // .thenApply(c -> c.toResponse());
+    private BiFunction<String, SessionFragment, ResponseWithSession<String>> toResponse() {
+        return (payload, sessionFragment) -> new ResponseWithSession<String>(Response.forPayload(payload),
+            session.mergedWith(sessionFragment));
     }
 
     @Override

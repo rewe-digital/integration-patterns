@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
-import com.rewedigital.examples.msintegration.composer.session.ResponseWithSession;
 import com.rewedigital.examples.msintegration.composer.session.SessionFragment;
 
 class Composition {
@@ -36,11 +35,13 @@ class Composition {
     }
 
     public Composition forRange(final int startOffset, final int endOffset) {
-        return new Composition(startOffset, endOffset, template, contentRange, assetLinks, SessionFragment.empty(), children);
+        return new Composition(startOffset, endOffset, template, contentRange, assetLinks, session,
+            children);
     }
 
     public Composition withSession(final SessionFragment session) {
-        return new Composition(startOffset, endOffset, template, contentRange, assetLinks, session, children);
+        return new Composition(startOffset, endOffset, template, contentRange, assetLinks,
+            this.session.mergedWith(session), children);
     }
 
     // TODO TV make the recursion more explicit
@@ -57,17 +58,15 @@ class Composition {
         return writer.toString();
     }
 
-    public ResponseWithSession<String> toResponse(
-        final BiFunction<String, SessionFragment, ResponseWithSession<String>> responseBuilder) {
+    public <R> R map(final BiFunction<String, SessionFragment, R> responseBuilder) {
         return responseBuilder.apply(withAssetLinks(body()), mergedSession());
-
     }
 
     private SessionFragment mergedSession() {
-        return session.withValuesMergedFrom(children.stream()
+        return session.mergedWith(children.stream()
             .reduce(SessionFragment.empty(),
-                (s, c) -> s.withValuesMergedFrom(c.mergedSession()),
-                (a, b) -> a.withValuesMergedFrom(b)));
+                (s, c) -> s.mergedWith(c.mergedSession()),
+                (a, b) -> a.mergedWith(b)));
     }
 
     private String withAssetLinks(final String body) {
