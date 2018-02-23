@@ -1,4 +1,6 @@
-package com.rewedigital.examples.msintegration.composer.composing;
+package com.rewedigital.examples.msintegration.composer.parser;
+
+import java.util.Objects;
 
 import org.attoparser.IMarkupHandler;
 import org.attoparser.IMarkupParser;
@@ -10,7 +12,7 @@ import org.attoparser.config.ParseConfiguration.ElementBalancing;
 import com.google.common.base.Throwables;
 
 
-class Parser {
+public class Parser {
 
     private static final IMarkupParser _PARSER = new MarkupParser(parserConfig());
     public static final Parser PARSER = new Parser();
@@ -23,6 +25,8 @@ class Parser {
 
 
     public void parse(final String template, final IMarkupHandler markupHandler) {
+        Objects.requireNonNull(template);
+        Objects.requireNonNull(markupHandler);
         try {
             _PARSER.parse(template, markupHandler);
         } catch (final ParseException e) {

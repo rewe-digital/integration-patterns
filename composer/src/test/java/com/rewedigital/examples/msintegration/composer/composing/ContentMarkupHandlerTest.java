@@ -1,6 +1,6 @@
 package com.rewedigital.examples.msintegration.composer.composing;
 
-import static com.rewedigital.examples.msintegration.composer.composing.Parser.PARSER;
+import static com.rewedigital.examples.msintegration.composer.parser.Parser.PARSER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 
@@ -8,8 +8,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Test;
-
-import com.rewedigital.examples.msintegration.composer.composing.ContentRange;
 
 public class ContentMarkupHandlerTest {
 

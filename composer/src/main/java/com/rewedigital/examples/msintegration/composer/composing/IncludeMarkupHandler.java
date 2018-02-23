@@ -5,17 +5,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.attoparser.AbstractChainedMarkupHandler;
+import org.attoparser.AbstractMarkupHandler;
 import org.attoparser.IMarkupHandler;
 import org.attoparser.ParseException;
 import org.attoparser.output.OutputMarkupHandler;
 import org.attoparser.util.TextUtil;
 
-class IncludeMarkupHandler extends AbstractChainedMarkupHandler {
+class IncludeMarkupHandler extends AbstractMarkupHandler {
 
     private final char[] includeTag;
 
     private final List<IncludedService> includedServices = new ArrayList<>();
+    private final ContentMarkupHandler contentMarkupHandler;
+
     private Optional<IncludedService> include = Optional.empty();
     private StringWriter fallbackWriter;
     private IMarkupHandler next;
@@ -23,23 +25,23 @@ class IncludeMarkupHandler extends AbstractChainedMarkupHandler {
 
 
     public IncludeMarkupHandler(final ContentRange defaultContentRange, final ComposerHtmlConfiguration configuration) {
-        super(new ContentMarkupHandler(defaultContentRange, configuration));
         this.includeTag = configuration.includeTag().toCharArray();
-        next = super.getNext();
+        contentMarkupHandler = new ContentMarkupHandler(defaultContentRange, configuration);
+        next = contentMarkupHandler;
     }
 
-    public IncludeProcessor processor(final String template) {
+    public IncludeProcessor buildProcessor(final String template) {
         return new IncludeProcessor(template, includedServices, contentRange(),
             assetLinks());
     }
 
 
     private ContentRange contentRange() {
-        return ((ContentMarkupHandler) getNext()).contentRange();
+        return contentMarkupHandler.contentRange();
     }
 
     private List<String> assetLinks() {
-        return ((ContentMarkupHandler) getNext()).assetLinks();
+        return contentMarkupHandler.assetLinks();
     }
 
     @Override
@@ -113,9 +115,9 @@ class IncludeMarkupHandler extends AbstractChainedMarkupHandler {
             includedServices.add(value);
             include = Optional.empty();
 
-            // reset the chain
+            // Reset the chain
             fallbackWriter = null;
-            next = super.getNext();
+            next = contentMarkupHandler;
         }
         next.handleCloseElementEnd(buffer, nameOffset, nameLen, line, col);
     }

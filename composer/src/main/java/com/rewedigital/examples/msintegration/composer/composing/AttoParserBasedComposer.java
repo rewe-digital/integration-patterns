@@ -5,6 +5,7 @@ import static java.util.Objects.requireNonNull;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
 
+import com.rewedigital.examples.msintegration.composer.parser.Parser;
 import com.rewedigital.examples.msintegration.composer.session.ResponseWithSession;
 import com.rewedigital.examples.msintegration.composer.session.SessionFragment;
 import com.rewedigital.examples.msintegration.composer.session.SessionRoot;
@@ -25,7 +26,7 @@ public class AttoParserBasedComposer implements ContentComposer, TemplateCompose
 
     @Override
     public CompletableFuture<ResponseWithSession<String>> composeTemplate(final Response<String> templateResponse) {
-        return parse(bodyOf(templateResponse), ContentRange.allOf(bodyOf(templateResponse)))
+        return parse(bodyOf(templateResponse), ContentRange.allUpToo(bodyOf(templateResponse).length()))
             .composeIncludes(contentFetcher, this)
             .thenApply(c -> c.withSession(SessionFragment.of(templateResponse)))
             .thenApply(c -> c.map(toResponse()));
@@ -46,7 +47,7 @@ public class AttoParserBasedComposer implements ContentComposer, TemplateCompose
     private IncludeProcessor parse(final String template, final ContentRange defaultContentRange) {
         final IncludeMarkupHandler includeHandler = new IncludeMarkupHandler(defaultContentRange, configuration);
         Parser.PARSER.parse(template, includeHandler);
-        return includeHandler.processor(template);
+        return includeHandler.buildProcessor(template);
     }
 
     private static String bodyOf(final Response<String> templateResponse) {

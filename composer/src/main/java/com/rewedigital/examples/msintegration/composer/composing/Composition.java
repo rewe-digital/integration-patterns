@@ -44,6 +44,11 @@ class Composition {
             this.session.mergedWith(session), children);
     }
 
+    public static Composition forRoot(final String template, final ContentRange contentRange,
+        final List<String> assetLinks, final List<Composition> children) {
+        return new Composition(template, contentRange, assetLinks, children);
+    }
+
     // TODO TV make the recursion more explicit
     private String body() {
         final StringWriter writer = new StringWriter(template.length());
@@ -75,6 +80,4 @@ class Composition {
             .collect(Collectors.joining("\n"));
         return body.replaceFirst("</head>", assets + "\n</head>");
     }
-
-
 }
