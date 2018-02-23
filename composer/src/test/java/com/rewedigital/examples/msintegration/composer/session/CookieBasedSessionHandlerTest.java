@@ -54,13 +54,17 @@ public class CookieBasedSessionHandlerTest {
     }
 
     private static Session cleanSession(final String key, final String value) {
-        final HashMap<String, String> data = new HashMap<>();
-        data.put(key, value);
-        return Session.of(data);
+        return session(key, value, false);
     }
 
     private static Session dirtySession(final String key, final String value) {
-        return cleanSession(key, value).withId("someId");
+        return session(key, value, true);
+    }
+    
+    private static Session session(final String key, final String value, final boolean dirty) {
+        final HashMap<String, String> data = new HashMap<>();
+        data.put(key, value);
+        return Session.of(data, dirty);
     }
 
     private CookieBasedSessionHandler sessionHandler() {

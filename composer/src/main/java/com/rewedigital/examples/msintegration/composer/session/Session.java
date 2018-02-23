@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.Response;
 
+// TODO evaluate idea: split into SessionRoot and SessionFragment?
 public class Session {
 
     public interface Serializer {
