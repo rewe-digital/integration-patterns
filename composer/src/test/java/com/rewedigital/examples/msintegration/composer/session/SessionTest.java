@@ -47,7 +47,7 @@ public class SessionTest {
 
     @Test
     public void enrichesRequestWithSessionHeaders() {
-        final Session session = Session.of(Response.forStatus(Status.OK).withHeader("x-rd-some-key", "value")
+        final SessionRoot session = SessionRoot.of(Response.forStatus(Status.OK).withHeader("x-rd-some-key", "value")
             .withHeader("x-rd-other-key", "other-value"));
 
         final Request request = session.enrich(Request.forUri("/some/path"));
@@ -58,65 +58,65 @@ public class SessionTest {
 
     @Test
     public void isInitiallyNotDirty() {
-        final Session session = Session.of(Response.forStatus(Status.OK).withHeader("x-rd-some-key", "value")
+        final SessionRoot session = SessionRoot.of(Response.forStatus(Status.OK).withHeader("x-rd-some-key", "value")
             .withHeader("x-rd-other-key", "other-value"));
         assertThat(session.isDirty()).isFalse();
     }
 
     @Test
     public void isDirtyIfNewAttributesAreMerged() {
-        final Session firstSession =
-            Session.of(Response.forStatus(Status.OK).withHeader("x-rd-first-key", "first-value"));
+        final SessionRoot firstSession =
+            SessionRoot.of(Response.forStatus(Status.OK).withHeader("x-rd-first-key", "first-value"));
         final Session secondSession =
             Session.of(Response.forStatus(Status.OK).withHeader("x-rd-second-key", "second-value"));
 
-        final Session result = firstSession.withValuesMergedFrom(secondSession);
+        final SessionRoot result = firstSession.withValuesMergedFrom(secondSession);
         assertThat(result.isDirty()).isTrue();
     }
 
     @Test
     public void isNotDirtyIfSameAttributeAndValueIsMerged() {
-        final Session firstSession =
-            Session.of(Response.forStatus(Status.OK).withHeader("x-rd-first-key", "first-value"));
+        final SessionRoot firstSession =
+            SessionRoot.of(Response.forStatus(Status.OK).withHeader("x-rd-first-key", "first-value"));
         final Session secondSession =
             Session.of(Response.forStatus(Status.OK).withHeader("x-rd-first-key", "first-value"));
 
-        final Session result = firstSession.withValuesMergedFrom(secondSession);
+        final SessionRoot result = firstSession.withValuesMergedFrom(secondSession);
         assertThat(result.isDirty()).isFalse();
     }
 
     @Test
     public void isDirtyAfterChangingAttributeValue() {
-        final Session firstSession =
-            Session.of(Response.forStatus(Status.OK).withHeader("x-rd-first-key", "first-value"));
+        final SessionRoot firstSession =
+            SessionRoot.of(Response.forStatus(Status.OK).withHeader("x-rd-first-key", "first-value"));
         final Session secondSession =
             Session.of(Response.forStatus(Status.OK).withHeader("x-rd-first-key", "second-value"));
 
-        final Session result = firstSession.withValuesMergedFrom(secondSession);
+        final SessionRoot result = firstSession.withValuesMergedFrom(secondSession);
         assertThat(result.isDirty()).isTrue();
         assertThat(result.get("first-key")).contains("second-value");
     }
 
     @Test
     public void doesNotOverwriteSessionId() {
-        final Session initialSession = Session.of(Collections.emptyMap()).withId("initialSessionId");
+        final SessionRoot initialSession = SessionRoot.of(Collections.emptyMap()).withId("initialSessionId");
         final Session sessionWithOtherId =
             Session.of(Response.forStatus(Status.OK).withHeader("x-rd-session-id", "otherSessionId"));
 
-        final Session mergedSession = initialSession.withValuesMergedFrom(sessionWithOtherId);
+        final SessionRoot mergedSession = initialSession.withValuesMergedFrom(sessionWithOtherId);
         assertThat(mergedSession.getId()).contains("initialSessionId");
     }
 
     @Test
     public void allowsRemovalOfSessionAttributes() {
-        final Session firstSession = Session.of(
+        final SessionRoot firstSession = SessionRoot.of(
             Response.forStatus(Status.OK)
                 .withHeader("x-rd-key", "value"));
         final Session secondSession = Session.of(
             Response.forStatus(Status.OK)
                 .withHeader("x-rd-key", ""));
 
-        final Session mergedSession = firstSession.withValuesMergedFrom(secondSession);
+        final SessionRoot mergedSession = firstSession.withValuesMergedFrom(secondSession);
         assertThat(mergedSession.get("first-key")).isEmpty();
         assertThat(mergedSession.get("second-key")).isEmpty();
     }
