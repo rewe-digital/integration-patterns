@@ -49,7 +49,7 @@ public class RemoteHttpSessionInterceptor implements SessionHandler.Interceptor 
                 .map(p -> p.utf8()).map(p -> parse(p))
                 .orElse(Collections.emptyMap());
 
-        final SessionData mergedData = new SessionData(session.rawData()).mergedWith(new SessionData(responseData));
+        final SessionData mergedData = session.data().mergedWith(new SessionData(responseData));
         return SessionRoot.of(mergedData.rawData());
     }
 
@@ -68,9 +68,8 @@ public class RemoteHttpSessionInterceptor implements SessionHandler.Interceptor 
         try {
             return objectMapper.readValue(payload, Map.class);
         } catch (final IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.error("Could not read json response {}", payload);
+            return Collections.emptyMap();
         }
-        return Collections.emptyMap();
     }
 }

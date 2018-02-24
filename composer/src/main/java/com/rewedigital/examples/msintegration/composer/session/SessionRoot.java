@@ -75,6 +75,10 @@ public class SessionRoot {
         return data.rawData();
     }
 
+    public SessionData data() {
+        return data;
+    }
+
     private Map<String, String> asHeaders() {
         return data.asHeaders();
     }
