@@ -34,8 +34,8 @@ public class ComposingRequestHandler {
         final SessionRoot session = sessionHandler.initialize(context);
 
         final Request request = context.request();
-        return routing.matches(request, session).map(
-            rm -> rm.routeType(routeTypes)
+        return routing.matches(request, session)
+            .map(rm -> rm.routeType(routeTypes)
                 .execute(rm, context, session))
             .orElse(defaultResponse(session))
             .thenApply(sessionHandler::store);
