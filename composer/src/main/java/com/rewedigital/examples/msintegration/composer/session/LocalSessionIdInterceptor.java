@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,8 +26,8 @@ public class LocalSessionIdInterceptor implements SessionHandler.Interceptor {
     }
 
     @Override
-    public SessionRoot afterCreation(final SessionRoot session, final RequestContext context) {
-        return withId(withExpiration(session, context));
+    public CompletionStage<SessionRoot> afterCreation(final SessionRoot session, final RequestContext context) {
+        return CompletableFuture.completedFuture(withId(withExpiration(session, context)));
     }
 
     private SessionRoot withId(final SessionRoot session) {

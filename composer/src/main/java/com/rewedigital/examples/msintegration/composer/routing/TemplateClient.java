@@ -12,8 +12,7 @@ import okio.ByteString;
 
 public class TemplateClient {
 
-    public CompletionStage<ResponseWithSession<ByteString>> fetch(final String path,
-        final RequestContext context,
+    public CompletionStage<ResponseWithSession<ByteString>> fetch(final String path, final RequestContext context,
         final SessionRoot session) {
         return context.requestScopedClient()
             .send(session.enrich(Request.forUri(path, context.request().method())))

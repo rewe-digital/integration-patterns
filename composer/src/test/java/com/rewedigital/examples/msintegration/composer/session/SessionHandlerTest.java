@@ -6,6 +6,8 @@ import static org.mockito.Mockito.mock;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 import org.junit.Test;
 
@@ -17,22 +19,22 @@ import com.spotify.apollo.Response;
 public class SessionHandlerTest {
 
     @Test
-    public void shouldAllowInterceptorToAddSessionAttribute() {
+    public void shouldAllowInterceptorToAddSessionAttribute() throws Exception {
         final Interceptor interceptor = interceptorAdding("x-rd-some-key", "some-value");
         final SessionHandler sessionHandler = new SimpleSessionHandler(asList(interceptor), SessionRoot.empty());
 
-        final SessionRoot session = sessionHandler.initialize(mock(RequestContext.class));
+        final SessionRoot session = sessionHandler.initialize(mock(RequestContext.class)).toCompletableFuture().get();
         assertThat(session.get("some-key")).contains("some-value");
     }
 
     @Test
-    public void shouldExecuteMultipleInterceptors() {
+    public void shouldExecuteMultipleInterceptors() throws Exception {
         final Interceptor firstInterceptor = interceptorAdding("x-rd-first", "some-value");
         final Interceptor secondInterceptor = interceptorAdding("x-rd-second", "other-value");
         final SessionHandler sessionHandler =
             new SimpleSessionHandler(asList(firstInterceptor, secondInterceptor), SessionRoot.empty());
 
-        final SessionRoot session = sessionHandler.initialize(mock(RequestContext.class));
+        final SessionRoot session = sessionHandler.initialize(mock(RequestContext.class)).toCompletableFuture().get();
         assertThat(session.get("first")).contains("some-value");
         assertThat(session.get("second")).contains("other-value");
     }
@@ -41,10 +43,10 @@ public class SessionHandlerTest {
         return new Interceptor() {
 
             @Override
-            public SessionRoot afterCreation(final SessionRoot session, final RequestContext context) {
+            public CompletionStage<SessionRoot> afterCreation(final SessionRoot session, final RequestContext context) {
                 final Map<String, String> data = session.rawData();
                 data.put(key, value);
-                return SessionRoot.of(data);
+                return CompletableFuture.completedFuture(SessionRoot.of(data));
             }
         };
     }

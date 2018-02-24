@@ -1,12 +1,11 @@
 package com.rewedigital.examples.msintegration.composer.session;
 
+import static com.rewedigital.examples.msintegration.composer.session.Sessions.sessionRootExpiringAt;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.junit.Test;
 
@@ -27,63 +26,60 @@ public class LocalSessionIdInterceptorTest {
     private static final int now = 0;
 
     @Test
-    public void createsSessionIdForNewSession() {
+    public void createsSessionIdForNewSession() throws Exception {
         final LocalSessionIdInterceptor interceptor = new LocalSessionIdInterceptor(config());
-        final SessionRoot session = interceptor.afterCreation(SessionRoot.empty(), context());
+        final SessionRoot session =
+            interceptor.afterCreation(SessionRoot.empty(), context()).toCompletableFuture().get();
         assertThat(session.getId()).isPresent();
     }
 
     @Test
-    public void retainsExistingSessionId() {
+    public void retainsExistingSessionId() throws Exception {
         final SessionRoot sessionWithId = SessionRoot.empty().withId("the session id");
         final LocalSessionIdInterceptor interceptor = new LocalSessionIdInterceptor(config());
-        final SessionRoot session = interceptor.afterCreation(sessionWithId, context());
+        final SessionRoot session = interceptor.afterCreation(sessionWithId, context()).toCompletableFuture().get();
         assertThat(session.getId()).contains("the session id");
     }
 
     @Test
-    public void addsExpirationWithTTLFromConfig() {
+    public void addsExpirationWithTTLFromConfig() throws Exception {
         final LocalSessionIdInterceptor interceptor = new LocalSessionIdInterceptor(config(ttl));
-        final SessionRoot session = interceptor.afterCreation(SessionRoot.empty(), contextForArrivalTime(now));
+        final SessionRoot session =
+            interceptor.afterCreation(SessionRoot.empty(), contextForArrivalTime(now)).toCompletableFuture().get();
         assertThat(session.rawData().get("expires-at")).isEqualTo(Long.toString(now + ttl));
     }
 
     @Test
-    public void createsNewSessionIfExpired() {
-        final SessionRoot expiredSession = sessionExpiringAt(expireAt, "x-rd-key", "value");
+    public void createsNewSessionIfExpired() throws Exception {
+        final SessionRoot expiredSession = sessionRootExpiringAt(expireAt, "x-rd-key", "value");
         final LocalSessionIdInterceptor interceptor = new LocalSessionIdInterceptor(config(ttl));
-        final SessionRoot session = interceptor.afterCreation(expiredSession, contextForArrivalTime(afterExpiration));
+        final SessionRoot session = interceptor.afterCreation(expiredSession, contextForArrivalTime(afterExpiration))
+            .toCompletableFuture().get();
         assertThat(session.get("key")).isNotPresent();
         assertThat(session.isDirty());
     }
 
     @Test
-    public void updatesExpiration() {
-        final SessionRoot initialSession = sessionExpiringAt(expireAt, "x-rd-key", "value");
+    public void updatesExpiration() throws Exception {
+        final SessionRoot initialSession = sessionRootExpiringAt(expireAt, "x-rd-key", "value");
         final LocalSessionIdInterceptor interceptor = new LocalSessionIdInterceptor(config(ttl));
-        final SessionRoot session = interceptor.afterCreation(initialSession, contextForArrivalTime(beforeExpiration));
+        final SessionRoot session = interceptor.afterCreation(initialSession, contextForArrivalTime(beforeExpiration))
+            .toCompletableFuture().get();
         assertThat(session.get("key")).contains("value");
         assertThat(session.rawData().get("expires-at")).isEqualTo(Long.toString(beforeExpiration + ttl));
         assertThat(session.isDirty()).isTrue();
     }
 
     @Test
-    public void doesNotUpdateExpirationTimeBeforeGracePeriod() {
-        final SessionRoot initialSession = sessionExpiringAt(expireAt, "x-rd-key", "value");
+    public void doesNotUpdateExpirationTimeBeforeGracePeriod() throws Exception {
+        final SessionRoot initialSession = sessionRootExpiringAt(expireAt, "x-rd-key", "value");
         final LocalSessionIdInterceptor interceptor = new LocalSessionIdInterceptor(config(ttl, renewAfter));
         final SessionRoot session =
-            interceptor.afterCreation(initialSession, contextForArrivalTime(beforeRenewalRequired));
+            interceptor.afterCreation(initialSession, contextForArrivalTime(beforeRenewalRequired))
+                .toCompletableFuture().get();
         assertThat(session.get("key")).contains("value");
         assertThat(session.rawData().get("expires-at")).isEqualTo(Long.toString(expireAt));
         assertThat(session.isDirty()).isFalse();
-    }
-
-    private SessionRoot sessionExpiringAt(final long epochSeconds, final String key, final String value) {
-        final Map<String, String> data = new HashMap<>();
-        data.put("x-rd-session-id", "1234");
-        data.put("expires-at", Long.toString(epochSeconds));
-        data.put(key, value);
-        return SessionRoot.of(data);
     }
 
     private RequestContext context() {

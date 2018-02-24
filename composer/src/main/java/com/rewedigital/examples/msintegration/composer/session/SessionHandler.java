@@ -4,6 +4,9 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.function.BinaryOperator;
 
 import com.spotify.apollo.Request;
 import com.spotify.apollo.RequestContext;
@@ -12,7 +15,7 @@ import com.spotify.apollo.Response;
 public abstract class SessionHandler implements SessionRoot.Serializer {
 
     public interface Interceptor {
-        SessionRoot afterCreation(SessionRoot session, RequestContext context);
+        CompletionStage<SessionRoot> afterCreation(SessionRoot session, RequestContext context);
     }
 
     private static final SessionHandler NOOP_HANDLER = new SessionHandler(Collections.emptyList()) {
@@ -29,8 +32,8 @@ public abstract class SessionHandler implements SessionRoot.Serializer {
         }
 
         @Override
-        public SessionRoot initialize(final RequestContext context) {
-            return obtainSession(context.request());
+        public CompletionStage<SessionRoot> initialize(final RequestContext context) {
+            return CompletableFuture.completedFuture(obtainSession(context.request()));
         }
     };
 
@@ -45,7 +48,7 @@ public abstract class SessionHandler implements SessionRoot.Serializer {
         this.interceptors = new LinkedList<>(interceptors);
     }
 
-    public SessionRoot initialize(final RequestContext context) {
+    public CompletionStage<SessionRoot> initialize(final RequestContext context) {
         final SessionRoot session = obtainSession(context.request());
         return runInterceptors(session, context);
     }
@@ -57,11 +60,14 @@ public abstract class SessionHandler implements SessionRoot.Serializer {
     protected abstract SessionRoot obtainSession(Request request);
 
 
-    private SessionRoot runInterceptors(final SessionRoot session, final RequestContext context) {
-        SessionRoot result = session;
-        for (final Interceptor interceptor : interceptors) {
-            result = interceptor.afterCreation(result, context);
-        }
-        return result;
+    private CompletionStage<SessionRoot> runInterceptors(final SessionRoot session, final RequestContext context) {
+        return interceptors.stream().reduce(CompletableFuture.completedFuture(session),
+            (f, i) -> f.thenCompose(s -> i.afterCreation(s, context)), throwingCombiner());
+    }
+
+    private static BinaryOperator<CompletableFuture<SessionRoot>> throwingCombiner() {
+        return (f, g) -> {
+            throw new IllegalStateException("Session Interceptors can not be executed in parallel");
+        };
     }
 }

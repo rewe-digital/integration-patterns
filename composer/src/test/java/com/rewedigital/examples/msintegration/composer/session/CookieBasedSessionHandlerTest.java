@@ -1,11 +1,12 @@
 package com.rewedigital.examples.msintegration.composer.session;
 
+import static com.rewedigital.examples.msintegration.composer.session.Sessions.cleanSessionRoot;
+import static com.rewedigital.examples.msintegration.composer.session.Sessions.dirtySessionRoot;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Optional;
 
 import org.junit.Test;
@@ -20,24 +21,26 @@ import com.typesafe.config.ConfigValueFactory;
 public class CookieBasedSessionHandlerTest {
 
     @Test
-    public void shouldWriteAndReadCookie() {
+    public void shouldWriteAndReadCookie() throws Exception {
         final String cookieHeader =
-            dirtySession("x-rd-key", "value").writeTo(Response.ok(), sessionHandler()).header("Set-Cookie").get();
+            dirtySessionRoot("x-rd-key", "value").writeTo(Response.ok(), sessionHandler()).header("Set-Cookie").get();
         final SessionRoot session =
-            sessionHandler().initialize(contextFor(Request.forUri("/").withHeader("Cookie", cookieHeader)));
+            sessionHandler().initialize(contextFor(Request.forUri("/").withHeader("Cookie", cookieHeader)))
+                .toCompletableFuture().get();
         assertThat(session.get("key")).contains("value");
     }
 
     @Test
-    public void shouldCreateNewSessionIfNonePresent() {
-        final SessionRoot session = sessionHandler().initialize(contextFor(Request.forUri("/")));
+    public void shouldCreateNewSessionIfNonePresent() throws Exception {
+        final SessionRoot session =
+            sessionHandler().initialize(contextFor(Request.forUri("/"))).toCompletableFuture().get();
         assertThat(session).isNotNull();
     }
 
     @Test
     public void shouldNotWriteSessionCookieIfSessionIsNotDirty() {
         final Optional<String> setCookieHeader =
-            cleanSession("x-rd-key", "value").writeTo(Response.ok(), sessionHandler()).header("Set-Cookie");
+            cleanSessionRoot("x-rd-key", "value").writeTo(Response.ok(), sessionHandler()).header("Set-Cookie");
         assertThat(setCookieHeader).isEmpty();
     }
 
@@ -51,20 +54,6 @@ public class CookieBasedSessionHandlerTest {
     public void shouldConstructNoopInstanceIfSessionHandlingIsDisabled() {
         final SessionHandler result = new CookieBasedSessionHandler.Factory(disabledConfig()).build();
         assertThat(result).isEqualTo(SessionHandler.noSession());
-    }
-
-    private static SessionRoot cleanSession(final String key, final String value) {
-        return session(key, value, false);
-    }
-
-    private static SessionRoot dirtySession(final String key, final String value) {
-        return session(key, value, true);
-    }
-    
-    private static SessionRoot session(final String key, final String value, final boolean dirty) {
-        final HashMap<String, String> data = new HashMap<>();
-        data.put(key, value);
-        return SessionRoot.of(data, dirty);
     }
 
     private CookieBasedSessionHandler sessionHandler() {

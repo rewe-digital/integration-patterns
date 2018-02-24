@@ -10,7 +10,6 @@ import com.rewedigital.examples.msintegration.composer.session.ResponseWithSessi
 import com.rewedigital.examples.msintegration.composer.session.SessionHandler;
 import com.rewedigital.examples.msintegration.composer.session.SessionHandlerFactory;
 import com.rewedigital.examples.msintegration.composer.session.SessionRoot;
-import com.spotify.apollo.Request;
 import com.spotify.apollo.RequestContext;
 import com.spotify.apollo.Response;
 import com.spotify.apollo.Status;
@@ -31,14 +30,13 @@ public class ComposingRequestHandler {
     }
 
     public CompletionStage<Response<ByteString>> execute(final RequestContext context) {
-        final SessionRoot session = sessionHandler.initialize(context);
-
-        final Request request = context.request();
-        return routing.matches(request, session)
-            .map(rm -> rm.routeType(routeTypes)
-                .execute(rm, context, session))
-            .orElse(defaultResponse(session))
-            .thenApply(sessionHandler::store);
+        return sessionHandler.initialize(context).thenCompose(session -> {
+            return routing.matches(context.request(), session)
+                .map(rm -> rm.routeType(routeTypes)
+                    .execute(rm, context, session))
+                .orElse(defaultResponse(session))
+                .thenApply(sessionHandler::store);
+        });
     }
 
     private static CompletableFuture<ResponseWithSession<ByteString>> defaultResponse(final SessionRoot session) {

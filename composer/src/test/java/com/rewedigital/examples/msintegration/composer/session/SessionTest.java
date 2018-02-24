@@ -1,10 +1,8 @@
 package com.rewedigital.examples.msintegration.composer.session;
 
+import static com.rewedigital.examples.msintegration.composer.session.Sessions.cleanSessionRoot;
+import static com.rewedigital.examples.msintegration.composer.session.Sessions.sessionRoot;
 import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.junit.Test;
 
@@ -49,7 +47,7 @@ public class SessionTest {
 
     @Test
     public void enrichesRequestWithSessionHeaders() {
-        final SessionRoot session = SessionRoot.of(data("x-rd-some-key", "value")).mergedWith(
+        final SessionRoot session = sessionRoot("x-rd-some-key", "value").mergedWith(
             SessionFragment.of(Response.forStatus(Status.OK).withHeader("x-rd-other-key", "other-value")));
         final Request request = session.enrich(Request.forUri("/some/path"));
 
@@ -59,7 +57,7 @@ public class SessionTest {
 
     @Test
     public void isDirtyIfNewAttributesAreMerged() {
-        final SessionRoot firstSession = SessionRoot.of(data("x-rd-first-key", "first-value"));
+        final SessionRoot firstSession = sessionRoot("x-rd-first-key", "first-value");
         final SessionFragment secondSession =
             SessionFragment.of(Response.forStatus(Status.OK).withHeader("x-rd-second-key", "second-value"));
 
@@ -69,7 +67,7 @@ public class SessionTest {
 
     @Test
     public void isNotDirtyIfSameAttributeAndValueIsMerged() {
-        final SessionRoot sessionRoot = SessionRoot.of(data("x-rd-first-key", "first-value"), false);
+        final SessionRoot sessionRoot = cleanSessionRoot("x-rd-first-key", "first-value");
         final SessionFragment secondSession =
             SessionFragment.of(Response.forStatus(Status.OK).withHeader("x-rd-first-key", "first-value"));
 
@@ -79,7 +77,7 @@ public class SessionTest {
 
     @Test
     public void isDirtyAfterChangingAttributeValue() {
-        final SessionRoot firstSession = SessionRoot.of(data("x-rd-first-key", "first-value"));
+        final SessionRoot firstSession = sessionRoot("x-rd-first-key", "first-value");
         final SessionFragment secondSession =
             SessionFragment.of(Response.forStatus(Status.OK).withHeader("x-rd-first-key", "second-value"));
 
@@ -90,7 +88,7 @@ public class SessionTest {
 
     @Test
     public void doesNotOverwriteSessionId() {
-        final SessionRoot initialSession = SessionRoot.of(Collections.emptyMap()).withId("initialSessionId");
+        final SessionRoot initialSession = SessionRoot.empty().withId("initialSessionId");
         final SessionFragment sessionWithOtherId =
             SessionFragment.of(Response.forStatus(Status.OK).withHeader("x-rd-session-id", "otherSessionId"));
 
@@ -100,7 +98,7 @@ public class SessionTest {
 
     @Test
     public void allowsRemovalOfSessionAttributes() {
-        final SessionRoot firstSession = SessionRoot.of(data("x-rd-key", "value"));
+        final SessionRoot firstSession = sessionRoot("x-rd-key", "value");
         final SessionFragment secondSession = SessionFragment.of(
             Response.forStatus(Status.OK)
                 .withHeader("x-rd-key", ""));
@@ -108,11 +106,5 @@ public class SessionTest {
         final SessionRoot mergedSession = firstSession.mergedWith(secondSession);
         assertThat(mergedSession.get("first-key")).isEmpty();
         assertThat(mergedSession.get("second-key")).isEmpty();
-    }
-
-    private Map<String, String> data(final String key, final String value) {
-        final Map<String, String> data = new HashMap<>();
-        data.put(key, value);
-        return data;
     }
 }

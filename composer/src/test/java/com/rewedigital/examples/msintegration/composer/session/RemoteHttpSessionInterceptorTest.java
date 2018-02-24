@@ -1,11 +1,10 @@
 package com.rewedigital.examples.msintegration.composer.session;
 
+import static com.rewedigital.examples.msintegration.composer.session.Sessions.sessionRoot;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
@@ -27,17 +26,18 @@ import okio.ByteString;
 public class RemoteHttpSessionInterceptorTest {
 
     @Test
-    public void shouldCallConfiguredUrlToUpdateSession() {
+    public void shouldCallConfiguredUrlToUpdateSession() throws Exception {
         final String url = "https://test.uri/session";
         final RemoteHttpSessionInterceptor interceptor =
             new RemoteHttpSessionInterceptor(config().withValue("url", ConfigValueFactory.fromAnyRef(url)));
-        
+
         final Client client = mock(Client.class);
         when(client.send(requestFor("POST", url, "{\"x-rd-key\":\"value\"}")))
             .thenReturn(response("{\"x-rd-key\":\"new-value\"}"));
-        
+
         final SessionRoot session =
-            interceptor.afterCreation(SessionRoot.of(data("x-rd-key", "value")), contextWith(client));
+            interceptor.afterCreation(sessionRoot("x-rd-key", "value"), contextWith(client))
+                .toCompletableFuture().get();
         assertThat(session.get("key")).contains("new-value");
     }
 
@@ -75,12 +75,6 @@ public class RemoteHttpSessionInterceptorTest {
         final RequestContext context = mock(RequestContext.class);
         when(context.requestScopedClient()).thenReturn(client);
         return context;
-    }
-
-    private Map<String, String> data(final String key, final String value) {
-        final Map<String, String> data = new HashMap<>();
-        data.put(key, value);
-        return data;
     }
 
 }

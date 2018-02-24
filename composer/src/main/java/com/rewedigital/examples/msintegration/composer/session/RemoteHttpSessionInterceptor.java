@@ -3,7 +3,7 @@ package com.rewedigital.examples.msintegration.composer.session;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.CompletionStage;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,17 +30,10 @@ public class RemoteHttpSessionInterceptor implements SessionHandler.Interceptor 
     }
 
     @Override
-    public SessionRoot afterCreation(final SessionRoot session, final RequestContext context) {
-        try {
-            return context.requestScopedClient()
-                .send(Request.forUri(url, "POST").withPayload(toJsonPayload(session)))
-                .thenApply(response -> handleResponse(response, session)).toCompletableFuture().get(); // FIXME do not
-                                                                                                       // get() here
-        } catch (InterruptedException | ExecutionException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        return session;
+    public CompletionStage<SessionRoot> afterCreation(final SessionRoot session, final RequestContext context) {
+        return context.requestScopedClient()
+            .send(Request.forUri(url, "POST").withPayload(toJsonPayload(session)))
+            .thenApply(response -> handleResponse(response, session));
     }
 
     private SessionRoot handleResponse(final Response<ByteString> response, final SessionRoot session) {
