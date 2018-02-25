@@ -1,9 +1,9 @@
 package com.rewedigital.examples.msintegration.composer.session;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,17 +25,22 @@ public class SessionConfiguration {
     private final List<SessionHandler.Interceptor> interceptors;
 
     public static SessionConfiguration fromConfig(final Config config) {
-        return new SessionConfiguration(config.getBoolean("enabled"), config.getString("cookie"),
-            config.getString("signing-algorithm"), buildInterceptors(config.getList("interceptors")));
+        final boolean enabled = config.getBoolean("enabled");
+        return new SessionConfiguration(enabled, config.getString("cookie"),
+            config.getString("signing-algorithm"), buildInterceptors(config.getList("interceptors"), enabled));
     }
 
-    private static List<SessionHandler.Interceptor> buildInterceptors(final ConfigList configList) {
+    private static List<SessionHandler.Interceptor> buildInterceptors(final ConfigList configList, final boolean enabled) {
+        if (!enabled) {
+            return Collections.emptyList();
+        }
+
         return configList.stream()
-            .flatMap(SessionConfiguration::buildInterceptor)
+            .map(SessionConfiguration::buildInterceptor)
             .collect(Collectors.toList());
     }
 
-    private static Stream<Interceptor> buildInterceptor(final ConfigValue configValue) {
+    private static Interceptor buildInterceptor(final ConfigValue configValue) {
         final Config config = configValue.atKey("interceptor").getConfig("interceptor");
         final String type = config.getString("type");
 
@@ -43,7 +48,7 @@ public class SessionConfiguration {
             final Config args = config.withFallback(ConfigFactory.empty().atKey("args")).getConfig("args");
             final Interceptor result = (Interceptor) Class.forName(type).getConstructor(Config.class).newInstance(args);
             LOGGER.info("registered Session Interceptor of type {}", type);
-            return Stream.of(result);
+            return result;
         } catch (final Exception e) {
             throw new ConfigException.Generic("Unable to instantiate Session Intercetor of type [" + type + "]",
                 e);

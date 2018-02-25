@@ -42,7 +42,8 @@ public class LocalSessionIdInterceptor implements SessionHandler.Interceptor {
 
     private SessionRoot withExpiration(final SessionRoot session, final RequestContext context) {
         Map<String, String> data = session.rawData();
-        final Optional<Long> expiresAt = Optional.ofNullable(data.get("expires-at")).map(this::parseExpiresAt);
+        final Optional<Long> expiresAt =
+            Optional.ofNullable(data.get("expires-at")).map(this::parseExpiresAt);
 
         if (isExpired(expiresAt, context)) {
             data = new HashMap<>();

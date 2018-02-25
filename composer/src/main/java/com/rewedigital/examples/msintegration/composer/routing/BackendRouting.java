@@ -1,5 +1,6 @@
 package com.rewedigital.examples.msintegration.composer.routing;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -9,8 +10,10 @@ import org.slf4j.LoggerFactory;
 import com.rewedigital.examples.msintegration.composer.session.SessionRoot;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.route.InvalidUriException;
+import com.spotify.apollo.route.Rule;
 import com.spotify.apollo.route.RuleMatch;
 import com.spotify.apollo.route.RuleRouter;
+import com.typesafe.config.Config;
 
 public class BackendRouting {
 
@@ -19,6 +22,14 @@ public class BackendRouting {
 
     public BackendRouting(final RuleRouter<Match> ruleRouter) {
         this.ruleRouter = Objects.requireNonNull(ruleRouter);
+    }
+
+    public BackendRouting(final List<Rule<Match>> routingRules) {
+        this(RuleRouter.of(routingRules));
+    }
+
+    public BackendRouting(final Config config) {
+        this(RoutingConfiguration.fromConfig(config).localRules());
     }
 
     public Optional<RouteMatch> matches(final Request incommingRequest, final SessionRoot session) {

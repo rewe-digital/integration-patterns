@@ -31,7 +31,6 @@ import com.spotify.apollo.RequestContext;
 import com.spotify.apollo.Response;
 import com.spotify.apollo.Status;
 import com.spotify.apollo.route.Rule;
-import com.spotify.apollo.route.RuleRouter;
 
 import okio.ByteString;
 
@@ -76,7 +75,7 @@ public class ComposingHandlerTest {
 
     private BackendRouting aRouter(final String pattern, final RouteTypeName routeType) {
         final Rule<Match> sampleRule = Rule.fromUri(pattern, "GET", Match.of("http://target", routeType));
-        return new BackendRouting(RuleRouter.of(singletonList(sampleRule)));
+        return new BackendRouting(singletonList(sampleRule));
     }
 
     private RequestContext aContext() {
