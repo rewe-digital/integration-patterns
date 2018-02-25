@@ -1,6 +1,6 @@
 package com.rewedigital.examples.msintegration.composer.routing;
 
-import static com.rewedigital.examples.msintegration.composer.routing.StaticBackendRoutes.RouteTypeName.PROXY;
+import static com.rewedigital.examples.msintegration.composer.routing.RouteTypeName.PROXY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -10,8 +10,6 @@ import java.util.Optional;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
-import com.rewedigital.examples.msintegration.composer.routing.BackendRouting.RouteMatch;
-import com.rewedigital.examples.msintegration.composer.routing.StaticBackendRoutes.Match;
 import com.rewedigital.examples.msintegration.composer.session.SessionRoot;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.route.Rule;
