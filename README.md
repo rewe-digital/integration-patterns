@@ -1,5 +1,7 @@
 # Example integration-patterns
 
+[![Build Status](https://travis-ci.org/rewe-digital/integration-patterns.svg?branch=master)](https://travis-ci.org/rewe-digital/integration-patterns)
+
 This repository contains an example for integrating microservices. Currently, it focuses on the often overlooked frontend composition integration. Services are integrated by a dynamic frontend composition allowing several services to contribute their parts of a frontend page.
 
 The example consists of the following services:
