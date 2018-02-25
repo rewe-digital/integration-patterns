@@ -22,9 +22,9 @@ import okio.ByteString;
 public class TemplateRoute implements RouteType {
 
     private final ComposerFactory composerFactory;
-    private final TemplateClient templateClient;
+    private final SessionAwareProxyClient templateClient;
 
-    public TemplateRoute(final TemplateClient templateClient, final ComposerFactory composerFactory) {
+    public TemplateRoute(final SessionAwareProxyClient templateClient, final ComposerFactory composerFactory) {
         this.templateClient = Objects.requireNonNull(templateClient);
         this.composerFactory = Objects.requireNonNull(composerFactory);
     }

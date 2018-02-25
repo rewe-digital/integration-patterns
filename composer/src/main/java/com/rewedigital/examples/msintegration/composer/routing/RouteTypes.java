@@ -7,9 +7,9 @@ import com.rewedigital.examples.msintegration.composer.composing.ComposerFactory
 public class RouteTypes {
 
     private final ComposerFactory composerFactory;
-    private final TemplateClient templateClient;
+    private final SessionAwareProxyClient templateClient;
 
-    public RouteTypes(final ComposerFactory composerFactory, final TemplateClient templateClient) {
+    public RouteTypes(final ComposerFactory composerFactory, final SessionAwareProxyClient templateClient) {
         this.templateClient = Objects.requireNonNull(templateClient);
         this.composerFactory = Objects.requireNonNull(composerFactory);
     }

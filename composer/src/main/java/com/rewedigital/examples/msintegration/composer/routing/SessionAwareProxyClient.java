@@ -10,7 +10,7 @@ import com.spotify.apollo.RequestContext;
 
 import okio.ByteString;
 
-public class TemplateClient {
+public class SessionAwareProxyClient {
 
     public CompletionStage<ResponseWithSession<ByteString>> fetch(final String path, final RequestContext context,
         final SessionRoot session) {

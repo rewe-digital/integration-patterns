@@ -9,7 +9,7 @@ import com.rewedigital.examples.msintegration.composer.proxy.ComposingRequestHan
 import com.rewedigital.examples.msintegration.composer.routing.BackendRouting;
 import com.rewedigital.examples.msintegration.composer.routing.RouteTypes;
 import com.rewedigital.examples.msintegration.composer.routing.StaticBackendRoutes;
-import com.rewedigital.examples.msintegration.composer.routing.TemplateClient;
+import com.rewedigital.examples.msintegration.composer.routing.SessionAwareProxyClient;
 import com.rewedigital.examples.msintegration.composer.session.CookieBasedSessionHandler;
 import com.spotify.apollo.Environment;
 import com.spotify.apollo.core.Service;
@@ -43,7 +43,7 @@ public class ComposerApplication {
                     new BackendRouting(StaticBackendRoutes.routes()),
                     new RouteTypes(
                         new ComposerFactory(configuration.getConfig("composer.html")),
-                        new TemplateClient()),
+                        new SessionAwareProxyClient()),
                     new CookieBasedSessionHandler.Factory(configuration.getConfig("composer.session")));
 
             environment.routingEngine()

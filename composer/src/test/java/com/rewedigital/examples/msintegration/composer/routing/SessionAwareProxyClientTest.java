@@ -17,7 +17,7 @@ import com.spotify.apollo.Response;
 
 import okio.ByteString;
 
-public class TemplateClientTest {
+public class SessionAwareProxyClientTest {
 
     @Test
     public void fetchesTemplateHandlingSession() throws Exception {
@@ -30,7 +30,7 @@ public class TemplateClientTest {
 
         final RequestContext context = contextWith(aClient(expectedRequest, response), method);
         final ResponseWithSession<ByteString> templateResponse =
-            new TemplateClient().fetch(path, context, Sessions.sessionRoot("x-rd-key", "value")).toCompletableFuture()
+            new SessionAwareProxyClient().fetch(path, context, Sessions.sessionRoot("x-rd-key", "value")).toCompletableFuture()
                 .get();
 
         assertThat(templateResponse.session().get("key")).contains("value");

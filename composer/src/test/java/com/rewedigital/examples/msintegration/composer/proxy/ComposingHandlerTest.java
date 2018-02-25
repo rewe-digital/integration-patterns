@@ -20,7 +20,7 @@ import com.rewedigital.examples.msintegration.composer.routing.BackendRouting;
 import com.rewedigital.examples.msintegration.composer.routing.RouteTypes;
 import com.rewedigital.examples.msintegration.composer.routing.StaticBackendRoutes;
 import com.rewedigital.examples.msintegration.composer.routing.StaticBackendRoutes.Match;
-import com.rewedigital.examples.msintegration.composer.routing.TemplateClient;
+import com.rewedigital.examples.msintegration.composer.routing.SessionAwareProxyClient;
 import com.rewedigital.examples.msintegration.composer.session.ResponseWithSession;
 import com.rewedigital.examples.msintegration.composer.session.SessionHandler;
 import com.rewedigital.examples.msintegration.composer.session.SessionHandlerFactory;
@@ -102,10 +102,10 @@ public class ComposingHandlerTest {
         };
     }
 
-    private static class RoutingResult extends TemplateClient {
+    private static class RoutingResult extends SessionAwareProxyClient {
 
         public static RouteTypes returning(final Status status, final String responseBody) {
-            return new RouteTypes(composerFactory(), new TemplateClient() {
+            return new RouteTypes(composerFactory(), new SessionAwareProxyClient() {
                 @Override
                 public CompletionStage<ResponseWithSession<ByteString>> fetch(final String path,
                     final RequestContext context, final SessionRoot session) {

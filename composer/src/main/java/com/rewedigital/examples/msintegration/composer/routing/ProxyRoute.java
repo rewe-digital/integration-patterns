@@ -12,9 +12,9 @@ import okio.ByteString;
 
 public class ProxyRoute implements RouteType {
 
-    private final TemplateClient templateClient;
+    private final SessionAwareProxyClient templateClient;
 
-    public ProxyRoute(final TemplateClient templateClient) {
+    public ProxyRoute(final SessionAwareProxyClient templateClient) {
         this.templateClient = Objects.requireNonNull(templateClient);
     }
 
