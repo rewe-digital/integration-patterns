@@ -13,7 +13,7 @@ import org.attoparser.util.TextUtil;
 
 class IncludeMarkupHandler extends AbstractMarkupHandler {
 
-    private static final char[] INCLUDE = "rewe-digital-include".toCharArray();
+    private final char[] includeTag;
 
     private final List<IncludedService> includedServices = new ArrayList<>();
     private final ContentMarkupHandler contentMarkupHandler;
@@ -23,8 +23,10 @@ class IncludeMarkupHandler extends AbstractMarkupHandler {
     private IMarkupHandler next;
     private boolean collectAttributes = false;
 
-    public IncludeMarkupHandler(final ContentRange defaultContentRange) {
-        contentMarkupHandler = new ContentMarkupHandler(defaultContentRange);
+
+    public IncludeMarkupHandler(final ContentRange defaultContentRange, final ComposerHtmlConfiguration configuration) {
+        this.includeTag = configuration.includeTag().toCharArray();
+        contentMarkupHandler = new ContentMarkupHandler(defaultContentRange, configuration);
         next = contentMarkupHandler;
     }
 
@@ -121,7 +123,7 @@ class IncludeMarkupHandler extends AbstractMarkupHandler {
     }
 
     private boolean isIncludeElement(final char[] buffer, final int nameOffset, final int nameLen) {
-        return TextUtil.contains(true, buffer, nameOffset, nameLen, INCLUDE, 0, INCLUDE.length);
+        return TextUtil.contains(true, buffer, nameOffset, nameLen, includeTag, 0, includeTag.length);
     }
 
     @Override

@@ -9,6 +9,8 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <maven.compiler.source>1.8</maven.compiler.source>
 
+        <jjwt.version>0.7.0</jjwt.version>
+        <assertj-core.version>3.8.0</assertj-core.version>
         <apollo.version>1.6.1</apollo.version>
         <attoparser.version>2.0.4.RELEASE</attoparser.version>
         <handy-uri-templates.version>2.1.6</handy-uri-templates.version>
@@ -30,6 +32,10 @@
             <groupId>com.damnhandy</groupId>
             <artifactId>handy-uri-templates</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt</artifactId>
+        </dependency>
 
         <!-- Test support -->
         <dependency>
@@ -50,6 +56,7 @@
             <artifactId>code-assert</artifactId>
             <scope>test</scope>
         </dependency>
+
     </dependencies>
 
     <dependencyManagement>
@@ -70,6 +77,11 @@
                 <groupId>com.damnhandy</groupId>
                 <artifactId>handy-uri-templates</artifactId>
                 <version>${handy-uri-templates.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt</artifactId>
+                <version>${jjwt.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.assertj</groupId>

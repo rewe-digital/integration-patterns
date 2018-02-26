@@ -1,4 +1,4 @@
-package com.rewedigital.examples.msintegration.composer.proxy;
+package com.rewedigital.examples.msintegration.composer.composing;
 
 import static java.util.Objects.requireNonNull;
 
@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.damnhandy.uri.template.UriTemplate;
-import com.rewedigital.examples.msintegration.composer.composing.ContentFetcher;
+import com.rewedigital.examples.msintegration.composer.session.SessionRoot;
 import com.spotify.apollo.Client;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.Response;
@@ -22,8 +22,11 @@ public class ValidatingContentFetcher implements ContentFetcher {
 
     private final Client client;
     private final Map<String, Object> parsedPathArguments;
+    private final SessionRoot session;
 
-    public ValidatingContentFetcher(final Client client, final Map<String, Object> parsedPathArguments) {
+    public ValidatingContentFetcher(final Client client, final Map<String, Object> parsedPathArguments,
+        final SessionRoot session) {
+        this.session = session;
         this.client = requireNonNull(client);
         this.parsedPathArguments = requireNonNull(parsedPathArguments);
     }
@@ -36,7 +39,7 @@ public class ValidatingContentFetcher implements ContentFetcher {
         }
 
         final String expandedPath = UriTemplate.fromTemplate(path).expand(parsedPathArguments);
-        return client.send(Request.forUri(expandedPath, "GET"))
+        return client.send(session.enrich(Request.forUri(expandedPath, "GET")))
             .thenApply(this::acceptHtmlOnly)
             .thenApply(r -> toStringPayload(r, fallback))
             .toCompletableFuture();

@@ -2,7 +2,6 @@ package com.rewedigital.examples.msintegration.composer.architecture;
 
 import static guru.nidi.codeassert.junit.CodeAssertMatchers.hasNoCycles;
 import static guru.nidi.codeassert.junit.CodeAssertMatchers.matchesRulesExactly;
-
 import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
@@ -26,27 +25,30 @@ public class DependenciesTest {
     @Test
     public void clientDoesNotRelyOnComposing() {
         class ComRewedigitalExamplesMsintegrationComposer extends DependencyRuler {
-            DependencyRule client, composing, parser, proxy, routing, util;
+            DependencyRule client, composing, configuration, parser, proxy, routing, session;
 
             @Override
             public void defineRules() {
                 base().mayUse(base().allSub());
-                client.mayUse(util).mustNotUse(composing);
-                parser.mayUse(util).mustNotUse(composing);
-                composing.mayUse(client, parser, util).mustNotUse(proxy, routing);
-                proxy.mayUse(composing, routing, util).mustNotUse(client);
+                
+                client.mustNotUse(all());
+                parser.mustNotUse(all());
+                configuration.mustNotUse(all());
+                
+                composing.mayUse(client, parser, session);
+                proxy.mayUse(composing, routing, session);
+                routing.mayUse(composing, session);
+                session.mustNotUse(client, parser, composing, proxy);
             }
         }
 
-        DependencyRules rules = DependencyRules.denyAll()
+        final DependencyRules rules = DependencyRules.denyAll()
             .withRelativeRules(new ComRewedigitalExamplesMsintegrationComposer())
             .withExternals("java.*", "org.*", "net.*", "com.spotify.*", "com.google.*",
-                "com.damnhandy.*", "okio");
+                "com.damnhandy.*", "okio", "com.fasterxml.*", "com.typesafe.*", "io.jsonwebtoken", "io.jsonwebtoken.*");
 
-        DependencyResult result = new DependencyAnalyzer(config).rules(rules).analyze();
+        final DependencyResult result = new DependencyAnalyzer(config).rules(rules).analyze();
 
         assertThat(result, matchesRulesExactly());
-
     }
-
 }

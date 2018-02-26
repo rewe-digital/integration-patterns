@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 import org.junit.Test;
 
-import com.rewedigital.examples.msintegration.composer.proxy.ValidatingContentFetcher;
+import com.rewedigital.examples.msintegration.composer.session.SessionRoot;
 import com.spotify.apollo.Client;
 import com.spotify.apollo.Response;
 import com.spotify.apollo.Status;
@@ -29,7 +29,9 @@ public class TemplateComposerTest {
         final TemplateComposer composer = makeComposer(aClientWithSimpleContent("should not be included"));
 
         final Response<String> result = composer
-            .composeTemplate(r("template <rewe-digital-include></rewe-digital-include> content")).get();
+            .composeTemplate(r("template <rewe-digital-include></rewe-digital-include> content"))
+            .get()
+            .response();
 
         assertThat(result.payload()).contains("template  content");
     }
@@ -42,7 +44,7 @@ public class TemplateComposerTest {
         final Response<String> result = composer
             .composeTemplate(r(
                 "template content <rewe-digital-include path=\"http://mock/\"></rewe-digital-include> more content"))
-            .get();
+            .get().response();
 
         assertThat(result.payload()).contains("template content " + content + " more content");
     }
@@ -53,7 +55,7 @@ public class TemplateComposerTest {
             "<link href=\"css/link\" data-rd-options=\"include\" rel=\"stylesheet\"/>"));
         final Response<String> result = composer
             .composeTemplate(r("<head></head><rewe-digital-include path=\"http://mock/\"></rewe-digital-include>"))
-            .get();
+            .get().response();
         assertThat(result.payload()).contains(
             "<head><link rel=\"stylesheet\" data-rd-options=\"include\" href=\"css/link\" />\n" +
                 "</head>");
@@ -68,7 +70,7 @@ public class TemplateComposerTest {
                 innerContent));
         final Response<String> result = composer
             .composeTemplate(r("<rewe-digital-include path=\"http://mock/\"></rewe-digital-include>"))
-            .get();
+            .get().response();
         assertThat(result.payload()).contains(innerContent);
     }
 
@@ -78,22 +80,47 @@ public class TemplateComposerTest {
         final Response<String> result = composer
             .composeTemplate(
                 r("template content <rewe-digital-include path=\"http://mock/\"><rewe-digital-content><div>default content</div></rewe-digital-content></rewe-digital-include>"))
-            .get();
+            .get().response();
         assertThat(result.payload().get()).contains("template content <div>default content</div>");
     }
 
+    @Test
+    public void composesSessionAlongWithTemplates() throws Exception {
+        final TemplateComposer composer =
+            makeComposer(aClientWithSimpleContent("content", "x-rd-session-key-content", "session-val-content"));
+
+        final SessionRoot result = composer
+            .composeTemplate(r(
+                "template content <rewe-digital-include path=\"http://mock/\"></rewe-digital-include> more content")
+                    .withHeader("x-rd-session-key-template", "session-val-template"))
+            .get().session();
+
+        assertThat(result.get("session-key-template")).contains("session-val-template");
+        assertThat(result.get("session-key-content")).contains("session-val-content");
+        assertThat(result.isDirty()).isTrue();
+    }
 
     private TemplateComposer makeComposer(final Client client) {
-        return new AttoParserBasedComposer(new ValidatingContentFetcher(client, Collections.emptyMap()));
+        final SessionRoot session = SessionRoot.empty();
+        return new AttoParserBasedComposer(
+            new ValidatingContentFetcher(client, Collections.emptyMap(), session), session,
+            new ComposerHtmlConfiguration("rewe-digital-include", "rewe-digital-content", "data-rd-options"));
     }
 
     private Client aClientWithSimpleContent(final String content) {
         return aClientWithSimpleContent(content, "");
     }
 
-    private Client aClientWithSimpleContent(final String content, final String head) {
-        final Response<ByteString> response = contentResponse(content, head);
 
+    private Client aClientWithSimpleContent(final String content, final String sessionKey, final String sessionValue) {
+        return aClientReturning(contentResponse(content, "").withHeader(sessionKey, sessionValue));
+    }
+
+    private Client aClientWithSimpleContent(final String content, final String head) {
+        return aClientReturning(contentResponse(content, head));
+    }
+
+    private Client aClientReturning(final Response<ByteString> response) {
         final Client client = mock(Client.class);
         when(client.send(any()))
             .thenReturn(completedFuture(response));

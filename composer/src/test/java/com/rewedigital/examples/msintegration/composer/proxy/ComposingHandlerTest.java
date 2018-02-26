@@ -1,7 +1,7 @@
 package com.rewedigital.examples.msintegration.composer.proxy;
 
-import static com.rewedigital.examples.msintegration.composer.routing.StaticBackendRoutes.RouteType.PROXY;
-import static com.rewedigital.examples.msintegration.composer.routing.StaticBackendRoutes.RouteType.TEMPLATE;
+import static com.rewedigital.examples.msintegration.composer.routing.StaticBackendRoutes.RouteTypeName.PROXY;
+import static com.rewedigital.examples.msintegration.composer.routing.StaticBackendRoutes.RouteTypeName.TEMPLATE;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
@@ -14,10 +14,17 @@ import java.util.concurrent.CompletionStage;
 
 import org.junit.Test;
 
+import com.rewedigital.examples.msintegration.composer.composing.ComposerFactory;
+import com.rewedigital.examples.msintegration.composer.configuration.DefaultConfiguration;
 import com.rewedigital.examples.msintegration.composer.routing.BackendRouting;
-import com.rewedigital.examples.msintegration.composer.routing.BackendRouting.RouteMatch;
+import com.rewedigital.examples.msintegration.composer.routing.RouteTypes;
 import com.rewedigital.examples.msintegration.composer.routing.StaticBackendRoutes;
 import com.rewedigital.examples.msintegration.composer.routing.StaticBackendRoutes.Match;
+import com.rewedigital.examples.msintegration.composer.routing.SessionAwareProxyClient;
+import com.rewedigital.examples.msintegration.composer.session.ResponseWithSession;
+import com.rewedigital.examples.msintegration.composer.session.SessionHandler;
+import com.rewedigital.examples.msintegration.composer.session.SessionHandlerFactory;
+import com.rewedigital.examples.msintegration.composer.session.SessionRoot;
 import com.spotify.apollo.Client;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.RequestContext;
@@ -35,19 +42,21 @@ public class ComposingHandlerTest {
     @Test
     public void returnsResponseFromTemplateRoute() throws Exception {
         final ComposingRequestHandler handler =
-            new ComposingRequestHandler(new BackendRouting(aRouter("/<path:path>", TEMPLATE)),
-                StubTemplateClient.returning(Status.OK, SERVICE_RESPONSE), new ComposerFactory());
+            new ComposingRequestHandler(aRouter("/<path:path>", TEMPLATE),
+                RoutingResult.returning(Status.OK, SERVICE_RESPONSE),
+                sessionSerializer());
 
         final Response<ByteString> response = handler.execute(aContext()).toCompletableFuture().get();
 
         assertThat(response.payload().get().utf8()).isEqualTo(SERVICE_RESPONSE);
     }
-    
+
     @Test
     public void returnsDefaultResponseFromErrorOnTemplateRoute() throws Exception {
         final ComposingRequestHandler handler =
-            new ComposingRequestHandler(new BackendRouting(aRouter("/<path:path>", TEMPLATE)),
-                 StubTemplateClient.returning(Status.BAD_REQUEST, ""), new ComposerFactory());
+            new ComposingRequestHandler(aRouter("/<path:path>", TEMPLATE),
+                RoutingResult.returning(Status.BAD_REQUEST, ""),
+                sessionSerializer());
 
         final Response<ByteString> response = handler.execute(aContext()).toCompletableFuture().get();
         assertThat(response.status()).isEqualTo(Status.INTERNAL_SERVER_ERROR);
@@ -56,17 +65,18 @@ public class ComposingHandlerTest {
     @Test
     public void returnsErrorResponseFromProxyRoute() throws Exception {
         final ComposingRequestHandler handler =
-            new ComposingRequestHandler(new BackendRouting(aRouter("/<path:path>", PROXY)),
-                 StubTemplateClient.returning(Status.BAD_REQUEST, ""), new ComposerFactory());
+            new ComposingRequestHandler(aRouter("/<path:path>", PROXY),
+                RoutingResult.returning(Status.BAD_REQUEST, ""),
+                sessionSerializer());
 
         final Response<ByteString> response = handler.execute(aContext()).toCompletableFuture().get();
         assertThat(response.status()).isEqualTo(Status.BAD_REQUEST);
 
     }
 
-    private RuleRouter<Match> aRouter(final String pattern, final StaticBackendRoutes.RouteType routeType) {
+    private BackendRouting aRouter(final String pattern, final StaticBackendRoutes.RouteTypeName routeType) {
         final Rule<Match> sampleRule = Rule.fromUri(pattern, "GET", Match.of("http://target", routeType));
-        return RuleRouter.of(singletonList(sampleRule));
+        return new BackendRouting(RuleRouter.of(singletonList(sampleRule)));
     }
 
     private RequestContext aContext() {
@@ -76,22 +86,37 @@ public class ComposingHandlerTest {
         when(request.method()).thenReturn("GET");
         final RequestContext context = mock(RequestContext.class);
         when(context.request()).thenReturn(request);
-        Client client = mock(Client.class);
+        final Client client = mock(Client.class);
         when(client.send(any())).thenThrow(new RuntimeException());
         when(context.requestScopedClient()).thenReturn(client);
         return context;
     }
 
-    private static class StubTemplateClient extends TemplateClient {
+    private SessionHandlerFactory sessionSerializer() {
+        return new SessionHandlerFactory() {
 
-        public static TemplateClient returning(final Status status, final String responseBody) {
-            return new TemplateClient() {
+            @Override
+            public SessionHandler build() {
+                return SessionHandler.noSession();
+            }
+        };
+    }
+
+    private static class RoutingResult extends SessionAwareProxyClient {
+
+        public static RouteTypes returning(final Status status, final String responseBody) {
+            return new RouteTypes(composerFactory(), new SessionAwareProxyClient() {
                 @Override
-                public CompletionStage<Response<ByteString>> getTemplate(final RouteMatch match,
-                    final RequestContext context) {
-                    return CompletableFuture.completedFuture(Response.of(status, ByteString.encodeUtf8(responseBody)));
+                public CompletionStage<ResponseWithSession<ByteString>> fetch(final String path,
+                    final RequestContext context, final SessionRoot session) {
+                    return CompletableFuture.completedFuture(
+                        new ResponseWithSession<>(Response.of(status, ByteString.encodeUtf8(responseBody)), session));
                 }
-            };
+            });
+        }
+
+        private static ComposerFactory composerFactory() {
+            return new ComposerFactory(DefaultConfiguration.defaultConfiguration().getConfig("composer.html"));
         }
     }
 

@@ -2,9 +2,10 @@ package com.rewedigital.examples.msintegration.composer.composing;
 
 import java.io.StringWriter;
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
-import com.spotify.apollo.Response;
+import com.rewedigital.examples.msintegration.composer.session.SessionFragment;
 
 class Composition {
 
@@ -14,9 +15,15 @@ class Composition {
     private final int endOffset;
     private final String template;
     private final ContentRange contentRange;
+    private final SessionFragment session;
+
+    public Composition(final String template, final ContentRange contentRange, final List<String> assetLinks,
+        final List<Composition> children) {
+        this(0, template.length(), template, contentRange, assetLinks, SessionFragment.empty(), children);
+    }
 
     private Composition(final int startOffset, final int endOffset, final String template,
-        final ContentRange contentRange, final List<String> assetLinks,
+        final ContentRange contentRange, final List<String> assetLinks, final SessionFragment session,
         final List<Composition> children) {
         this.startOffset = startOffset;
         this.endOffset = endOffset;
@@ -24,21 +31,25 @@ class Composition {
         this.contentRange = contentRange;
         this.assetLinks = assetLinks;
         this.children = children;
+        this.session = session;
+    }
+
+    public Composition forRange(final int startOffset, final int endOffset) {
+        return new Composition(startOffset, endOffset, template, contentRange, assetLinks, session,
+            children);
+    }
+
+    public Composition withSession(final SessionFragment session) {
+        return new Composition(startOffset, endOffset, template, contentRange, assetLinks,
+            this.session.mergedWith(session), children);
     }
 
     public static Composition forRoot(final String template, final ContentRange contentRange,
         final List<String> assetLinks, final List<Composition> children) {
-        return new Composition(0, template.length(), template, contentRange, assetLinks, children);
+        return new Composition(template, contentRange, assetLinks, children);
     }
 
-    public Composition forRange(final int startOffset, final int endOffset) {
-        return new Composition(startOffset, endOffset, template, contentRange, assetLinks, children);
-    }
-
-    public Response<String> toResponse() {
-        return Response.forPayload(withAssetLinks(body()));
-    }
-
+    // TODO TV make the recursion more explicit
     private String body() {
         final StringWriter writer = new StringWriter(template.length());
         int currentIndex = contentRange.start();
@@ -52,13 +63,21 @@ class Composition {
         return writer.toString();
     }
 
+    public <R> R map(final BiFunction<String, SessionFragment, R> responseBuilder) {
+        return responseBuilder.apply(withAssetLinks(body()), mergedSession());
+    }
+
+    private SessionFragment mergedSession() {
+        return session.mergedWith(children.stream()
+            .reduce(SessionFragment.empty(),
+                (s, c) -> s.mergedWith(c.mergedSession()),
+                (a, b) -> a.mergedWith(b)));
+    }
+
     private String withAssetLinks(final String body) {
         final String assets = assetLinks.stream()
             .distinct()
             .collect(Collectors.joining("\n"));
         return body.replaceFirst("</head>", assets + "\n</head>");
     }
-
-
-
 }

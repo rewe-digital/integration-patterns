@@ -1,10 +1,10 @@
 package com.rewedigital.examples.msintegration.composer.composing;
 
-import static com.rewedigital.examples.msintegration.composer.util.StreamUtil.flatten;
 import static java.util.stream.Collectors.toList;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 class IncludeProcessor {
@@ -30,6 +30,12 @@ class IncludeProcessor {
                 .thenCompose(r -> r.compose(composer)));
         return flatten(composedIncludes)
             .thenApply(c -> Composition.forRoot(template, contentRange, assetLinks, c.collect(toList())));
+    }
+
+    private static <T> CompletableFuture<Stream<T>> flatten(final Stream<CompletableFuture<T>> com) {
+        final List<CompletableFuture<T>> list = com.map(c -> c.toCompletableFuture()).collect(Collectors.toList());
+        return CompletableFuture.allOf(list.toArray(new CompletableFuture[list.size()]))
+            .thenApply(v -> list.stream().map(CompletableFuture::join));
     }
 
 }

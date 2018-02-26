@@ -11,22 +11,28 @@ import org.attoparser.util.TextUtil;
 
 class ContentMarkupHandler extends AbstractMarkupHandler {
 
+    private final char[] contentTag;
+    private final String assetOptionsAttribute;
+
     private final List<String> links = new LinkedList<>();
     private final Map<String, String> attributes = new HashMap<>();
     private final ContentRange defaultContentRange;
-    
+
     private int contentStart = 0;
     private int contentEnd = 0;
 
     private boolean parsingHead = false;
     private boolean parsingLink = false;
 
+
     public List<String> assetLinks() {
         return links;
     }
 
-    public ContentMarkupHandler(final ContentRange defaultContentRange) {
+    public ContentMarkupHandler(final ContentRange defaultContentRange, final ComposerHtmlConfiguration configuration) {
         this.defaultContentRange = defaultContentRange;
+        this.contentTag = configuration.contentTag().toCharArray();
+        this.assetOptionsAttribute = configuration.assetOptionsAttribute();
     }
 
     public ContentRange contentRange() {
@@ -41,7 +47,7 @@ class ContentMarkupHandler extends AbstractMarkupHandler {
             startLink();
         }
     }
-    
+
     @Override
     public void handleStandaloneElementEnd(char[] buffer, int nameOffset, int nameLen, boolean minimized, int line,
         int col) throws ParseException {
@@ -98,8 +104,7 @@ class ContentMarkupHandler extends AbstractMarkupHandler {
 
     private boolean isContentElement(final char[] buffer, final int nameOffset, final int nameLen) {
         return contentEnd <= 0
-            && TextUtil.contains(true, buffer, nameOffset, nameLen, "rewe-digital-content", 0,
-                "rewe-digital-content".length());
+            && TextUtil.contains(true, buffer, nameOffset, nameLen, contentTag, 0, contentTag.length);
     }
 
 
@@ -108,7 +113,7 @@ class ContentMarkupHandler extends AbstractMarkupHandler {
     }
 
     private void pushLink() {
-        if (attributes.getOrDefault("data-rd-options", "").contains("include")) {
+        if (attributes.getOrDefault(assetOptionsAttribute, "").contains("include")) {
             links.add(
                 attributes
                     .entrySet()
