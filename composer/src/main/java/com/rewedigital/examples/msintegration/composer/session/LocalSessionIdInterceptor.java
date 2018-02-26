@@ -70,8 +70,8 @@ public class LocalSessionIdInterceptor implements SessionHandler.Interceptor {
     private long parseExpiresAt(final String s) {
         try {
             return Long.parseLong(s);
-        } catch (final Exception ex) {
-            LOGGER.error("maleformatted expires-at: {} - expireing session", s);
+        } catch (final NumberFormatException ex) {
+            LOGGER.error("maleformatted expires-at: {} - expireing session", s, ex);
             return -1;
         }
     }
