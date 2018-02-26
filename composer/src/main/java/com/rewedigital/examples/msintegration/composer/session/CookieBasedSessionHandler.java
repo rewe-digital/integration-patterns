@@ -25,7 +25,6 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.impl.crypto.MacProvider;
 
 public class CookieBasedSessionHandler extends SessionHandler {
 
@@ -50,7 +49,6 @@ public class CookieBasedSessionHandler extends SessionHandler {
     private static final TypeReference<HashMap<String, String>> typeRef =
         new TypeReference<HashMap<String, String>>() {};
     private static final String PAYLOAD = "payload";
-    private static final Key defaultSigningKey = MacProvider.generateKey();
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -63,8 +61,8 @@ public class CookieBasedSessionHandler extends SessionHandler {
     public CookieBasedSessionHandler(final SessionConfiguration configuration) {
         super(configuration.interceptors());
         this.configuration = requireNonNull(configuration);
-        this.algorithm = SignatureAlgorithm.forName(configuration.signingAlgorithm());
-        this.signingKey = defaultSigningKey;// FIXME TV read from config
+        this.algorithm = configuration.signingAlgorithm();
+        this.signingKey = configuration.signingKey();
         this.parser = Jwts.parser().setSigningKey(signingKey);
     }
 
@@ -115,7 +113,7 @@ public class CookieBasedSessionHandler extends SessionHandler {
     private boolean isSessionCookie(final HttpCookie cookie) {
         final boolean result = configuration.cookieName().equalsIgnoreCase(cookie.getName());
         if (result) {
-            LOGGER.info("session cookie found");
+            LOGGER.debug("session cookie found");
         }
         return result;
     }

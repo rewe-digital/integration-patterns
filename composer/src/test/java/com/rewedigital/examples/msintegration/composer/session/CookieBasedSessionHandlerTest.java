@@ -18,6 +18,8 @@ import com.spotify.apollo.Response;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigValueFactory;
 
+import io.jsonwebtoken.SignatureAlgorithm;
+
 public class CookieBasedSessionHandlerTest {
 
     @Test
@@ -67,7 +69,7 @@ public class CookieBasedSessionHandlerTest {
     }
 
     private SessionConfiguration configuration() {
-        return new SessionConfiguration(true, "sessioncookie", "HS512", Collections.emptyList());
+        return new SessionConfiguration(true, "sessioncookie", SignatureAlgorithm.HS512.getValue(), "123", Collections.emptyList());
     }
 
     private Config enabledConfig() {

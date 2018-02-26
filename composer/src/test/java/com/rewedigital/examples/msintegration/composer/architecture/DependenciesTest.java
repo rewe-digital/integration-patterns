@@ -30,11 +30,11 @@ public class DependenciesTest {
             @Override
             public void defineRules() {
                 base().mayUse(base().allSub());
-                
+
                 client.mustNotUse(all());
                 parser.mustNotUse(all());
                 configuration.mustNotUse(all());
-                
+
                 composing.mayUse(client, parser, session);
                 proxy.mayUse(composing, routing, session);
                 routing.mayUse(composing, session);
@@ -45,7 +45,8 @@ public class DependenciesTest {
         final DependencyRules rules = DependencyRules.denyAll()
             .withRelativeRules(new ComRewedigitalExamplesMsintegrationComposer())
             .withExternals("java.*", "org.*", "net.*", "com.spotify.*", "com.google.*",
-                "com.damnhandy.*", "okio", "com.fasterxml.*", "com.typesafe.*", "io.jsonwebtoken", "io.jsonwebtoken.*");
+                "com.damnhandy.*", "okio", "com.fasterxml.*", "com.typesafe.*", "io.jsonwebtoken", "io.jsonwebtoken.*",
+                "javax.*");
 
         final DependencyResult result = new DependencyAnalyzer(config).rules(rules).analyze();
 

@@ -29,6 +29,7 @@ public class DefaultConfiguration {
         result.put("composer.session.enabled", Boolean.TRUE);
         result.put("composer.session.cookie", "rdsession");
         result.put("composer.session.signing-algorithm", "HS512");
+        result.put("composer.session.signing-key", "123");
         result.put("composer.session.interceptors", Collections.<ConfigValue>emptyList());
         
         result.put("composer.routing.local-routes", Collections.<ConfigValue>emptyList());
