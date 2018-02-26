@@ -1,0 +1,3 @@
+[submodule "composer"]
+	path = composer
+	url = git@github.com:rewe-digital/composer.git
