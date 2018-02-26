@@ -1,5 +1,7 @@
 package com.rewedigital.examples.msintegration.composer.routing;
 
+import java.util.Objects;
+
 public class Match {
 
     private final String backend;
@@ -24,11 +26,7 @@ public class Match {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((backend == null) ? 0 : backend.hashCode());
-        result = prime * result + ((routeType == null) ? 0 : routeType.hashCode());
-        return result;
+        return Objects.hash(backend, routeType);
     }
 
     @Override
