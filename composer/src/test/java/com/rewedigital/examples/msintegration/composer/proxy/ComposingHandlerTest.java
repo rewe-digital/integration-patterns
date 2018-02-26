@@ -1,7 +1,7 @@
 package com.rewedigital.examples.msintegration.composer.proxy;
 
-import static com.rewedigital.examples.msintegration.composer.routing.StaticBackendRoutes.RouteTypeName.PROXY;
-import static com.rewedigital.examples.msintegration.composer.routing.StaticBackendRoutes.RouteTypeName.TEMPLATE;
+import static com.rewedigital.examples.msintegration.composer.routing.RouteTypeName.PROXY;
+import static com.rewedigital.examples.msintegration.composer.routing.RouteTypeName.TEMPLATE;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
@@ -17,9 +17,9 @@ import org.junit.Test;
 import com.rewedigital.examples.msintegration.composer.composing.ComposerFactory;
 import com.rewedigital.examples.msintegration.composer.configuration.DefaultConfiguration;
 import com.rewedigital.examples.msintegration.composer.routing.BackendRouting;
+import com.rewedigital.examples.msintegration.composer.routing.Match;
+import com.rewedigital.examples.msintegration.composer.routing.RouteTypeName;
 import com.rewedigital.examples.msintegration.composer.routing.RouteTypes;
-import com.rewedigital.examples.msintegration.composer.routing.StaticBackendRoutes;
-import com.rewedigital.examples.msintegration.composer.routing.StaticBackendRoutes.Match;
 import com.rewedigital.examples.msintegration.composer.routing.SessionAwareProxyClient;
 import com.rewedigital.examples.msintegration.composer.session.ResponseWithSession;
 import com.rewedigital.examples.msintegration.composer.session.SessionHandler;
@@ -31,7 +31,6 @@ import com.spotify.apollo.RequestContext;
 import com.spotify.apollo.Response;
 import com.spotify.apollo.Status;
 import com.spotify.apollo.route.Rule;
-import com.spotify.apollo.route.RuleRouter;
 
 import okio.ByteString;
 
@@ -74,9 +73,9 @@ public class ComposingHandlerTest {
 
     }
 
-    private BackendRouting aRouter(final String pattern, final StaticBackendRoutes.RouteTypeName routeType) {
+    private BackendRouting aRouter(final String pattern, final RouteTypeName routeType) {
         final Rule<Match> sampleRule = Rule.fromUri(pattern, "GET", Match.of("http://target", routeType));
-        return new BackendRouting(RuleRouter.of(singletonList(sampleRule)));
+        return new BackendRouting(singletonList(sampleRule));
     }
 
     private RequestContext aContext() {
