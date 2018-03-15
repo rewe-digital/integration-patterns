@@ -1,14 +1,13 @@
 package com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing;
 
-import java.util.Objects;
-import java.util.Optional;
-
-import javax.inject.Inject;
-import javax.transaction.Transactional;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
+import javax.transaction.Transactional;
+import java.util.Objects;
+import java.util.Optional;
 
 @Component
 public class DomainEventPublisher {
@@ -44,7 +43,7 @@ public class DomainEventPublisher {
         }
 
         final String lastPublishedVersionId = getLastPublishedVersionId(event);
-        obtainLastPublishedVersion(lastPublishedVersionId).ifPresent(v -> {
+        obtainLastPublishedVersion(lastPublishedVersionId).ifPresent((LastPublishedVersion v) -> {
             try {
                 if (v.getVersion() < event.getVersion()) {
                     eventPublisher.publish(event).get(); // need to block here so that following statements are

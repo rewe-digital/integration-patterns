@@ -28,18 +28,14 @@ class ZooKeeperLocal {
         final ServerConfig configuration = getConfiguration();
         zooKeeperServer = new ZooKeeperServerMain();
 
-        Thread startThread = new Thread() {
-            @Override
-            public void run() {
-                try {
-                    zooKeeperServer.runFromConfig(configuration);
-                } catch (IOException e) {
-                    LOG.debug("ZooKeeper Failed", e);
-                }
-
+        Thread startThread = new Thread(() -> {
+            try {
+                zooKeeperServer.runFromConfig(configuration);
+            } catch (IOException e) {
+                LOG.debug("ZooKeeper Failed", e);
             }
 
-        };
+        });
 
         startThread.start();
 

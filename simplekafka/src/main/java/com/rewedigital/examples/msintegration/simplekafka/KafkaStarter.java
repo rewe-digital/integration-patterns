@@ -1,16 +1,15 @@
 package com.rewedigital.examples.msintegration.simplekafka;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.Properties;
-
+import kafka.server.KafkaConfig;
+import kafka.server.KafkaServerStartable;
 import org.apache.zookeeper.server.ServerConfig;
 import org.apache.zookeeper.server.ZooKeeperServerMain;
 import org.apache.zookeeper.server.quorum.QuorumPeerConfig;
 
-import kafka.server.KafkaConfig;
-import kafka.server.KafkaServerStartable;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Properties;
 
 // FIXME TV: describe source and purpose of this hacky stuff :-)
 
@@ -46,17 +45,14 @@ public class KafkaStarter {
             configuration.readFrom(quorumConfiguration);
 
 
-            new Thread() {
-                @Override
-                public void run() {
-                    try {
-                        zooKeeperServer.runFromConfig(configuration);
-                    } catch (final IOException e) {
-                        System.out.println("ZooKeeper Failed");
-                        e.printStackTrace(System.err);
-                    }
+            new Thread(() -> {
+                try {
+                    zooKeeperServer.runFromConfig(configuration);
+                } catch (final IOException e) {
+                    System.out.println("ZooKeeper Failed");
+                    e.printStackTrace(System.err);
                 }
-            }.start();
+            }).start();
         }
     }
 

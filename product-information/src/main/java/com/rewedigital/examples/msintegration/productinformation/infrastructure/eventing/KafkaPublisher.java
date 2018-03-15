@@ -1,7 +1,7 @@
 package com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing;
 
-import javax.inject.Inject;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,8 +10,7 @@ import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Component;
 import org.springframework.util.concurrent.ListenableFuture;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import javax.inject.Inject;
 
 @Component
 public class KafkaPublisher {
@@ -33,10 +32,10 @@ public class KafkaPublisher {
 
     public ListenableFuture<SendResult<String, String>> publish(final DomainEvent event) {
         LOGGER.debug("publishing event {} to topic {}", event.getId(), topic);
-        return kafkaTemplate.send(topic, event.getKey(), toMessage(event));
+        return kafkaTemplate.send(topic, event.getKey(), toEventMessage(event));
     }
 
-    private String toMessage(final DomainEvent event) {
+    private String toEventMessage(final DomainEvent event) {
         try {
             return objectMapper.writeValueAsString(event);
         } catch (final JsonProcessingException e) {
