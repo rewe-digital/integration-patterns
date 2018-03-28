@@ -16,7 +16,7 @@
 
 <body>
 
-	<rewe-digital-include path="http://localhost:8081/header"></rewe-digital-include>
+	<rewe-digital-include th:path="${headerFooterSrc + '/header'}"></rewe-digital-include>
 	<div class="container">
 		<div class="row">
 			<div class="col-xs-4 item-photo">
@@ -69,7 +69,7 @@
 		</div>
 	</div>
 
-	<rewe-digital-include path="http://localhost:8081/footer"></rewe-digital-include>
+	<rewe-digital-include th:path="${headerFooterSrc + '/footer'}"></rewe-digital-include>
 	<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
 	<script
 		src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
