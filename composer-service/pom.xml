@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
@@ -10,7 +11,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <docker.image.prefix>rewedigital-msint</docker.image.prefix>
-	<dockerfile-maven-version>1.4.0</dockerfile-maven-version>
+    <dockerfile-maven-version>1.4.0</dockerfile-maven-version>
     <composer.jar-file>composer.jar</composer.jar-file>
   </properties>
 
@@ -22,8 +23,8 @@
     <plugins>
       <plugin>
         <groupId>com.spotify</groupId>
-		<artifactId>dockerfile-maven-plugin</artifactId>
-		<version>${dockerfile-maven-version}</version>
+        <artifactId>dockerfile-maven-plugin</artifactId>
+        <version>${dockerfile-maven-version}</version>
         <executions>
           <execution>
             <id>default</id>
@@ -31,12 +32,12 @@
               <goal>build</goal>
             </goals>
             <configuration>
-			    <repository>${docker.image.prefix}/${project.artifactId}</repository>
-				<buildArgs>
-					<JAR_FILE>/composer/target/${composer.jar-file}</JAR_FILE>
-					<CONF_FILE>/composer.conf</CONF_FILE>
-				</buildArgs>
-			</configuration>
+              <repository>${docker.image.prefix}/${project.artifactId}</repository>
+              <buildArgs>
+                <JAR_FILE>/composer/target/${composer.jar-file}</JAR_FILE>
+                <CONF_FILE>/composer.conf</CONF_FILE>
+              </buildArgs>
+            </configuration>
           </execution>
         </executions>
       </plugin>
