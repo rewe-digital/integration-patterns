@@ -1,6 +1,6 @@
 #!/bin/sh
 echo "Building all procjects.."
-cd composer
+cd composer-service
 mvn clean verify -DskipTests
 cd ..
 cd header-footer
