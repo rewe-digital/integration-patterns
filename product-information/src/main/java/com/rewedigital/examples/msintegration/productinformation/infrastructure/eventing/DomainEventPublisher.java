@@ -1,14 +1,13 @@
 package com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing;
 
-import java.util.Objects;
-import java.util.Optional;
-
-import javax.inject.Inject;
-import javax.transaction.Transactional;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
+import javax.transaction.Transactional;
+import java.util.Objects;
+import java.util.Optional;
 
 @Component
 public class DomainEventPublisher {
@@ -30,7 +29,7 @@ public class DomainEventPublisher {
 
     @Transactional
     public void process(final String eventId) {
-        sendEvent(eventRepository.findOne(eventId));
+        eventRepository.findById(eventId).ifPresent(e -> sendEvent((DomainEvent)e));
     }
 
     @Transactional
@@ -44,7 +43,7 @@ public class DomainEventPublisher {
         }
 
         final String lastPublishedVersionId = getLastPublishedVersionId(event);
-        obtainLastPublishedVersion(lastPublishedVersionId).ifPresent(v -> {
+        obtainLastPublishedVersion(lastPublishedVersionId).ifPresent((LastPublishedVersion v) -> {
             try {
                 if (v.getVersion() < event.getVersion()) {
                     eventPublisher.publish(event).get(); // need to block here so that following statements are
@@ -66,15 +65,16 @@ public class DomainEventPublisher {
     }
 
     private Optional<LastPublishedVersion> obtainLastPublishedVersion(final String lastPublishedVersionId) {
-        LastPublishedVersion lastPublishedVersion = lastPublishedVersionRepository.findOne(lastPublishedVersionId);
-        if (lastPublishedVersion == null) {
-            try {
-                lastPublishedVersion =
-                    lastPublishedVersionRepository.saveAndFlush(LastPublishedVersion.of(lastPublishedVersionId));
-            } catch (final Exception ex) {
-                return Optional.empty();
-            }
-        }
+        LastPublishedVersion lastPublishedVersion = lastPublishedVersionRepository
+                .findById(lastPublishedVersionId).orElseGet(() -> {
+                    try {
+                        LastPublishedVersion version =
+                                lastPublishedVersionRepository.saveAndFlush(LastPublishedVersion.of(lastPublishedVersionId));
+                        return version;
+                    } catch (final Exception ex) {
+                        return null;
+                    }
+                });
         return Optional.of(lastPublishedVersion);
     }
 

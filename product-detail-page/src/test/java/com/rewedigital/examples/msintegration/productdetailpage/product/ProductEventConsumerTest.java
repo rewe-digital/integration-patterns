@@ -73,7 +73,7 @@ public class ProductEventConsumerTest {
         productEventConsumer.listen(CONSUMER_RECORD,ack);
 
         verify(ack, never()).acknowledge();
-        verify(processor).processMessage(anyObject());
+        verify(processor).processEvent(anyObject());
         verify(unprocessableEventService).save(anyObject());
     }
 

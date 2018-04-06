@@ -72,23 +72,23 @@ public class ProductEventRepositoryTest extends AbstractIntegrationTest {
     public void testFindFirstByTimeInSmallestVersion() {
         final DomainEvent firstEvent = productEventRepository.findFirstByTimeInSmallestVersion();
         assertThat(firstEvent.getKey()).isEqualTo(p5.getKey());
-        productEventRepository.delete(firstEvent.getId());
+        productEventRepository.delete(firstEvent);
 
         final DomainEvent secondEvent = productEventRepository.findFirstByTimeInSmallestVersion();
         assertThat(secondEvent.getKey()).isEqualTo(p1.getKey());
-        productEventRepository.delete(secondEvent.getId());
+        productEventRepository.delete(secondEvent);
 
         final DomainEvent thirdEvent = productEventRepository.findFirstByTimeInSmallestVersion();
         assertThat(thirdEvent.getKey()).isEqualTo(p2.getKey());
-        productEventRepository.delete(thirdEvent.getId());
+        productEventRepository.delete(thirdEvent);
 
         final DomainEvent fourthEvent = productEventRepository.findFirstByTimeInSmallestVersion();
         assertThat(fourthEvent.getKey()).isEqualTo(p4.getKey());
-        productEventRepository.delete(fourthEvent.getId());
+        productEventRepository.delete(fourthEvent);
 
         final DomainEvent fifthEvent = productEventRepository.findFirstByTimeInSmallestVersion();
         assertThat(fifthEvent.getKey()).isEqualTo(p3.getKey());
-        productEventRepository.delete(fifthEvent.getId());
+        productEventRepository.delete(fifthEvent);
     }
 
 }
