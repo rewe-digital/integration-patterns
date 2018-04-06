@@ -1,0 +1,15 @@
+version: '3'
+services:
+  product-detail-page:
+    image: rewedigital-msint/product-detail-page:latest
+    ports:
+      - 8080:8080
+  header-footer:
+    image: rewedigital-msint/header-footer:latest
+    ports:
+      - 8081:8081
+  composer:
+    image: rewedigital-msint/msint-composer:latest
+    ports:
+      - 8000:8000
+      
