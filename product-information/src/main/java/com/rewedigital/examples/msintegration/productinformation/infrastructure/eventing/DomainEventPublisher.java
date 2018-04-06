@@ -29,7 +29,7 @@ public class DomainEventPublisher {
 
     @Transactional
     public void process(final String eventId) {
-        sendEvent(eventRepository.findOne(eventId));
+        eventRepository.findById(eventId).ifPresent(e -> sendEvent((DomainEvent)e));
     }
 
     @Transactional
@@ -65,15 +65,16 @@ public class DomainEventPublisher {
     }
 
     private Optional<LastPublishedVersion> obtainLastPublishedVersion(final String lastPublishedVersionId) {
-        LastPublishedVersion lastPublishedVersion = lastPublishedVersionRepository.findOne(lastPublishedVersionId);
-        if (lastPublishedVersion == null) {
-            try {
-                lastPublishedVersion =
-                    lastPublishedVersionRepository.saveAndFlush(LastPublishedVersion.of(lastPublishedVersionId));
-            } catch (final Exception ex) {
-                return Optional.empty();
-            }
-        }
+        LastPublishedVersion lastPublishedVersion = lastPublishedVersionRepository
+                .findById(lastPublishedVersionId).orElseGet(() -> {
+                    try {
+                        LastPublishedVersion version =
+                                lastPublishedVersionRepository.saveAndFlush(LastPublishedVersion.of(lastPublishedVersionId));
+                        return version;
+                    } catch (final Exception ex) {
+                        return null;
+                    }
+                });
         return Optional.of(lastPublishedVersion);
     }
 
