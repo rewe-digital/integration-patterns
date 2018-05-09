@@ -4,6 +4,8 @@ import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.e
 
 public class MessageProcessingException extends Exception {
 
+    private static final long serialVersionUID = 1L;
+    
     private final EventProcessingState state;
 
     public MessageProcessingException(final EventProcessingState state, final String message,

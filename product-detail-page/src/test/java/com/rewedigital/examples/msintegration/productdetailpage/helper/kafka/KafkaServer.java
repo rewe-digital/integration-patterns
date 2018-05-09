@@ -62,8 +62,8 @@ public class KafkaServer {
         try {
             FileUtils.deleteDirectory(new File((String) kafkaProperties.get("log.dirs")));
 
-            final ZooKeeperLocal zooKeeperLocal = provideZooKeeperLocal();
-            final KafkaLocal kafka = new KafkaLocal(kafkaProperties, zooKeeperLocal);
+            provideZooKeeperLocal();
+            final KafkaLocal kafka = new KafkaLocal(kafkaProperties);
             kafka.start();
             Thread.sleep(2000);
             return ((kafka));
