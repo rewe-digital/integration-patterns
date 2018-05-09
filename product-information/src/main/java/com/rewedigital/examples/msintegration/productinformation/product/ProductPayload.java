@@ -5,7 +5,7 @@ import com.rewedigital.examples.msintegration.productinformation.infrastructure.
 import javax.persistence.Column;
 import javax.validation.constraints.NotNull;
 
-public class ProductPayload extends EventPayload{
+public class ProductPayload extends EventPayload {
 
 
     private String productId;

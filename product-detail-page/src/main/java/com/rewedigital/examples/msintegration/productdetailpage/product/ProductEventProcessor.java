@@ -17,12 +17,12 @@ public class ProductEventProcessor extends AbstractDomainEventProcessor<ProductP
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractDomainEventProcessor.class);
 
-    private final ProductService productService;
+    private final JpaProductRepository repository;;
 
     @Inject
-    public ProductEventProcessor(final ConsumerTopicConfig productTopicConfig, final EventParser eventParser, final ProcessedEventService processedEventService, final ProductService productService) {
+    public ProductEventProcessor(final ConsumerTopicConfig productTopicConfig, final EventParser eventParser, final ProcessedEventService processedEventService, final JpaProductRepository repository) {
         super(ProductEvent.class, productTopicConfig, eventParser, processedEventService);
-        this.productService = productService;
+        this.repository = repository;
     }
 
     @Override
@@ -30,7 +30,7 @@ public class ProductEventProcessor extends AbstractDomainEventProcessor<ProductP
         switch (productEvent.getType()) {
             case "product-created":
             case "product-updated":
-                productService.createOrUpdateProduct(toProduct(productEvent));
+                repository.save(toProduct(productEvent));
                 break;
             default:
                 LOG.warn("Unexpected type: '{}' of message with key '{}'", productEvent.getType(),

@@ -8,8 +8,8 @@ import javax.validation.constraints.NotNull;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ProductPayload extends EventPayload{
-    
+public class ProductPayload extends EventPayload {
+
     private String productId;
     private String name;
     private String vendor;
