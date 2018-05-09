@@ -11,7 +11,6 @@ services:
   kafka:
     image: confluentinc/cp-kafka:latest
     ports:
-      - 9092:9092
       - 5000:5000
     depends_on:
       - zookeeper
@@ -25,17 +24,21 @@ services:
   product-information:
     image: rewedigital-msint/product-information:latest
     ports:
-      - 8082:8082
+      - 9082:8082
+    depends_on:
+      - kafka
   product-detail-page:
     image: rewedigital-msint/product-detail-page:latest
     ports:
-      - 8080:8080
+      - 9080:8080
+    depends_on:
+      - kafka
   header-footer:
     image: rewedigital-msint/header-footer:latest
     ports:
-      - 8081:8081
+      - 9081:8081
   composer:
     image: rewedigital-msint/msint-composer:latest
     ports:
-      - 8000:8000
+      - 9000:8000
       
