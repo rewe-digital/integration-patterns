@@ -32,7 +32,7 @@ public class KafkaPublisher {
     }
 
     public ListenableFuture<SendResult<String, String>> publish(final DomainEvent event) {
-        LOGGER.debug("publishing event {} to topic {}", event.getId(), topic);
+        LOGGER.info("publishing event {} to topic {}", event.getId(), topic);
         return kafkaTemplate.send(topic, event.getKey(), toMessage(event));
     }
 

@@ -2,13 +2,15 @@ package com.rewedigital.examples.msintegration.productinformation.infrastructure
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
-import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class DomainEventPublisher {
@@ -43,12 +45,14 @@ public class DomainEventPublisher {
             return;
         }
 
-        final String lastPublishedVersionId = getLastPublishedVersionId(event);
+        final String lastPublishedVersionId = buildLastPublishedVersionId(event);
         obtainLastPublishedVersion(lastPublishedVersionId).ifPresent(v -> {
             try {
                 if (v.getVersion() < event.getVersion()) {
-                    eventPublisher.publish(event).get(); // need to block here so that following statements are
-                                                         // executed inside transaction
+                    // need to block here so that following statements are executed inside transaction
+                    SendResult<String, String> sendResult = eventPublisher.publish(event).get(1, TimeUnit.SECONDS);
+                    LOG.info("published event to {}:{} at {}", sendResult.getProducerRecord().topic(),
+                        sendResult.getProducerRecord().partition(), sendResult.getProducerRecord().timestamp());
                     v.setVersion(event.getVersion());
                     lastPublishedVersionRepository.save(v);
                 }
@@ -59,7 +63,7 @@ public class DomainEventPublisher {
         });
     }
 
-    private String getLastPublishedVersionId(final DomainEvent event) {
+    private String buildLastPublishedVersionId(final DomainEvent event) {
         final String entityId = event.getKey();
         final String aggregateName = event.getAggregateName();
         return aggregateName + "-" + entityId;
@@ -72,6 +76,7 @@ public class DomainEventPublisher {
                 lastPublishedVersion =
                     lastPublishedVersionRepository.saveAndFlush(LastPublishedVersion.of(lastPublishedVersionId));
             } catch (final Exception ex) {
+                LOG.error("error while storing last published version with id {}", lastPublishedVersion, ex);
                 return Optional.empty();
             }
         }

@@ -21,7 +21,7 @@ public class DomainEventPublishScheduler implements ApplicationListener<DomainEv
         eventProcessor.process(event.id());
     }
 
-    @Scheduled(fixedRate = 1000)
+   // @Scheduled(fixedRate = 1000)
     public void processNextMessage() {
         eventProcessor.processNext();
     }
