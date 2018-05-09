@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Component
-public class ProductEventPublishingRepository extends AbstractEventPublishingRepository<Product> {
+public class ProductEventPublishingRepository extends AbstractEventPublishingRepository<Product, ProductPayload, ProductEvent> {
 
     private final JpaProductRepository productRepository;
 

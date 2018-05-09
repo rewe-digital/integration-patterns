@@ -16,10 +16,8 @@ class KafkaLocal  {
 
     private KafkaServerStartable kafka;
     private Properties kafkaProperties;
-    private ZooKeeperLocal zooKeeperLocal;
 
-    public KafkaLocal(Properties kafkaProperties, ZooKeeperLocal zooKeeperLocal) {
-        this.zooKeeperLocal = Objects.requireNonNull(zooKeeperLocal);
+    public KafkaLocal(Properties kafkaProperties) {
         this.kafkaProperties = Objects.requireNonNull(kafkaProperties);
     }
 

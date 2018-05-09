@@ -14,7 +14,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Component
-public class KafkaPublisher {
+public class KafkaPublisher<P extends EventPayload, E extends DomainEvent<P>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaPublisher.class);
 
@@ -31,12 +31,12 @@ public class KafkaPublisher {
         this.topic = topic;
     }
 
-    public ListenableFuture<SendResult<String, String>> publish(final DomainEvent event) {
+    public ListenableFuture<SendResult<String, String>> publish(final E event) {
         LOGGER.info("publishing event {} to topic {}", event.getId(), topic);
         return kafkaTemplate.send(topic, event.getKey(), toMessage(event));
     }
 
-    private String toMessage(final DomainEvent event) {
+    private String toMessage(final E event) {
         try {
             return objectMapper.writeValueAsString(event);
         } catch (final JsonProcessingException e) {

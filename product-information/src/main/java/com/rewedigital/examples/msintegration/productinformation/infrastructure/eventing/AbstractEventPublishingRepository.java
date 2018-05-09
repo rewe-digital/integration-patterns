@@ -7,25 +7,25 @@ import javax.transaction.Transactional;
 
 import org.springframework.context.ApplicationEventPublisher;
 
-public abstract class AbstractEventPublishingRepository<P> {
+public abstract class AbstractEventPublishingRepository<T, P extends EventPayload, E extends DomainEvent<P>> {
 
-    private final DomainEventRepository eventRepository;
+    private final DomainEventRepository<P, E> eventRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
 
-    protected AbstractEventPublishingRepository(final DomainEventRepository eventRepository,
+    protected AbstractEventPublishingRepository(final DomainEventRepository<P, E> eventRepository,
         final ApplicationEventPublisher eventPublisher) {
         this.eventRepository = Objects.requireNonNull(eventRepository);
         this.applicationEventPublisher = Objects.requireNonNull(eventPublisher);
     }
 
     @Transactional
-    public P save(final P entity, final Function<P, DomainEvent> eventFactory) {
-        final P persistedEntity = persist(entity);
-        final DomainEvent event = eventFactory.apply(persistedEntity);
+    public T save(final T entity, final Function<T, E> eventFactory) {
+        final T persistedEntity = persist(entity);
+        final E event = eventFactory.apply(persistedEntity);
         eventRepository.saveAndFlush(event);
         applicationEventPublisher.publishEvent(event.message(this));
         return persistedEntity;
     }
 
-    protected abstract P persist(final P entity);
+    protected abstract T persist(final T entity);
 }

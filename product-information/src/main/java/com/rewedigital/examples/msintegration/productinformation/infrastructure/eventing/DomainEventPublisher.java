@@ -13,18 +13,18 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
-public class DomainEventPublisher {
+public class DomainEventPublisher<P extends EventPayload, E extends DomainEvent<P>> {
 
     private static final Logger LOG = LoggerFactory.getLogger(DomainEventPublisher.class);
 
     private final LastPublishedVersionRepository lastPublishedVersionRepository;
-    private final DomainEventRepository eventRepository;
-    private final KafkaPublisher eventPublisher;
+    private final DomainEventRepository<P,E> eventRepository;
+    private final KafkaPublisher<P, E> eventPublisher;
 
     @Inject
     public DomainEventPublisher(final LastPublishedVersionRepository lastPublishedVersionRepository,
-        final DomainEventRepository eventRepository,
-        final KafkaPublisher eventPublisher) {
+        final DomainEventRepository<P,E> eventRepository,
+        final KafkaPublisher<P, E> eventPublisher) {
         this.lastPublishedVersionRepository = Objects.requireNonNull(lastPublishedVersionRepository);
         this.eventRepository = Objects.requireNonNull(eventRepository);
         this.eventPublisher = Objects.requireNonNull(eventPublisher);
@@ -40,7 +40,7 @@ public class DomainEventPublisher {
         sendEvent(eventRepository.findFirstByTimeInSmallestVersion());
     }
 
-    private void sendEvent(final DomainEvent event) {
+    private void sendEvent(final E event) {
         if (event == null) {
             return;
         }
@@ -63,7 +63,7 @@ public class DomainEventPublisher {
         });
     }
 
-    private String buildLastPublishedVersionId(final DomainEvent event) {
+    private String buildLastPublishedVersionId(final E event) {
         final String entityId = event.getKey();
         final String aggregateName = event.getAggregateName();
         return aggregateName + "-" + entityId;
