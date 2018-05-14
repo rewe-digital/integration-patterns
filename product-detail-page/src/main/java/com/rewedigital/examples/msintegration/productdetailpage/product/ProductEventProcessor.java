@@ -1,36 +1,35 @@
 package com.rewedigital.examples.msintegration.productdetailpage.product;
 
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
 import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.AbstractDomainEventProcessor;
 import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.EventParser;
 import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.EventProcessingState;
 import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.configuration.ConsumerTopicConfig;
 import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.processed.ProcessedEventService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
 
 @Component
 public class ProductEventProcessor extends AbstractDomainEventProcessor<ProductPayload, ProductEvent> {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractDomainEventProcessor.class);
 
-    private final ProductService productService;
+    private final JpaProductRepository repository;;
 
     @Inject
-    public ProductEventProcessor(final ConsumerTopicConfig productTopicConfig, final EventParser eventParser, final ProcessedEventService processedEventService, final ProductService productService) {
+    public ProductEventProcessor(final ConsumerTopicConfig productTopicConfig, final EventParser eventParser, final ProcessedEventService processedEventService, final JpaProductRepository repository) {
         super(ProductEvent.class, productTopicConfig, eventParser, processedEventService);
-        this.productService = productService;
+        this.repository = repository;
     }
 
     @Override
-    protected EventProcessingState processMessage(final ProductEvent productEvent) {
+    protected EventProcessingState processEvent(final ProductEvent productEvent) {
         switch (productEvent.getType()) {
             case "product-created":
             case "product-updated":
-                productService.createOrUpdateProduct(toProduct(productEvent));
+                repository.save(toProduct(productEvent));
                 break;
             default:
                 LOG.warn("Unexpected type: '{}' of message with key '{}'", productEvent.getType(),

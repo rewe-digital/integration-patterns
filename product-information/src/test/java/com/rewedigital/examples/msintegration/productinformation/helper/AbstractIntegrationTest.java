@@ -20,7 +20,7 @@ public abstract class AbstractIntegrationTest {
     @Inject protected TestRestTemplate restTemplate;
 
     @Value("${local.server.port}") protected int port;
-    @Value("${productqueue.brokers}") private String bokers;
+    @Value("${eventing.brokers}") private String bokers;
 
     @BeforeClass
     public static void initTest() {

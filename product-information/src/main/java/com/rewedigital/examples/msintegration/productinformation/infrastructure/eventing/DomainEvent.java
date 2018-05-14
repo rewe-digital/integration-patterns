@@ -7,7 +7,7 @@ import javax.persistence.*;
 import java.time.ZonedDateTime;
 
 @MappedSuperclass
-public abstract class DomainEvent <P extends EventPayload>{
+public abstract class DomainEvent<P extends EventPayload> {
     public static class Message extends ApplicationEvent {
         private static final long serialVersionUID = 1L;
         private final String id;

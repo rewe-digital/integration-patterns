@@ -4,7 +4,7 @@ import com.rewedigital.examples.msintegration.productinformation.infrastructure.
 import org.springframework.data.jpa.repository.Query;
 
 
-public interface ProductEventRepository extends DomainEventRepository<ProductEvent> {
+public interface ProductEventRepository extends DomainEventRepository<ProductPayload, ProductEvent> {
 
     @Query(value = "SELECT * FROM PRODUCT_EVENT WHERE key = (SELECT key FROM PRODUCT_EVENT ORDER BY time ASC LIMIT 1) ORDER BY version ASC LIMIT 1", nativeQuery=true)
     ProductEvent findFirstByTimeInSmallestVersion();

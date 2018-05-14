@@ -4,7 +4,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.validation.constraints.NotNull;
+//import javax.validation.constraints.NotNull;
 
 @Entity
 public class UnprocessedEventEntity {
@@ -12,10 +12,10 @@ public class UnprocessedEventEntity {
     @Id
     private String key;
 
-    @NotNull
+//    @NotNull
     private String topic;
 
-    @NotNull
+//    @NotNull
     private String payload;
 
     public UnprocessedEventEntity() {

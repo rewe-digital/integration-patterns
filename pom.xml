@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.rewedigital.examples.msintegration</groupId>
+  <artifactId>integration-patterns</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <name>integration-patterns</name>
+  <description>Closure around related projects for easier building</description>
+
+  <modules>
+    <module>
+      product-information
+    </module>
+    <module>
+      product-detail-page
+    </module>
+    <module>
+      header-footer
+    </module>
+    <module>
+      composer-service
+    </module>
+  </modules>
+</project>

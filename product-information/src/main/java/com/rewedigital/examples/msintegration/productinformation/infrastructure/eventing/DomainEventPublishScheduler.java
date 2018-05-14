@@ -3,25 +3,24 @@ package com.rewedigital.examples.msintegration.productinformation.infrastructure
 import javax.inject.Inject;
 
 import org.springframework.context.ApplicationListener;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DomainEventPublishScheduler implements ApplicationListener<DomainEvent.Message> {
+public class DomainEventPublishScheduler<P extends EventPayload, E extends DomainEvent<P>> implements ApplicationListener<DomainEvent.Message> {
 
-    final DomainEventPublisher eventProcessor;
+    final DomainEventPublisher<P, E> eventProcessor;
 
     @Inject
-    public DomainEventPublishScheduler(final DomainEventPublisher eventProcessor) {
+    public DomainEventPublishScheduler(final DomainEventPublisher<P, E> eventProcessor) {
         this.eventProcessor = eventProcessor;
     }
 
     @Override
-    public void onApplicationEvent(final DomainEvent.Message event) {
+    public void onApplicationEvent(final E.Message event) {
         eventProcessor.process(event.id());
     }
 
-    @Scheduled(fixedRate = 1000)
+   // @Scheduled(fixedRate = 1000)
     public void processNextMessage() {
         eventProcessor.processNext();
     }

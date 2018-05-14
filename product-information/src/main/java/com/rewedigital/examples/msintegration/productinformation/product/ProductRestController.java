@@ -42,10 +42,9 @@ public class ProductRestController {
     @RequestMapping(value = "/products/{productId}", method = RequestMethod.PUT)
     @Transactional
     public Product updateProduct(@PathVariable final String productId, @RequestBody final Product product) {
-        final Product foundProduct = productEventPublishingRepository.findOne(productId);
-        if (foundProduct == null) {
-            throw new ProductNotFoundException("product with id %s does not exist", productId);
-        }
+        productEventPublishingRepository
+            .findById(productId)
+            .orElseThrow(() -> new ProductNotFoundException("product with id %s does not exist", productId));
 
         if (!productId.equals(product.getId())) {
             throw new ProductBadRequestException("wrong id in payload");
@@ -68,7 +67,7 @@ public class ProductRestController {
     }
 
     private static ProductEvent toEvent(final Product product, final ProductEventType eventType,
-                                       final ObjectMapper objectMapper) {
+        final ObjectMapper objectMapper) {
         try {
             final ProductEvent result = new ProductEvent();
             result.setId(UUID.randomUUID().toString());

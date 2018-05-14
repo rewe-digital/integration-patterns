@@ -3,7 +3,7 @@ package com.rewedigital.examples.msintegration.productdetailpage.product;
 import static com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.EventProcessingState.SUCCESS;
 import static com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.EventProcessingState.TEMPORARY_ERROR;
 import static com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.EventProcessingState.UNEXPECTED_ERROR;
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -15,7 +15,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.kafka.support.Acknowledgment;
 
 import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing.EventProcessingState;
@@ -52,7 +52,7 @@ public class ProductEventConsumerTest {
         productEventConsumer.listen(CONSUMER_RECORD,ack);
 
         verify(ack).acknowledge();
-        verify(unprocessableEventService, never()).save(anyObject());
+        verify(unprocessableEventService, never()).save(any());
     }
 
     @Test
@@ -62,8 +62,8 @@ public class ProductEventConsumerTest {
         productEventConsumer.listen(CONSUMER_RECORD,ack);
 
         verify(ack).acknowledge();
-        verify(processor).processConsumerRecord(anyObject());
-        verify(unprocessableEventService).save(anyObject());
+        verify(processor).processConsumerRecord(any());
+        verify(unprocessableEventService).save(any());
     }
 
     @Test(expected = TemporaryKafkaProcessingError.class)
@@ -73,8 +73,8 @@ public class ProductEventConsumerTest {
         productEventConsumer.listen(CONSUMER_RECORD,ack);
 
         verify(ack, never()).acknowledge();
-        verify(processor).processMessage(anyObject());
-        verify(unprocessableEventService).save(anyObject());
+        verify(processor).processEvent(any());
+        verify(unprocessableEventService).save(any());
     }
 
     private ProductEventProcessor mockedProcessor(final EventProcessingState expectedEventProcessingState) {

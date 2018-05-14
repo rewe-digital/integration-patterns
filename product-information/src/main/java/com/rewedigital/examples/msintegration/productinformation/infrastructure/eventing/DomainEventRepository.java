@@ -5,13 +5,14 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.repository.NoRepositoryBean;
 
 import javax.persistence.LockModeType;
+import java.util.Optional;
 
 @NoRepositoryBean
-public interface DomainEventRepository<E extends DomainEvent> extends JpaRepository<E, String> {
+public interface DomainEventRepository<P extends EventPayload, E extends DomainEvent<P>> extends JpaRepository<E, String> {
 
     @Override
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    E findOne(String id);
+    Optional<E> findById(String id);
     
     E findFirstByOrderByTimeAsc();
 

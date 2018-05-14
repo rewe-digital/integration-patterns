@@ -1,15 +1,44 @@
 version: '3'
 services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    ports:
+      - 2181:2181
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    ports:
+      - 5000:5000
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,EXTERNAL://localhost:5000
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+  product-information:
+    image: rewedigital-msint/product-information:latest
+    ports:
+      - 9082:8082
+    depends_on:
+      - kafka
   product-detail-page:
     image: rewedigital-msint/product-detail-page:latest
     ports:
-      - 8080:8080
+      - 9080:8080
+    depends_on:
+      - kafka
   header-footer:
     image: rewedigital-msint/header-footer:latest
     ports:
-      - 8081:8081
+      - 9081:8081
   composer:
     image: rewedigital-msint/msint-composer:latest
     ports:
-      - 8000:8000
+      - 9000:8000
       

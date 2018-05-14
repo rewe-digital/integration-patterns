@@ -4,6 +4,8 @@ import com.rewedigital.examples.msintegration.productdetailpage.infrastructure.e
 
 public class TemporaryMessageProcessingException extends MessageProcessingException {
 
+    private static final long serialVersionUID = 1L;
+
     public TemporaryMessageProcessingException(final String message) {
         super(EventProcessingState.TEMPORARY_ERROR, message);
     }

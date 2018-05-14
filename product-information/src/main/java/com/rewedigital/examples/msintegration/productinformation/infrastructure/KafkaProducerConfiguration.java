@@ -17,7 +17,7 @@ public class KafkaProducerConfiguration {
 
     private final String servers;
 
-    public KafkaProducerConfiguration(@Value("${productqueue.brokers}") final String servers) {
+    public KafkaProducerConfiguration(@Value("${eventing.brokers}") final String servers) {
         this.servers = servers;
     }
 
@@ -36,9 +36,9 @@ public class KafkaProducerConfiguration {
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, servers);
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        props.put(ProducerConfig.ACKS_CONFIG, "all");
-        props.put(ProducerConfig.RETRIES_CONFIG, Integer.MAX_VALUE);
-        props.put(ProducerConfig.MAX_BLOCK_MS_CONFIG, Long.MAX_VALUE);
+        //props.put(ProducerConfig.ACKS_CONFIG, "all");
+        //props.put(ProducerConfig.RETRIES_CONFIG, Integer.MAX_VALUE);
+        //props.put(ProducerConfig.MAX_BLOCK_MS_CONFIG, Long.MAX_VALUE);
 
         return props;
     }

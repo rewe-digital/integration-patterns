@@ -5,5 +5,5 @@ import com.rewedigital.examples.msintegration.productinformation.infrastructure.
 import javax.persistence.Entity;
 
 @Entity
-public class ProductEvent extends DomainEvent<ProductPayload>{
+public class ProductEvent extends DomainEvent<ProductPayload> {
 }
