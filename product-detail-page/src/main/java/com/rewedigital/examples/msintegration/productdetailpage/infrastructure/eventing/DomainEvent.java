@@ -1,6 +1,6 @@
 package com.rewedigital.examples.msintegration.productdetailpage.infrastructure.eventing;
 
-import javax.validation.constraints.NotNull;
+//import javax.validation.constraints.NotNull;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -13,22 +13,22 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DomainEvent<P extends EventPayload> {
 
-    @NotNull
+ //   @NotNull
     private final String id;
 
-    @NotNull
+//    @NotNull
     private final String key;
 
-    @NotNull
+//    @NotNull
     private final String time;
 
-    @NotNull
+//    @NotNull
     private final String type;
 
-    @NotNull
+//    @NotNull
     private final Long version;
 
-    @NotNull
+//    @NotNull
     private final P payload;
 
 

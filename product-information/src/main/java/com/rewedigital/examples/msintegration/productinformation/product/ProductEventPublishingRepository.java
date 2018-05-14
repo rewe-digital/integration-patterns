@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import javax.inject.Inject;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Component
 public class ProductEventPublishingRepository extends AbstractEventPublishingRepository<Product, ProductPayload, ProductEvent> {
@@ -26,8 +27,8 @@ public class ProductEventPublishingRepository extends AbstractEventPublishingRep
         return productRepository.saveAndFlush(entity);
     }
 
-    public Product findOne(final String id) {
-        return productRepository.findOne(id);
+    public Optional<Product> findById(final String id) {
+        return productRepository.findById(id);
     }
 
     public List<Product> findAll() {

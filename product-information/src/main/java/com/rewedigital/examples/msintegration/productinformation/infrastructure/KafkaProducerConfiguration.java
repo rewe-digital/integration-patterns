@@ -17,7 +17,7 @@ public class KafkaProducerConfiguration {
 
     private final String servers;
 
-    public KafkaProducerConfiguration(@Value("${productqueue.brokers}") final String servers) {
+    public KafkaProducerConfiguration(@Value("${eventing.brokers}") final String servers) {
         this.servers = servers;
     }
 

@@ -1,1 +1,1 @@
-productqueue.brokers = localhost:32000
+eventing.brokers = localhost:32000

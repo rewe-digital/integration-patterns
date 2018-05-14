@@ -1,5 +1,6 @@
 package com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing;
 
+
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -12,18 +13,19 @@ import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+
 @Component
 public class DomainEventPublisher<P extends EventPayload, E extends DomainEvent<P>> {
 
     private static final Logger LOG = LoggerFactory.getLogger(DomainEventPublisher.class);
 
     private final LastPublishedVersionRepository lastPublishedVersionRepository;
-    private final DomainEventRepository<P,E> eventRepository;
+    private final DomainEventRepository<P, E> eventRepository;
     private final KafkaPublisher<P, E> eventPublisher;
 
     @Inject
     public DomainEventPublisher(final LastPublishedVersionRepository lastPublishedVersionRepository,
-        final DomainEventRepository<P,E> eventRepository,
+        final DomainEventRepository<P, E> eventRepository,
         final KafkaPublisher<P, E> eventPublisher) {
         this.lastPublishedVersionRepository = Objects.requireNonNull(lastPublishedVersionRepository);
         this.eventRepository = Objects.requireNonNull(eventRepository);
@@ -32,7 +34,7 @@ public class DomainEventPublisher<P extends EventPayload, E extends DomainEvent<
 
     @Transactional
     public void process(final String eventId) {
-        sendEvent(eventRepository.findOne(eventId));
+        eventRepository.findById(eventId).ifPresent(e -> sendEvent(e));
     }
 
     @Transactional
@@ -47,6 +49,7 @@ public class DomainEventPublisher<P extends EventPayload, E extends DomainEvent<
 
         final String lastPublishedVersionId = buildLastPublishedVersionId(event);
         obtainLastPublishedVersion(lastPublishedVersionId).ifPresent(v -> {
+
             try {
                 if (v.getVersion() < event.getVersion()) {
                     // need to block here so that following statements are executed inside transaction
@@ -70,17 +73,18 @@ public class DomainEventPublisher<P extends EventPayload, E extends DomainEvent<
     }
 
     private Optional<LastPublishedVersion> obtainLastPublishedVersion(final String lastPublishedVersionId) {
-        LastPublishedVersion lastPublishedVersion = lastPublishedVersionRepository.findOne(lastPublishedVersionId);
-        if (lastPublishedVersion == null) {
-            try {
-                lastPublishedVersion =
-                    lastPublishedVersionRepository.saveAndFlush(LastPublishedVersion.of(lastPublishedVersionId));
-            } catch (final Exception ex) {
-                LOG.error("error while storing last published version with id {}", lastPublishedVersion, ex);
-                return Optional.empty();
-            }
-        }
-        return Optional.of(lastPublishedVersion);
+        LastPublishedVersion lastPublishedVersion = lastPublishedVersionRepository
+            .findById(lastPublishedVersionId).orElseGet(() -> {
+                try {
+                    LastPublishedVersion version =
+                        lastPublishedVersionRepository.saveAndFlush(LastPublishedVersion.of(lastPublishedVersionId));
+                    return version;
+                } catch (final Exception ex) {
+                    LOG.error("error while storing last published version with id {}", lastPublishedVersionId, ex);
+                    return null;
+                }
+            });
+        return Optional.ofNullable(lastPublishedVersion);
     }
 
 }
