@@ -26,7 +26,6 @@
     <thymeleaf.version>3.0.9.RELEASE</thymeleaf.version>
     <thymeleaf-layout-dialect.version>2.3.0</thymeleaf-layout-dialect.version>
     <spring-cloud.version>Edgware.SR2</spring-cloud.version>
-    <spring-kafka.version>2.1.4.RELEASE</spring-kafka.version>
 
     <docker.image.prefix>rewedigital-msint</docker.image.prefix>
     <dockerfile-maven-version>1.4.0</dockerfile-maven-version>
@@ -52,7 +51,6 @@
     <dependency>
       <groupId>org.springframework.kafka</groupId>
       <artifactId>spring-kafka</artifactId>
-      <version>${spring-kafka.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -74,7 +72,6 @@
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
-      <version>3.5</version>
     </dependency>
     <dependency>
       <groupId>com.google.collections</groupId>
