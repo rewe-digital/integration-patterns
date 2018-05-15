@@ -1,4 +1,4 @@
-package com.rewedigital.examples.msintegration.productinformation.infrastructure;
+package com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing;
 
 import java.util.HashMap;
 import java.util.Map;
