@@ -10,18 +10,19 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.rewedigital.examples.msintegration.productinformation.helper.AbstractIntegrationTest;
+import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.DomainEvent;
 import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.DomainEventRepository;
 
 public class ProductEventRepositoryTest extends AbstractIntegrationTest {
 
     @Autowired
-    DomainEventRepository<ProductPayload, ProductEvent> productEventRepository;
+    private DomainEventRepository productEventRepository;
 
-    private ProductEvent p1;
-    private ProductEvent p2;
-    private ProductEvent p3;
-    private ProductEvent p4;
-    private ProductEvent p5;
+    private DomainEvent p1;
+    private DomainEvent p2;
+    private DomainEvent p3;
+    private DomainEvent p4;
+    private DomainEvent p5;
 
     @Before
     public void setup() {
@@ -51,11 +52,11 @@ public class ProductEventRepositoryTest extends AbstractIntegrationTest {
         productEventRepository.save(p5);
     }
 
-    private ProductEvent createProductEvent(final String key, final ZonedDateTime time, final Long version) {
-        final ProductEvent p = new ProductEvent();
+    private DomainEvent createProductEvent(final String key, final ZonedDateTime time, final Long version) {
+        final DomainEvent p = new DomainEvent();
         p.setId(UUID.randomUUID().toString());
         p.setKey(key);
-        p.setPayload(new ProductPayload());
+        p.setPayload(new byte[0]);
         p.setTime(time);
         p.setType("product.created");
         p.setVersion(version);
@@ -64,29 +65,29 @@ public class ProductEventRepositoryTest extends AbstractIntegrationTest {
 
     @Test
     public void testFindFirstQuery() {
-        final ProductEvent foundEvent = productEventRepository.findFirstByOrderByTimeAsc();
+        final DomainEvent foundEvent = productEventRepository.findFirstByOrderByTimeAsc();
         assertThat(foundEvent.getKey()).isEqualTo(p5.getKey());
     }
 
     @Test
     public void testFindFirstByTimeInSmallestVersion() {
-        final ProductEvent firstEvent = productEventRepository.findFirstByTimeInSmallestVersion();
+        final DomainEvent firstEvent = productEventRepository.findFirstByTimeInSmallestVersion();
         assertThat(firstEvent.getKey()).isEqualTo(p5.getKey());
         productEventRepository.delete(firstEvent);
 
-        final ProductEvent secondEvent = productEventRepository.findFirstByTimeInSmallestVersion();
+        final DomainEvent secondEvent = productEventRepository.findFirstByTimeInSmallestVersion();
         assertThat(secondEvent.getKey()).isEqualTo(p1.getKey());
         productEventRepository.delete(secondEvent);
 
-        final ProductEvent thirdEvent = productEventRepository.findFirstByTimeInSmallestVersion();
+        final DomainEvent thirdEvent = productEventRepository.findFirstByTimeInSmallestVersion();
         assertThat(thirdEvent.getKey()).isEqualTo(p2.getKey());
         productEventRepository.delete(thirdEvent);
 
-        final ProductEvent fourthEvent = productEventRepository.findFirstByTimeInSmallestVersion();
+        final DomainEvent fourthEvent = productEventRepository.findFirstByTimeInSmallestVersion();
         assertThat(fourthEvent.getKey()).isEqualTo(p4.getKey());
         productEventRepository.delete(fourthEvent);
 
-        final ProductEvent fifthEvent = productEventRepository.findFirstByTimeInSmallestVersion();
+        final DomainEvent fifthEvent = productEventRepository.findFirstByTimeInSmallestVersion();
         assertThat(fifthEvent.getKey()).isEqualTo(p3.getKey());
         productEventRepository.delete(fifthEvent);
     }

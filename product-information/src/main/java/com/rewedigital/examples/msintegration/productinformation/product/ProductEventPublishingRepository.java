@@ -1,6 +1,8 @@
 package com.rewedigital.examples.msintegration.productinformation.product;
 
 import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.AbstractEventPublishingRepository;
+import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.DomainEventRepository;
+
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
@@ -10,13 +12,13 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Component
-public class ProductEventPublishingRepository extends AbstractEventPublishingRepository<Product, ProductPayload, ProductEvent> {
+public class ProductEventPublishingRepository extends AbstractEventPublishingRepository<Product> {
 
     private final JpaProductRepository productRepository;
 
     @Inject
     public ProductEventPublishingRepository(final JpaProductRepository productRepository,
-        final ProductEventRepository eventRepository,
+        final DomainEventRepository eventRepository,
         final ApplicationEventPublisher eventPublisher) {
         super(eventRepository, eventPublisher);
         this.productRepository = Objects.requireNonNull(productRepository);

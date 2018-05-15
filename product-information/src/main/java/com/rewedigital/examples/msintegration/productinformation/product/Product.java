@@ -88,16 +88,4 @@ public class Product {
     public Long getVersion() {
         return version;
     }
-
-    public ProductPayload toPayload() {
-        ProductPayload pp = new ProductPayload();
-        pp.setProductNumber(this.productNumber);
-        pp.setProductId(this.id);
-        pp.setDescription(this.description);
-        pp.setImage(this.image);
-        pp.setName(this.name);
-        pp.setPrice(this.price);
-        pp.setVendor(this.vendor);
-        return pp;
-    }
 }

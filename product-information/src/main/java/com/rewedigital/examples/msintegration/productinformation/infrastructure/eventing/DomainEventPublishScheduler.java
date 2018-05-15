@@ -6,17 +6,17 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DomainEventPublishScheduler<P extends EventPayload, E extends DomainEvent<P>> implements ApplicationListener<DomainEvent.Message> {
+public class DomainEventPublishScheduler implements ApplicationListener<DomainEvent.Message> {
 
-    final DomainEventPublisher<P, E> eventProcessor;
+    final DomainEventPublisher eventProcessor;
 
     @Inject
-    public DomainEventPublishScheduler(final DomainEventPublisher<P, E> eventProcessor) {
+    public DomainEventPublishScheduler(final DomainEventPublisher eventProcessor) {
         this.eventProcessor = eventProcessor;
     }
 
     @Override
-    public void onApplicationEvent(final E.Message event) {
+    public void onApplicationEvent(final DomainEvent.Message event) {
         eventProcessor.process(event.id());
     }
 

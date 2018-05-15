@@ -1,6 +1,8 @@
 package com.rewedigital.examples.msintegration.productinformation.product;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.DomainEvent;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
@@ -66,17 +68,21 @@ public class ProductRestController {
         return productEventPublishingRepository.save(product, e -> toEvent(e, eventType, objectMapper));
     }
 
-    private static ProductEvent toEvent(final Product product, final ProductEventType eventType,
+    private static DomainEvent toEvent(final Product product, final ProductEventType eventType,
         final ObjectMapper objectMapper) {
         try {
-            final ProductEvent result = new ProductEvent();
+            byte[] payload = objectMapper.writeValueAsBytes(product); 
+            final DomainEvent result = new DomainEvent();
             result.setId(UUID.randomUUID().toString());
             result.setKey(product.getId());
-            result.setType(eventType.getName());
             result.setTime(ZonedDateTime.now(ZoneOffset.UTC));
-            result.setPayload(product.toPayload());
             result.setVersion(product.getVersion());
+            result.setEntityType(Product.class);
+
+            result.setType(eventType.getName());
             result.setAggregateName("product");
+
+            result.setPayload(payload);
             return result;
         } catch (final Exception ex) {
             LOG.error("Could not send product event", ex);

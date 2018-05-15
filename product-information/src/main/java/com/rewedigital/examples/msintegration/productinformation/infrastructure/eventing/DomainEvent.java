@@ -1,13 +1,14 @@
 package com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing;
 
-import com.rewedigital.examples.msintegration.productinformation.product.ZonedDateTimeConverter;
 import org.springframework.context.ApplicationEvent;
+
+import com.rewedigital.examples.msintegration.productinformation.infrastructure.ZonedDateTimeConverter;
 
 import javax.persistence.*;
 import java.time.ZonedDateTime;
 
-@MappedSuperclass
-public abstract class DomainEvent<P extends EventPayload> {
+@Entity
+public class DomainEvent {
     public static class Message extends ApplicationEvent {
         private static final long serialVersionUID = 1L;
         private final String id;
@@ -34,10 +35,12 @@ public abstract class DomainEvent<P extends EventPayload> {
 
     private String type;
 
-    @Embedded
-    private P payload;
+    @Lob
+    private byte[] payload;
 
     private String aggregateName;
+
+    private Class<?> entityType;
 
     public Message message(final Object source) {
         return new Message(id, source);
@@ -83,12 +86,20 @@ public abstract class DomainEvent<P extends EventPayload> {
         this.type = type;
     }
 
-    public P getPayload() {
+    public byte[] getPayload() {
         return payload;
     }
 
-    public void setPayload(final P payload) {
+    public void setPayload(final byte[] payload) {
         this.payload = payload;
+    }
+
+    public Class<?> getEntityType() {
+        return entityType;
+    }
+
+    public void setEntityType(Class<?> entityType) {
+        this.entityType = entityType;
     }
 
     public String getAggregateName() {

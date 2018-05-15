@@ -15,18 +15,18 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 @Component
-public class DomainEventPublisher<P extends EventPayload, E extends DomainEvent<P>> {
+public class DomainEventPublisher {
 
     private static final Logger LOG = LoggerFactory.getLogger(DomainEventPublisher.class);
 
     private final LastPublishedVersionRepository lastPublishedVersionRepository;
-    private final DomainEventRepository<P, E> eventRepository;
-    private final KafkaPublisher<P, E> eventPublisher;
+    private final DomainEventRepository eventRepository;
+    private final KafkaPublisher<DomainEvent> eventPublisher;
 
     @Inject
     public DomainEventPublisher(final LastPublishedVersionRepository lastPublishedVersionRepository,
-        final DomainEventRepository<P, E> eventRepository,
-        final KafkaPublisher<P, E> eventPublisher) {
+        final DomainEventRepository eventRepository,
+        final KafkaPublisher<DomainEvent> eventPublisher) {
         this.lastPublishedVersionRepository = Objects.requireNonNull(lastPublishedVersionRepository);
         this.eventRepository = Objects.requireNonNull(eventRepository);
         this.eventPublisher = Objects.requireNonNull(eventPublisher);
@@ -42,7 +42,7 @@ public class DomainEventPublisher<P extends EventPayload, E extends DomainEvent<
         sendEvent(eventRepository.findFirstByTimeInSmallestVersion());
     }
 
-    private void sendEvent(final E event) {
+    private void sendEvent(final DomainEvent event) {
         if (event == null) {
             return;
         }
@@ -54,19 +54,19 @@ public class DomainEventPublisher<P extends EventPayload, E extends DomainEvent<
                 if (v.getVersion() < event.getVersion()) {
                     // need to block here so that following statements are executed inside transaction
                     SendResult<String, String> sendResult = eventPublisher.publish(event).get(1, TimeUnit.SECONDS);
-                    LOG.info("published event to {}:{} at {}", sendResult.getProducerRecord().topic(),
+                    LOG.info("Published event to {}:{} at {}", sendResult.getProducerRecord().topic(),
                         sendResult.getProducerRecord().partition(), sendResult.getProducerRecord().timestamp());
                     v.setVersion(event.getVersion());
                     lastPublishedVersionRepository.save(v);
                 }
                 eventRepository.delete(event);
             } catch (final Exception ex) {
-                LOG.error("error publishing event with id [{}] due to {}", event.getId(), ex.getMessage(), ex);
+                LOG.error("Error publishing event with id [{}] due to {}", event.getId(), ex.getMessage(), ex);
             }
         });
     }
 
-    private String buildLastPublishedVersionId(final E event) {
+    private String buildLastPublishedVersionId(final DomainEvent event) {
         final String entityId = event.getKey();
         final String aggregateName = event.getAggregateName();
         return aggregateName + "-" + entityId;
@@ -80,7 +80,7 @@ public class DomainEventPublisher<P extends EventPayload, E extends DomainEvent<
                         lastPublishedVersionRepository.saveAndFlush(LastPublishedVersion.of(lastPublishedVersionId));
                     return version;
                 } catch (final Exception ex) {
-                    LOG.error("error while storing last published version with id {}", lastPublishedVersionId, ex);
+                    LOG.error("Error while storing last published version with id {}", lastPublishedVersionId, ex);
                     return null;
                 }
             });

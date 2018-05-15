@@ -1,21 +1,22 @@
 package com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Lock;
-import org.springframework.data.repository.NoRepositoryBean;
-
-import javax.persistence.LockModeType;
 import java.util.Optional;
 
-@NoRepositoryBean
-public interface DomainEventRepository<P extends EventPayload, E extends DomainEvent<P>> extends JpaRepository<E, String> {
+import javax.persistence.LockModeType;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
+
+public interface DomainEventRepository extends JpaRepository<DomainEvent, String> {
 
     @Override
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    Optional<E> findById(String id);
+    Optional<DomainEvent> findById(String id);
     
-    E findFirstByOrderByTimeAsc();
+    DomainEvent findFirstByOrderByTimeAsc();
 
-    E findFirstByTimeInSmallestVersion();
+    @Query(value = "SELECT * FROM DOMAIN_EVENT WHERE key = (SELECT key FROM PRODUCT_EVENT ORDER BY time ASC LIMIT 1) ORDER BY version ASC LIMIT 1", nativeQuery=true)
+    DomainEvent findFirstByTimeInSmallestVersion();
 
 }
