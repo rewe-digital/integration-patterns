@@ -9,34 +9,37 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationListener;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 
 @Component
-public class DomainEventPublisher {
+public class DomainEventPublisher implements ApplicationListener<DomainEvent.Message> {
 
     private static final Logger LOG = LoggerFactory.getLogger(DomainEventPublisher.class);
 
     private final LastPublishedVersionRepository lastPublishedVersionRepository;
     private final DomainEventRepository eventRepository;
-    private final KafkaPublisher<DomainEvent> eventPublisher;
+    private final KafkaGateway<DomainEvent> eventPublisher;
 
     @Inject
     public DomainEventPublisher(final LastPublishedVersionRepository lastPublishedVersionRepository,
         final DomainEventRepository eventRepository,
-        final KafkaPublisher<DomainEvent> eventPublisher) {
+        final KafkaGateway<DomainEvent> eventPublisher) {
         this.lastPublishedVersionRepository = Objects.requireNonNull(lastPublishedVersionRepository);
         this.eventRepository = Objects.requireNonNull(eventRepository);
         this.eventPublisher = Objects.requireNonNull(eventPublisher);
     }
 
+    @Override
     @Transactional
-    public void process(final String eventId) {
-        eventRepository.findById(eventId).ifPresent(e -> sendEvent(e));
+    public void onApplicationEvent(final DomainEvent.Message event) {
+        eventRepository.findById(event.id()).ifPresent(e -> sendEvent(e));
     }
-
+    
+    // @Scheduled(fixedRate = 1000)
     @Transactional
     public void processNext() {
         sendEvent(eventRepository.findFirstByTimeInSmallestVersion());
@@ -54,7 +57,7 @@ public class DomainEventPublisher {
                 if (v.getVersion() < event.getVersion()) {
                     // need to block here so that following statements are executed inside transaction
                     SendResult<String, String> sendResult = eventPublisher.publish(event).get(1, TimeUnit.SECONDS);
-                    LOG.info("Published event to {}:{} at {}", sendResult.getProducerRecord().topic(),
+                    LOG.debug("Published event to topic:partition {}:{} at {}", sendResult.getProducerRecord().topic(),
                         sendResult.getProducerRecord().partition(), sendResult.getProducerRecord().timestamp());
                     v.setVersion(event.getVersion());
                     lastPublishedVersionRepository.save(v);
@@ -77,7 +80,7 @@ public class DomainEventPublisher {
             .findById(lastPublishedVersionId).orElseGet(() -> {
                 try {
                     LastPublishedVersion version =
-                        lastPublishedVersionRepository.saveAndFlush(LastPublishedVersion.of(lastPublishedVersionId));
+                        lastPublishedVersionRepository.save(LastPublishedVersion.of(lastPublishedVersionId));
                     return version;
                 } catch (final Exception ex) {
                     LOG.error("Error while storing last published version with id {}", lastPublishedVersionId, ex);

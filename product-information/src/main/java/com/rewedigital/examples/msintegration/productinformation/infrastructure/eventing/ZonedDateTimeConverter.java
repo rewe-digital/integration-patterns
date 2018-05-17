@@ -1,4 +1,4 @@
-package com.rewedigital.examples.msintegration.productinformation.infrastructure;
+package com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing;
 
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;

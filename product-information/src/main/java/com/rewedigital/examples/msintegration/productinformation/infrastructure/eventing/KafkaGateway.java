@@ -18,9 +18,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Component
-public class KafkaPublisher<E extends DomainEvent> {
+public class KafkaGateway<E extends DomainEvent> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(KafkaPublisher.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(KafkaGateway.class);
 
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
@@ -28,7 +28,7 @@ public class KafkaPublisher<E extends DomainEvent> {
 
     // FIXME topic name
     @Inject
-    public KafkaPublisher(final KafkaTemplate<String, String> kafkaTemplate, final ObjectMapper objectMapper,
+    public KafkaGateway(final KafkaTemplate<String, String> kafkaTemplate, final ObjectMapper objectMapper,
         @Value("${eventing.topic.product}") final String topic) {
         this.kafkaTemplate = kafkaTemplate;
         this.objectMapper = objectMapper;

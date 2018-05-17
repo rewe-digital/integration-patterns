@@ -2,8 +2,6 @@ package com.rewedigital.examples.msintegration.productinformation.infrastructure
 
 import org.springframework.context.ApplicationEvent;
 
-import com.rewedigital.examples.msintegration.productinformation.infrastructure.ZonedDateTimeConverter;
-
 import javax.persistence.*;
 import java.time.ZonedDateTime;
 

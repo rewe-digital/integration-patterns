@@ -16,7 +16,7 @@ public interface DomainEventRepository extends JpaRepository<DomainEvent, String
     
     DomainEvent findFirstByOrderByTimeAsc();
 
-    @Query(value = "SELECT * FROM DOMAIN_EVENT WHERE key = (SELECT key FROM PRODUCT_EVENT ORDER BY time ASC LIMIT 1) ORDER BY version ASC LIMIT 1", nativeQuery=true)
+    @Query(value = "SELECT * FROM DOMAIN_EVENT WHERE key = (SELECT key FROM DOMAIN_EVENT ORDER BY time ASC LIMIT 1) ORDER BY version ASC LIMIT 1", nativeQuery=true)
     DomainEvent findFirstByTimeInSmallestVersion();
 
 }

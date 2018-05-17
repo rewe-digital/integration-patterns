@@ -26,11 +26,10 @@ public class ProductRestControllerTest extends AbstractIntegrationTest {
 
         final Product response = restTemplate.postForObject("/products", product, Product.class);
 
-        // wait until event is received from kafka
-
         assertThat(response).isNotNull();
         assertThat(response.getVersion()).isNotNull();
 
+        // wait until event is received from kafka
         assertThatLastPublishedVersionBecomes(response.getId(), 0L);
     }
 
@@ -56,7 +55,7 @@ public class ProductRestControllerTest extends AbstractIntegrationTest {
                 return;
             }
             try {
-                Thread.sleep(100);
+                Thread.sleep(1000);
             } catch (final InterruptedException e) {
                 e.printStackTrace();
             }
