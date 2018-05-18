@@ -5,27 +5,32 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
-import org.junit.Before;
+import javax.persistence.EntityManager;
+
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.rewedigital.examples.msintegration.productinformation.helper.AbstractIntegrationTest;
 import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.internal.DomainEvent;
-import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.internal.DomainEventRepository;
+import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.internal.DomainEventPublisher;
 
-public class ProductEventRepositoryTest extends AbstractIntegrationTest {
+public class DomainEventRepositoryTest extends AbstractIntegrationTest {
 
     @Autowired
-    private DomainEventRepository productEventRepository;
-
+    private EntityManager entityManager;
+    
+    @Autowired
+    private DomainEventPublisher eventPublisher;
+    
     private DomainEvent p1;
     private DomainEvent p2;
     private DomainEvent p3;
     private DomainEvent p4;
     private DomainEvent p5;
 
-    @Before
-    public void setup() {
+    //@Before
+    public void insertEvents() {
         /*
         Test Setup
 
@@ -37,19 +42,19 @@ public class ProductEventRepositoryTest extends AbstractIntegrationTest {
         event3  08:45   3           1
          */
         p1 = createProductEvent("event1", ZonedDateTime.parse("2017-01-01T09:00:00Z[GMT]"), 1L);
-        productEventRepository.save(p1);
+        entityManager.persist(p1);
 
         p2 = createProductEvent("event1", ZonedDateTime.parse("2017-01-01T09:01:00Z[GMT]"), 2L);
-        productEventRepository.save(p2);
+        entityManager.persist(p2);
 
         p3 = createProductEvent("event2", ZonedDateTime.parse("2017-01-01T10:00:00Z[GMT]"), 2L);
-        productEventRepository.save(p3);
+        entityManager.persist(p3);
 
         p4 = createProductEvent("event2", ZonedDateTime.parse("2017-01-01T10:01:00Z[GMT]"), 1L);
-        productEventRepository.save(p4);
+        entityManager.persist(p4);
 
         p5 = createProductEvent("event3", ZonedDateTime.parse("2017-01-01T08:45:00Z[GMT]"), 3L);
-        productEventRepository.save(p5);
+        entityManager.persist(p5);
     }
 
     private DomainEvent createProductEvent(final String key, final ZonedDateTime time, final Long version) {
@@ -64,32 +69,29 @@ public class ProductEventRepositoryTest extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testFindFirstQuery() {
-        final DomainEvent foundEvent = productEventRepository.findFirstByOrderByTimeAsc();
-        assertThat(foundEvent.getKey()).isEqualTo(p5.getKey());
-    }
-
-    @Test
+    @Transactional
     public void testFindFirstByTimeInSmallestVersion() {
-        final DomainEvent firstEvent = productEventRepository.findFirstByTimeInSmallestVersion();
+        insertEvents();
+        
+        final DomainEvent firstEvent = eventPublisher.findUnprocessedEvents().get(0);
         assertThat(firstEvent.getKey()).isEqualTo(p5.getKey());
-        productEventRepository.delete(firstEvent);
+        entityManager.remove(firstEvent);
 
-        final DomainEvent secondEvent = productEventRepository.findFirstByTimeInSmallestVersion();
+        final DomainEvent secondEvent = eventPublisher.findUnprocessedEvents().get(0);
         assertThat(secondEvent.getKey()).isEqualTo(p1.getKey());
-        productEventRepository.delete(secondEvent);
+        entityManager.remove(secondEvent);
 
-        final DomainEvent thirdEvent = productEventRepository.findFirstByTimeInSmallestVersion();
+        final DomainEvent thirdEvent = eventPublisher.findUnprocessedEvents().get(0);
         assertThat(thirdEvent.getKey()).isEqualTo(p2.getKey());
-        productEventRepository.delete(thirdEvent);
+        entityManager.remove(thirdEvent);
 
-        final DomainEvent fourthEvent = productEventRepository.findFirstByTimeInSmallestVersion();
+        final DomainEvent fourthEvent = eventPublisher.findUnprocessedEvents().get(0);
         assertThat(fourthEvent.getKey()).isEqualTo(p4.getKey());
-        productEventRepository.delete(fourthEvent);
+        entityManager.remove(fourthEvent);
 
-        final DomainEvent fifthEvent = productEventRepository.findFirstByTimeInSmallestVersion();
+        final DomainEvent fifthEvent = eventPublisher.findUnprocessedEvents().get(0);
         assertThat(fifthEvent.getKey()).isEqualTo(p3.getKey());
-        productEventRepository.delete(fifthEvent);
+        entityManager.remove(fifthEvent);
     }
 
 }

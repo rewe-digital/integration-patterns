@@ -3,10 +3,10 @@ package com.rewedigital.examples.msintegration.productinformation.product;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
-import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -15,7 +15,7 @@ import com.rewedigital.examples.msintegration.productinformation.infrastructure.
 
 public class ProductRestControllerTest extends AbstractIntegrationTest {
 
-    @Inject
+    @Autowired
     private EntityManager entityManager;
 
     @Test
@@ -30,7 +30,7 @@ public class ProductRestControllerTest extends AbstractIntegrationTest {
         assertThat(response).isNotNull();
         assertThat(response.getVersion()).isNotNull();
 
-        // wait until event is received from kafka
+        // wait until event is published to kafka
         assertThatLastPublishedVersionBecomes(response.getId(), 0L);
     }
 
@@ -56,12 +56,12 @@ public class ProductRestControllerTest extends AbstractIntegrationTest {
                 return;
             }
             try {
-                Thread.sleep(1000);
+                Thread.sleep(100);
             } catch (final InterruptedException e) {
                 e.printStackTrace();
             }
             ++tryCount;
         }
-        fail("expected last published version of [" + id + "] to become [" + version + "]");
+        fail("expected last published version of [" + id + "] to become [" + version + "] but was [" + result + "]");
     }
 }
