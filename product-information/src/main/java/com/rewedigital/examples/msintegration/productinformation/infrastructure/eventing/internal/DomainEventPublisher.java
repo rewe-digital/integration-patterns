@@ -6,6 +6,8 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,17 +22,17 @@ public class DomainEventPublisher implements ApplicationListener<DomainEvent.Mes
 
     private static final Logger LOG = LoggerFactory.getLogger(DomainEventPublisher.class);
 
-    private final LastPublishedVersionRepository lastPublishedVersionRepository;
     private final DomainEventRepository eventRepository;
     private final KafkaGateway<DomainEvent> eventPublisher;
+    private final EntityManager entityManager;
 
     @Inject
-    public DomainEventPublisher(final LastPublishedVersionRepository lastPublishedVersionRepository,
-        final DomainEventRepository eventRepository,
-        final KafkaGateway<DomainEvent> eventPublisher) {
-        this.lastPublishedVersionRepository = Objects.requireNonNull(lastPublishedVersionRepository);
+    public DomainEventPublisher(final DomainEventRepository eventRepository,
+        final KafkaGateway<DomainEvent> eventPublisher,
+        final EntityManager entityManager) {
         this.eventRepository = Objects.requireNonNull(eventRepository);
         this.eventPublisher = Objects.requireNonNull(eventPublisher);
+        this.entityManager = Objects.requireNonNull(entityManager);
     }
 
     @Override
@@ -38,7 +40,7 @@ public class DomainEventPublisher implements ApplicationListener<DomainEvent.Mes
     public void onApplicationEvent(final DomainEvent.Message event) {
         eventRepository.findById(event.id()).ifPresent(e -> sendEvent(e));
     }
-    
+
     // @Scheduled(fixedRate = 1000)
     @Transactional
     public void processNext() {
@@ -60,7 +62,7 @@ public class DomainEventPublisher implements ApplicationListener<DomainEvent.Mes
                     LOG.debug("Published event to topic:partition {}:{} at {}", sendResult.getProducerRecord().topic(),
                         sendResult.getProducerRecord().partition(), sendResult.getProducerRecord().timestamp());
                     v.setVersion(event.getVersion());
-                    lastPublishedVersionRepository.save(v);
+                    entityManager.merge(v);
                 }
                 eventRepository.delete(event);
             } catch (final Exception ex) {
@@ -76,18 +78,20 @@ public class DomainEventPublisher implements ApplicationListener<DomainEvent.Mes
     }
 
     private Optional<LastPublishedVersion> obtainLastPublishedVersion(final String lastPublishedVersionId) {
-        LastPublishedVersion lastPublishedVersion = lastPublishedVersionRepository
-            .findById(lastPublishedVersionId).orElseGet(() -> {
-                try {
-                    LastPublishedVersion version =
-                        lastPublishedVersionRepository.save(LastPublishedVersion.of(lastPublishedVersionId));
-                    return version;
-                } catch (final Exception ex) {
-                    LOG.error("Error while storing last published version with id {}", lastPublishedVersionId, ex);
-                    return null;
-                }
-            });
-        return Optional.ofNullable(lastPublishedVersion);
+        return Optional.ofNullable(
+            Optional
+                .ofNullable(entityManager.find(LastPublishedVersion.class, lastPublishedVersionId,
+                    LockModeType.PESSIMISTIC_WRITE))
+                .orElseGet(() -> {
+                    try {
+                        final LastPublishedVersion v = LastPublishedVersion.of(lastPublishedVersionId);
+                        entityManager.persist(v);
+                        return v;
+                    } catch (final Exception ex) {
+                        LOG.error("Error while storing last published version with id {}", lastPublishedVersionId, ex);
+                        return null;
+                    }
+                }));
     }
 
 }

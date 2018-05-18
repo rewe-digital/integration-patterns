@@ -1,22 +1,22 @@
 package com.rewedigital.examples.msintegration.productinformation.product;
 
-import com.rewedigital.examples.msintegration.productinformation.helper.AbstractIntegrationTest;
-import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.internal.LastPublishedVersion;
-import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.internal.LastPublishedVersionRepository;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
 import org.junit.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import javax.inject.Inject;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import com.rewedigital.examples.msintegration.productinformation.helper.AbstractIntegrationTest;
+import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.internal.LastPublishedVersion;
 
 public class ProductRestControllerTest extends AbstractIntegrationTest {
 
     @Inject
-    private LastPublishedVersionRepository lastPublishedVersionRepository;
+    private EntityManager entityManager;
 
     @Test
     public void testProductInsert() {
@@ -51,7 +51,7 @@ public class ProductRestControllerTest extends AbstractIntegrationTest {
        LastPublishedVersion result = null;
         int tryCount = 0;
         while (result == null && tryCount <= 5) {
-            result = lastPublishedVersionRepository.findById("product-" + id).orElse(null);
+            result = entityManager.find(LastPublishedVersion.class, "product-" + id);
             if(result != null && result.getVersion() == version) {
                 return;
             }
