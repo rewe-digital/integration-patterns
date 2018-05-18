@@ -8,11 +8,11 @@ import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.EventSource;
 import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.EventPublishingEntityListener;
+import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.EventSource;
 
 @Entity
-@EntityListeners(EventPublishingEntityListener.Listener.class)
+@EntityListeners(EventPublishingEntityListener.class)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Product implements EventSource {
 

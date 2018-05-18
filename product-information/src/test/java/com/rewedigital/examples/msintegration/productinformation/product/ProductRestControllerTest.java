@@ -1,8 +1,9 @@
 package com.rewedigital.examples.msintegration.productinformation.product;
 
 import com.rewedigital.examples.msintegration.productinformation.helper.AbstractIntegrationTest;
-import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.LastPublishedVersion;
-import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.LastPublishedVersionRepository;
+import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.internal.LastPublishedVersion;
+import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.internal.LastPublishedVersionRepository;
+
 import org.junit.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

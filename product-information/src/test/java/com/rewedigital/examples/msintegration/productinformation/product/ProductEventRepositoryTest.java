@@ -10,8 +10,8 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.rewedigital.examples.msintegration.productinformation.helper.AbstractIntegrationTest;
-import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.DomainEvent;
-import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.DomainEventRepository;
+import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.internal.DomainEvent;
+import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.internal.DomainEventRepository;
 
 public class ProductEventRepositoryTest extends AbstractIntegrationTest {
 

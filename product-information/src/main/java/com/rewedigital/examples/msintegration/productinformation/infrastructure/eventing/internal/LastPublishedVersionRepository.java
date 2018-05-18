@@ -1,4 +1,4 @@
-package com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing;
+package com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.internal;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
