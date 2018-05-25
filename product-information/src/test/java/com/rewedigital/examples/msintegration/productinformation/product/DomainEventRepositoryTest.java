@@ -1,8 +1,10 @@
 package com.rewedigital.examples.msintegration.productinformation.product;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static java.time.ZonedDateTime.parse;
+import static org.junit.Assert.assertTrue;
 
-import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 import javax.persistence.EntityManager;
@@ -19,79 +21,59 @@ public class DomainEventRepositoryTest extends AbstractIntegrationTest {
 
     @Autowired
     private EntityManager entityManager;
-    
+
     @Autowired
     private DomainEventPublisher eventPublisher;
-    
-    private DomainEvent p1;
-    private DomainEvent p2;
-    private DomainEvent p3;
-    private DomainEvent p4;
-    private DomainEvent p5;
 
-    //@Before
-    public void insertEvents() {
-        /*
-        Test Setup
+    public List<DomainEvent> prepareEvents() {
+        final List<DomainEvent> events = Arrays.asList(
+            event("entity1", "2017-01-01T09:01:00Z[GMT]", 2L),
+            event("entity2", "2017-01-01T10:01:00Z[GMT]", 1L),
+            event("entity3", "2017-01-01T08:45:00Z[GMT]", 3L),
+            event("entity1", "2017-01-01T09:00:00Z[GMT]", 1L),
+            event("entity2", "2017-01-01T10:00:00Z[GMT]", 2L));
 
-        key   | time  | version || expected order
-        event1  09:00   1           2
-        event1  09:01   2           3
-        event2  10:00   2           5
-        event2  10:01   1           4
-        event3  08:45   3           1
-         */
-        p1 = createProductEvent("event1", ZonedDateTime.parse("2017-01-01T09:00:00Z[GMT]"), 1L);
-        entityManager.persist(p1);
-
-        p2 = createProductEvent("event1", ZonedDateTime.parse("2017-01-01T09:01:00Z[GMT]"), 2L);
-        entityManager.persist(p2);
-
-        p3 = createProductEvent("event2", ZonedDateTime.parse("2017-01-01T10:00:00Z[GMT]"), 2L);
-        entityManager.persist(p3);
-
-        p4 = createProductEvent("event2", ZonedDateTime.parse("2017-01-01T10:01:00Z[GMT]"), 1L);
-        entityManager.persist(p4);
-
-        p5 = createProductEvent("event3", ZonedDateTime.parse("2017-01-01T08:45:00Z[GMT]"), 3L);
-        entityManager.persist(p5);
-    }
-
-    private DomainEvent createProductEvent(final String key, final ZonedDateTime time, final Long version) {
-        final DomainEvent p = new DomainEvent();
-        p.setId(UUID.randomUUID().toString());
-        p.setKey(key);
-        p.setPayload(new byte[0]);
-        p.setTime(time);
-        p.setType("product.created");
-        p.setVersion(version);
-        return p;
+        events.forEach(e -> entityManager.persist(e));
+        return events;
     }
 
     @Test
     @Transactional
     public void testFindFirstByTimeInSmallestVersion() {
-        insertEvents();
-        
-        final DomainEvent firstEvent = eventPublisher.findUnprocessedEvents().get(0);
-        assertThat(firstEvent.getKey()).isEqualTo(p5.getKey());
-        entityManager.remove(firstEvent);
+        assertOrderEarlierVersionsFirst(findUnprocessedEvents(20));
+    }
 
-        final DomainEvent secondEvent = eventPublisher.findUnprocessedEvents().get(0);
-        assertThat(secondEvent.getKey()).isEqualTo(p1.getKey());
-        entityManager.remove(secondEvent);
+    private void assertOrderEarlierVersionsFirst(List<DomainEvent> events) {
+        for (int i = 0; i < events.size(); i++) {
+            final DomainEvent e = events.get(i);
+            for (int j = 0; j < events.size() && j != i; j++) {
+                DomainEvent f = events.get(j);
+                if (!e.getKey().equals(f.getKey())) {
+                    continue;
+                }
 
-        final DomainEvent thirdEvent = eventPublisher.findUnprocessedEvents().get(0);
-        assertThat(thirdEvent.getKey()).isEqualTo(p2.getKey());
-        entityManager.remove(thirdEvent);
+                if (j < i) {
+                    assertTrue("events for key " + e.getKey() + " in wrong order", f.getVersion() < e.getVersion());
+                } else {
+                    assertTrue("events for key " + e.getKey() + " in wrong order", f.getVersion() > e.getVersion());
+                }
+            }
+        }
+    }
 
-        final DomainEvent fourthEvent = eventPublisher.findUnprocessedEvents().get(0);
-        assertThat(fourthEvent.getKey()).isEqualTo(p4.getKey());
-        entityManager.remove(fourthEvent);
+    private List<DomainEvent> findUnprocessedEvents(int batchSize) {
+        return eventPublisher.findUnprocessedEvents(batchSize);
+    }
 
-        final DomainEvent fifthEvent = eventPublisher.findUnprocessedEvents().get(0);
-        assertThat(fifthEvent.getKey()).isEqualTo(p3.getKey());
-        entityManager.remove(fifthEvent);
+    private DomainEvent event(final String key, final String time, final Long version) {
+        final DomainEvent p = new DomainEvent();
+        p.setId(UUID.randomUUID().toString());
+        p.setKey(key);
+        p.setPayload(new byte[0]);
+        p.setTime(parse(time));
+        p.setType("entity.created");
+        p.setVersion(version);
+        return p;
     }
 
 }

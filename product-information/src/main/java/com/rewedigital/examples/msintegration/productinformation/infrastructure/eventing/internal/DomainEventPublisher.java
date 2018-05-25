@@ -39,7 +39,7 @@ public class DomainEventPublisher implements ApplicationListener<DomainEvent.Mes
     @Transactional
     public void onApplicationEvent(final DomainEvent.Message event) {
         LOG.info("Recevied message to publish event for id {}", event.id());
-        DomainEvent domainEvent = findEvent(event, 0);
+        DomainEvent domainEvent = findEvent(event.id(), 0);
         if (domainEvent != null) {
             sendEvent(domainEvent);
         } else {
@@ -47,15 +47,15 @@ public class DomainEventPublisher implements ApplicationListener<DomainEvent.Mes
         }
     }
 
-    private DomainEvent findEvent(final DomainEvent.Message event, int retryCount) {
-        DomainEvent domainEvent = entityManager.find(DomainEvent.class, event.id(), LockModeType.PESSIMISTIC_WRITE);
+    private DomainEvent findEvent(final String eventId, int retryCount) {
+        DomainEvent domainEvent = entityManager.find(DomainEvent.class, eventId, LockModeType.PESSIMISTIC_WRITE);
         // FIXME fix this!
         if (domainEvent == null && retryCount < 3) {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
             }
-            domainEvent = findEvent(event, retryCount + 1);
+            domainEvent = findEvent(eventId, retryCount + 1);
         }
         return domainEvent;
     }
@@ -63,15 +63,15 @@ public class DomainEventPublisher implements ApplicationListener<DomainEvent.Mes
     // @Scheduled(fixedRate = 1000)
     @Transactional
     public void processNext() {
-        findUnprocessedEvents().forEach(this::sendEvent);
+        findUnprocessedEvents(20).forEach(this::sendEvent);
     }
 
-    public List<DomainEvent> findUnprocessedEvents() {
+    public List<DomainEvent> findUnprocessedEvents(final int batchSize) {
         @SuppressWarnings("unchecked")
         List<DomainEvent> resultList =
             (List<DomainEvent>) entityManager.createNativeQuery(
-                "SELECT * FROM DOMAIN_EVENT WHERE key = (SELECT key FROM DOMAIN_EVENT ORDER BY time ASC LIMIT 1) ORDER BY version ASC LIMIT 1",
-                DomainEvent.class).getResultList();
+                "SELECT * FROM DOMAIN_EVENT WHERE key IN (SELECT key FROM DOMAIN_EVENT ORDER BY time ASC LIMIT ?) ORDER BY version, time ASC LIMIT ? FOR UPDATE",
+                DomainEvent.class).setParameter(1, batchSize).setParameter(2, batchSize).getResultList();
         return resultList;
     }
 
