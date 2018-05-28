@@ -107,4 +107,10 @@ public class DomainEvent {
     public void setAggregateName(final String aggregateName) {
         this.aggregateName = aggregateName;
     }
+
+    protected String lastPublishedVersionId() {
+        final String entityId = getKey();
+        final String aggregateName = getAggregateName();
+        return aggregateName + "-" + entityId;
+    }
 }

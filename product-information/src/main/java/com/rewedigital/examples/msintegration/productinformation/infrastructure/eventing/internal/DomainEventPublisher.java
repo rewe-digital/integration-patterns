@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationListener;
 import org.springframework.kafka.support.SendResult;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -60,19 +61,17 @@ public class DomainEventPublisher implements ApplicationListener<DomainEvent.Mes
         return domainEvent;
     }
 
-    // @Scheduled(fixedRate = 1000)
+    @Scheduled(fixedRate = 1000)
     @Transactional
     public void processNext() {
         findUnprocessedEvents(20).forEach(this::sendEvent);
     }
 
+    @SuppressWarnings("unchecked")
     public List<DomainEvent> findUnprocessedEvents(final int batchSize) {
-        @SuppressWarnings("unchecked")
-        List<DomainEvent> resultList =
-            (List<DomainEvent>) entityManager.createNativeQuery(
-                "SELECT * FROM DOMAIN_EVENT WHERE key IN (SELECT key FROM DOMAIN_EVENT ORDER BY time ASC LIMIT ?) ORDER BY version, time ASC LIMIT ? FOR UPDATE",
-                DomainEvent.class).setParameter(1, batchSize).setParameter(2, batchSize).getResultList();
-        return resultList;
+        return (List<DomainEvent>) entityManager.createNativeQuery(
+            "SELECT * FROM DOMAIN_EVENT WHERE key IN (SELECT key FROM DOMAIN_EVENT ORDER BY time ASC LIMIT ?) ORDER BY version, time ASC LIMIT ? FOR UPDATE",
+            DomainEvent.class).setParameter(1, batchSize).setParameter(2, batchSize).getResultList();
     }
 
     private void sendEvent(final DomainEvent event) {
@@ -80,7 +79,7 @@ public class DomainEventPublisher implements ApplicationListener<DomainEvent.Mes
             return;
         }
 
-        obtainLastPublishedVersion(buildLastPublishedVersionId(event))
+        obtainLastPublishedVersion(event.lastPublishedVersionId())
             .ifPresent(v -> publishIfNotOutdated(event, v));
     }
 
@@ -102,12 +101,6 @@ public class DomainEventPublisher implements ApplicationListener<DomainEvent.Mes
         SendResult<String, String> sendResult = eventPublisher.publish(event).get(1, TimeUnit.SECONDS);
         LOG.debug("Published event to topic:partition {}:{} at {}", sendResult.getProducerRecord().topic(),
             sendResult.getProducerRecord().partition(), sendResult.getProducerRecord().timestamp());
-    }
-
-    private String buildLastPublishedVersionId(final DomainEvent event) {
-        final String entityId = event.getKey();
-        final String aggregateName = event.getAggregateName();
-        return aggregateName + "-" + entityId;
     }
 
     private Optional<LastPublishedVersion> obtainLastPublishedVersion(final String lastPublishedVersionId) {
