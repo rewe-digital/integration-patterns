@@ -14,7 +14,7 @@ The example consists of the following services:
 
 To run the example, each project can be build using the latest maven version:
 ```
-maven clean install
+mvn clean install
 ```
 All projects can be build via `./build.sh` - this will build jars and docker images for all services.
 
