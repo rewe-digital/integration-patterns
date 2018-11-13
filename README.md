@@ -32,4 +32,4 @@ When started via docker-compose, the services run on
 * header-footer: `9081`
 * product-information: `9082`
 
-To test the setup, go to `http://localhost:9000/p/2670536` to see a product detail page including a header and a footer. To acess the product detail page directly, go to `http://localhost:9080/products/2670536`.
+To test the setup, go to `http://localhost:9000/p/2670536` to see a product detail page including a header and a footer. To access the product detail page directly, go to `http://localhost:9080/products/2670536`.
