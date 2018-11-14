@@ -15,7 +15,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>2.0.0.RELEASE</version>
+    <version>2.1.0.RELEASE</version>
     <relativePath /> <!-- lookup parent from repository -->
   </parent>
 
@@ -25,7 +25,7 @@
     <java.version>1.8</java.version>
     <spring-cloud.version>Edgware.SR2</spring-cloud.version>
     <assertj-core.version>3.8.0</assertj-core.version>
-    <spring-kafka.version>2.1.4.RELEASE</spring-kafka.version>
+    <spring-kafka.version>2.2.0.RELEASE</spring-kafka.version>
     <docker.image.prefix>rewedigital-msint</docker.image.prefix>
     <dockerfile-maven-version>1.4.8</dockerfile-maven-version>
   </properties>
