@@ -50,7 +50,7 @@ public class ProductRestControllerTest extends AbstractIntegrationTest {
     private void assertThatLastPublishedVersionBecomes(final String id, final long version) {
        LastPublishedVersion result = null;
         int tryCount = 0;
-        while (result == null && tryCount <= 5) {
+        while (result == null && tryCount <= 10) {
             result = lastPublishedVersionRepository.findById("product-" + id).orElse(null);
             if(result != null && result.getVersion() == version) {
                 return;
