@@ -10,7 +10,7 @@ import javax.validation.constraints.NotNull;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ProductPayload extends EventPayload {
 
-    private String productId;
+    private String id;
     private String name;
     private String vendor;
     private String price;
@@ -19,8 +19,8 @@ public class ProductPayload extends EventPayload {
     private String productNumber;
     private String image;
 
-    public void setProductId(final String productId) {
-        this.productId = productId;
+    public void setId(final String id) {
+        this.id = id;
     }
 
     public void setName(final String name) {
@@ -47,8 +47,8 @@ public class ProductPayload extends EventPayload {
         this.image = image;
     }
 
-    public String getProductId() {
-        return productId;
+    public String getId() {
+        return id;
     }
 
     public String getName() {

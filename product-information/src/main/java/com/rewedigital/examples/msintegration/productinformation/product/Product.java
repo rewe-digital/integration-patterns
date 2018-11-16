@@ -2,12 +2,19 @@ package com.rewedigital.examples.msintegration.productinformation.product;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.Id;
 import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.EventPublishingEntityListener;
+import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.EventSource;
+
 @Entity
-public class Product {
+@EntityListeners(EventPublishingEntityListener.class)
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class Product implements EventSource {
 
     @Id
     private String id;
@@ -15,13 +22,13 @@ public class Product {
     private String vendor;
     private String price;
 
-    @Column(length=2000)
+    @Column(length = 2000)
     private String description;
 
     @NotNull
     private String productNumber;
     private String image;
-    
+
     @Version
     private Long version;
 
@@ -89,15 +96,8 @@ public class Product {
         return version;
     }
 
-    public ProductPayload toPayload() {
-        ProductPayload pp = new ProductPayload();
-        pp.setProductNumber(this.productNumber);
-        pp.setProductId(this.id);
-        pp.setDescription(this.description);
-        pp.setImage(this.image);
-        pp.setName(this.name);
-        pp.setPrice(this.price);
-        pp.setVendor(this.vendor);
-        return pp;
+    @Override
+    public String getAggregateName() {
+        return "product";
     }
 }

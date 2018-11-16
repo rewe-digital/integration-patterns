@@ -1,21 +1,22 @@
 package com.rewedigital.examples.msintegration.productinformation.product;
 
-import com.rewedigital.examples.msintegration.productinformation.helper.AbstractIntegrationTest;
-import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.LastPublishedVersion;
-import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.LastPublishedVersionRepository;
-import org.junit.Test;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-
-import javax.inject.Inject;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
+import javax.persistence.EntityManager;
+
+import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import com.rewedigital.examples.msintegration.productinformation.helper.AbstractIntegrationTest;
+import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.internal.LastPublishedVersion;
+
 public class ProductRestControllerTest extends AbstractIntegrationTest {
 
-    @Inject
-    private LastPublishedVersionRepository lastPublishedVersionRepository;
+    @Autowired
+    private EntityManager entityManager;
 
     @Test
     public void testProductInsert() {
@@ -26,11 +27,10 @@ public class ProductRestControllerTest extends AbstractIntegrationTest {
 
         final Product response = restTemplate.postForObject("/products", product, Product.class);
 
-        // wait until event is received from kafka
-
         assertThat(response).isNotNull();
         assertThat(response.getVersion()).isNotNull();
 
+        // wait until event is published to kafka
         assertThatLastPublishedVersionBecomes(response.getId(), 0L);
     }
 
@@ -51,7 +51,7 @@ public class ProductRestControllerTest extends AbstractIntegrationTest {
        LastPublishedVersion result = null;
         int tryCount = 0;
         while (result == null && tryCount <= 5) {
-            result = lastPublishedVersionRepository.findById("product-" + id).orElse(null);
+            result = entityManager.find(LastPublishedVersion.class, "product-" + id);
             if(result != null && result.getVersion() == version) {
                 return;
             }
@@ -62,6 +62,6 @@ public class ProductRestControllerTest extends AbstractIntegrationTest {
             }
             ++tryCount;
         }
-        fail("expected last published version of [" + id + "] to become [" + version + "]");
+        fail("expected last published version of [" + id + "] to become [" + version + "] but was [" + result + "]");
     }
 }
