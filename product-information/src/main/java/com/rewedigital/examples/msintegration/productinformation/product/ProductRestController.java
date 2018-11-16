@@ -58,4 +58,5 @@ public class ProductRestController {
     public List<Product> getAll() {
         return productRepository.findAll();
     }
+
 }

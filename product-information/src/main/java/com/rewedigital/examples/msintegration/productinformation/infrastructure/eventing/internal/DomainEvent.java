@@ -1,12 +1,17 @@
 package com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.internal;
 
-import org.springframework.context.ApplicationEvent;
-
-import javax.persistence.*;
 import java.time.ZonedDateTime;
+
+import javax.persistence.Convert;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Lob;
+
+import org.springframework.context.ApplicationEvent;
 
 @Entity
 public class DomainEvent {
+
     public static class Message extends ApplicationEvent {
         private static final long serialVersionUID = 1L;
         private final String id;
