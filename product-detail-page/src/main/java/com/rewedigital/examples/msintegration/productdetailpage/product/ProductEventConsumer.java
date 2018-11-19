@@ -23,7 +23,7 @@ public class ProductEventConsumer extends AbstractKafkaConsumer {
                         CannotCreateTransactionException.class));
     }
 
-    @KafkaListener(topics = "${productqueue.topic_name}")
+    @KafkaListener(topics = "${eventing.topic_name}")
     public void listen(final ConsumerRecord<String, String> consumerRecord, final Acknowledgment ack) {
         super.handleConsumerRecord(consumerRecord, ack);
     }

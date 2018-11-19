@@ -29,7 +29,7 @@ public class ProductConsumerConfiguration {
         return new SimpleConsumerTopicConfig();
     }
 
-    @Value("${productqueue.brokers}")
+    @Value("${eventing.brokers}")
     private String servers;
 
     @Bean
