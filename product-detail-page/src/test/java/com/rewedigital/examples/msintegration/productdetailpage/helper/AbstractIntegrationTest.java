@@ -1,32 +1,33 @@
 package com.rewedigital.examples.msintegration.productdetailpage.helper;
 
 import com.rewedigital.examples.msintegration.productdetailpage.ProductDetailPageApplication;
-import com.rewedigital.examples.msintegration.productdetailpage.helper.kafka.KafkaServer;
-import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.test.util.TestPropertyValues;
+import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import javax.inject.Inject;
+import org.testcontainers.containers.KafkaContainer;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest( webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = ProductDetailPageApplication.class)
 @TestPropertySource(value="classpath:/config/application-test.yml")
+@ContextConfiguration(initializers = {AbstractIntegrationTest.Initializer.class})
 public abstract class AbstractIntegrationTest {
 
-    @Inject protected TestRestTemplate restTemplate;
+    @ClassRule
+    public static KafkaContainer kafka = new KafkaContainer("4.1.2");
 
-    @Value("${local.server.port}") protected int port;
-    @Value("${productqueue.brokers}") private String bokers;
-
-    @BeforeClass
-    public static void initTest() {
-        // TODO: Create Topics configured in application.yml and override the broker port there.
-        // startKafkaServer returns the broker port
-        KafkaServer.startKafkaServer("topic");
+    static class Initializer
+            implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+        public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
+            TestPropertyValues.of(
+                    "productqueue.brokers=" +kafka.getBootstrapServers()
+            ).applyTo(configurableApplicationContext.getEnvironment());
+        }
     }
 
 
