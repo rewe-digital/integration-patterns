@@ -28,7 +28,7 @@ public class TransactionTest extends AbstractIntegrationTest {
     public void testInsertWithFailingEventPersistence() {
         doThrow(PersistenceException.class).when(entityManager).persist(any(DomainEvent.class));
 
-        final ResponseEntity response = restTemplate.postForEntity("/products", TestUtil.getTestProduct(), Product.class);
+        final ResponseEntity<Product> response = restTemplate.postForEntity("/products", TestUtil.getTestProduct(), Product.class);
 
         assertThat(response.getStatusCode()).isEqualByComparingTo(HttpStatus.INTERNAL_SERVER_ERROR);
         assertThat(productRepository.findAll()).isEmpty();
@@ -39,12 +39,13 @@ public class TransactionTest extends AbstractIntegrationTest {
     public void testInsertWithFailingProductPersistence() {
         doThrow(RuntimeException.class).when(productRepository).save(any(Product.class));
 
-        final ResponseEntity response = restTemplate.postForEntity("/products", TestUtil.getTestProduct(), Product.class);
+        final ResponseEntity<Product> response = restTemplate.postForEntity("/products", TestUtil.getTestProduct(), Product.class);
 
         assertThat(productRepository.findAll().size()).isEqualTo(0);
         assertThat(response.getStatusCode()).isEqualByComparingTo(HttpStatus.INTERNAL_SERVER_ERROR);
         assertThat(getDomainEventsFromDb()).isEmpty();
     }
+
 
     private List<DomainEvent> getDomainEventsFromDb() {
         return entityManager.createQuery("SELECT e FROM DomainEvent e").getResultList();
