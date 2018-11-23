@@ -1,16 +1,23 @@
 package com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing;
 
-import javax.persistence.PrePersist;
+import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.internal.EventPublishingEntityListenerAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+
+import javax.persistence.PostPersist;
 import javax.persistence.PreRemove;
 import javax.persistence.PreUpdate;
 
-import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.internal.EventPublishingEntityListenerAdapter;
-
 public class EventPublishingEntityListener {
 
-    @PrePersist
-    public void onCreate(EventSource entity) {
-        publishEvent(entity, "created");
+    @PostPersist
+    void onPersist(EventSource entity) {
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+            @Override
+            public void afterCommit() {
+                publishEvent(entity, "created");
+            }
+        });
     }
 
     @PreUpdate

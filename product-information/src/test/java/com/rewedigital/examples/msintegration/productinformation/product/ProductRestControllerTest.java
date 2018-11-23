@@ -1,19 +1,19 @@
 package com.rewedigital.examples.msintegration.productinformation.product;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-
-import javax.persistence.EntityManager;
-
+import com.rewedigital.examples.msintegration.productinformation.helper.KafkaIntegrationTest;
+import com.rewedigital.examples.msintegration.productinformation.helper.TestUtil;
+import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.internal.LastPublishedVersion;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import com.rewedigital.examples.msintegration.productinformation.helper.AbstractIntegrationTest;
-import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.internal.LastPublishedVersion;
+import javax.persistence.EntityManager;
 
-public class ProductRestControllerTest extends AbstractIntegrationTest {
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+
+public class ProductRestControllerTest extends KafkaIntegrationTest {
 
     @Autowired
     private EntityManager entityManager;
@@ -21,7 +21,7 @@ public class ProductRestControllerTest extends AbstractIntegrationTest {
     @Test
     public void testProductInsert() {
 
-        final Product product = new Product();
+        final Product product = TestUtil.getTestProduct();
         product.setName("Bla!");
         product.setProductNumber("1234");
 
@@ -46,7 +46,6 @@ public class ProductRestControllerTest extends AbstractIntegrationTest {
         assertThat(response.getStatusCode()).isEqualByComparingTo(HttpStatus.BAD_REQUEST);
     }
 
-
     private void assertThatLastPublishedVersionBecomes(final String id, final long version) {
        LastPublishedVersion result = null;
         int tryCount = 0;
@@ -64,4 +63,5 @@ public class ProductRestControllerTest extends AbstractIntegrationTest {
         }
         fail("expected last published version of [" + id + "] to become [" + version + "] but was [" + result + "]");
     }
+
 }

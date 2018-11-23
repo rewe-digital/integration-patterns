@@ -1,11 +1,7 @@
 package com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.internal;
 
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.util.UUID;
-
-import javax.persistence.EntityManager;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.EventSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -14,9 +10,13 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.EventSource;
+import javax.persistence.EntityManager;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.util.UUID;
 
 @Service
 public class EventPublishingEntityListenerAdapter implements ApplicationContextAware {
@@ -40,6 +40,7 @@ public class EventPublishingEntityListenerAdapter implements ApplicationContextA
         return applicationContext.getBean(EventPublishingEntityListenerAdapter.class);
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void publishEvent(EventSource entity, String action) {
         final DomainEvent event =
             toEvent(entity, entity.getAggregateName() + "-" + action, objectMapper);
@@ -57,9 +58,7 @@ public class EventPublishingEntityListenerAdapter implements ApplicationContextA
             result.setId(UUID.randomUUID().toString());
             result.setKey(entity.getId());
             result.setTime(ZonedDateTime.now(ZoneOffset.UTC));
-            // incrementing version here due to running in @PreCreate, because @PostCreate leads to concurrent
-            // modification errors
-            result.setVersion(entity.getVersion() == null ? 0 : entity.getVersion() + 1);
+            result.setVersion(entity.getVersion() == null ? 0 : entity.getVersion());
             result.setEntityType(entity.getClass());
             result.setType(eventType);
             result.setAggregateName(entity.getAggregateName());
