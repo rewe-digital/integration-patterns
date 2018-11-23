@@ -42,7 +42,7 @@ public class DomainEventPublisher implements ApplicationListener<DomainEvent.Mes
     @Transactional
     public void onApplicationEvent(final DomainEvent.Message event) {
         LOG.info("Received message to publish event for id {}", event.id());
-        DomainEvent domainEvent = findEvent(event.id(), 0);
+        DomainEvent domainEvent = findEvent(event.id());
         if (domainEvent != null) {
             sendEvent(domainEvent);
         } else {
@@ -50,20 +50,8 @@ public class DomainEventPublisher implements ApplicationListener<DomainEvent.Mes
         }
     }
 
-    private DomainEvent findEvent(final String eventId, int retryCount) {
-        DomainEvent domainEvent = entityManager.find(DomainEvent.class, eventId, LockModeType.PESSIMISTIC_WRITE);
-        if(true) {
-            return domainEvent;
-        }
-        // FIXME fix this!
-        if (domainEvent == null && retryCount < 3) {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException ignored) {
-            }
-            domainEvent = findEvent(eventId, retryCount + 1);
-        }
-        return domainEvent;
+    private DomainEvent findEvent(final String eventId) {
+        return entityManager.find(DomainEvent.class, eventId, LockModeType.PESSIMISTIC_WRITE);
     }
 
     @Scheduled(fixedDelayString = "${eventing.scheduler.frequency.ms}")

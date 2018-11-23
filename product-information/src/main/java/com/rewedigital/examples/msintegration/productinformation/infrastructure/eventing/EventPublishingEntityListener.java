@@ -9,9 +9,7 @@ import javax.persistence.PreUpdate;
 public class EventPublishingEntityListener {
 
     @PrePersist
-    void onPersist(EventSource entity) {
-        publishEvent(entity, "created");
-    }
+    void onPersist(EventSource entity) { publishEvent(entity, "created"); }
 
     @PreUpdate
     public void onUpdate(EventSource entity) {
@@ -25,13 +23,6 @@ public class EventPublishingEntityListener {
 
     private void publishEvent(EventSource entity, String action) {
         EventPublishingEntityListenerAdapter.lookup().publishEvent(entity, action);
-
-/*        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
-            @Override
-            public void afterCommit() {
-                EventPublishingEntityListenerAdapter.lookup().publishEvent(entity, action);
-            }
-        });*/
 
     }
 }

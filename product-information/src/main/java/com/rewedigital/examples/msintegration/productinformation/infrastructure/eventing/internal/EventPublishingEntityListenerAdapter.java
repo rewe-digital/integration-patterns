@@ -46,10 +46,14 @@ public class EventPublishingEntityListenerAdapter implements ApplicationContextA
             toEvent(entity, entity.getAggregateName() + "-" + action, objectMapper);
         eventRepository.persist(event);
 
+        fireEvent(entity, event, action);
+    }
+
+    private void fireEvent(EventSource entity, DomainEvent event, String action) {
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
             @Override
             public void afterCommit() {
-                eventPublisher.publishEvent(event.message(this));
+                eventPublisher.publishEvent(event.message(EventPublishingEntityListenerAdapter.this));
                 LOG.debug("Published {} event for {} with id {}, version {}", action, entity.getClass(), entity.getId(),
                         entity.getVersion());
             }
