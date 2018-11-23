@@ -1,15 +1,11 @@
 package com.rewedigital.examples.msintegration.productinformation.product;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
-import javax.persistence.Id;
-import javax.persistence.Version;
-import javax.validation.constraints.NotNull;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.EventPublishingEntityListener;
 import com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.EventSource;
+
+import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 
 @Entity
 @EntityListeners(EventPublishingEntityListener.class)
@@ -18,15 +14,22 @@ public class Product implements EventSource {
 
     @Id
     private String id;
+
+    @NotNull
     private String name;
+
     private String vendor;
+
+    @NotNull
     private String price;
 
     @Column(length = 2000)
     private String description;
 
     @NotNull
+    @Column(unique = true)
     private String productNumber;
+
     private String image;
 
     @Version

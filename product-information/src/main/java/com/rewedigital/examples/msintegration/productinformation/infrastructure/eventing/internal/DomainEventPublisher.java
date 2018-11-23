@@ -1,24 +1,24 @@
 package com.rewedigital.examples.msintegration.productinformation.infrastructure.eventing.internal;
 
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationListener;
+import org.springframework.kafka.support.SendResult;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.LockModeType;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationListener;
-import org.springframework.kafka.support.SendResult;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 
 @Component
@@ -28,19 +28,21 @@ public class DomainEventPublisher implements ApplicationListener<DomainEvent.Mes
 
     private final KafkaGateway eventPublisher;
     private final EntityManager entityManager;
+    private final boolean schedulerEnabled;
 
     @Inject
     public DomainEventPublisher(final KafkaGateway eventPublisher,
-        final EntityManager entityManager) {
+        final EntityManager entityManager, @Value("${eventing.scheduler.enabled}") boolean schedulerEnabled) {
         this.eventPublisher = Objects.requireNonNull(eventPublisher);
         this.entityManager = Objects.requireNonNull(entityManager);
+        this.schedulerEnabled = schedulerEnabled;
     }
 
     @Override
     @Transactional
     public void onApplicationEvent(final DomainEvent.Message event) {
-        LOG.info("Recevied message to publish event for id {}", event.id());
-        DomainEvent domainEvent = findEvent(event.id(), 0);
+        LOG.info("Received message to publish event for id {}", event.id());
+        DomainEvent domainEvent = findEvent(event.id());
         if (domainEvent != null) {
             sendEvent(domainEvent);
         } else {
@@ -48,23 +50,16 @@ public class DomainEventPublisher implements ApplicationListener<DomainEvent.Mes
         }
     }
 
-    private DomainEvent findEvent(final String eventId, int retryCount) {
-        DomainEvent domainEvent = entityManager.find(DomainEvent.class, eventId, LockModeType.PESSIMISTIC_WRITE);
-        // FIXME fix this!
-        if (domainEvent == null && retryCount < 3) {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-            }
-            domainEvent = findEvent(eventId, retryCount + 1);
-        }
-        return domainEvent;
+    private DomainEvent findEvent(final String eventId) {
+        return entityManager.find(DomainEvent.class, eventId, LockModeType.PESSIMISTIC_WRITE);
     }
 
-    @Scheduled(fixedRate = 1000)
+    @Scheduled(fixedDelayString = "${eventing.scheduler.frequency.ms}")
     @Transactional
     public void processNext() {
-        findUnprocessedEvents(20).forEach(this::sendEvent);
+        if (schedulerEnabled) {
+            findUnprocessedEvents(20).forEach(this::sendEvent);
+        }
     }
 
     @SuppressWarnings("unchecked")
