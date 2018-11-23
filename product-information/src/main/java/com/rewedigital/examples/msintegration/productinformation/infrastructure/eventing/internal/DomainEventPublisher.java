@@ -41,7 +41,7 @@ public class DomainEventPublisher implements ApplicationListener<DomainEvent.Mes
     @Override
     @Transactional
     public void onApplicationEvent(final DomainEvent.Message event) {
-        LOG.info("Recevied message to publish event for id {}", event.id());
+        LOG.info("Received message to publish event for id {}", event.id());
         DomainEvent domainEvent = findEvent(event.id(), 0);
         if (domainEvent != null) {
             sendEvent(domainEvent);
@@ -52,11 +52,14 @@ public class DomainEventPublisher implements ApplicationListener<DomainEvent.Mes
 
     private DomainEvent findEvent(final String eventId, int retryCount) {
         DomainEvent domainEvent = entityManager.find(DomainEvent.class, eventId, LockModeType.PESSIMISTIC_WRITE);
+        if(true) {
+            return domainEvent;
+        }
         // FIXME fix this!
         if (domainEvent == null && retryCount < 3) {
             try {
                 Thread.sleep(100);
-            } catch (InterruptedException e) {
+            } catch (InterruptedException ignored) {
             }
             domainEvent = findEvent(eventId, retryCount + 1);
         }
