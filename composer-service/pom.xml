@@ -11,7 +11,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <docker.image.prefix>rewedigital-msint</docker.image.prefix>
-    <dockerfile-maven-version>1.4.8</dockerfile-maven-version>
+    <dockerfile-maven-version>1.4.13</dockerfile-maven-version>
     <composer.jar-file>composer.jar</composer.jar-file>
   </properties>
 

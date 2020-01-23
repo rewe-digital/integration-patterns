@@ -23,7 +23,7 @@
     <thymeleaf-layout-dialect.version>2.2.2</thymeleaf-layout-dialect.version>
 
     <docker.image.prefix>rewedigital-msint</docker.image.prefix>
-    <dockerfile-maven-version>1.4.0</dockerfile-maven-version>
+    <dockerfile-maven-version>1.4.13</dockerfile-maven-version>
   </properties>
 
   <dependencies>
