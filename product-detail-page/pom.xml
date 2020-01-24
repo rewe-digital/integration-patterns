@@ -26,7 +26,7 @@
     <thymeleaf.version>3.0.11.RELEASE</thymeleaf.version>
     <thymeleaf-layout-dialect.version>2.3.0</thymeleaf-layout-dialect.version>
     <spring-kafka.version>2.2.0.RELEASE</spring-kafka.version>
-    <spring-cloud.version>Edgware.SR2</spring-cloud.version>
+    <spring-cloud.version>Hoxton.SR1</spring-cloud.version>
 
     <docker.image.prefix>rewedigital-msint</docker.image.prefix>
     <dockerfile-maven-version>1.4.8</dockerfile-maven-version>
