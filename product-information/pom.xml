@@ -24,7 +24,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <java.version>1.8</java.version>
     <spring-cloud.version>Edgware.SR2</spring-cloud.version>
-    <assertj-core.version>3.8.0</assertj-core.version>
+    <assertj-core.version>3.15.0</assertj-core.version>
     <spring-kafka.version>2.2.0.RELEASE</spring-kafka.version>
     <docker.image.prefix>rewedigital-msint</docker.image.prefix>
     <dockerfile-maven-version>1.4.13</dockerfile-maven-version>
