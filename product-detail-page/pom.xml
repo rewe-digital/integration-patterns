@@ -29,7 +29,7 @@
     <spring-cloud.version>Edgware.SR2</spring-cloud.version>
 
     <docker.image.prefix>rewedigital-msint</docker.image.prefix>
-    <dockerfile-maven-version>1.4.8</dockerfile-maven-version>
+    <dockerfile-maven-version>1.4.13</dockerfile-maven-version>
   </properties>
 
   <dependencies>

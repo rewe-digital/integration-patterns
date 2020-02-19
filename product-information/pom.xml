@@ -27,7 +27,7 @@
     <assertj-core.version>3.8.0</assertj-core.version>
     <spring-kafka.version>2.2.0.RELEASE</spring-kafka.version>
     <docker.image.prefix>rewedigital-msint</docker.image.prefix>
-    <dockerfile-maven-version>1.4.8</dockerfile-maven-version>
+    <dockerfile-maven-version>1.4.13</dockerfile-maven-version>
   </properties>
 
   <dependencies>
